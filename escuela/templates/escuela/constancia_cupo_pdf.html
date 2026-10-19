@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia de Cupo</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 1.5cm 2cm 2.5cm 2cm;
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 2cm;
+                right: 2cm;
+                bottom: 0.5cm;
+                height: 1.5cm;
+            }
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            color: #000000;
+            line-height: 1.6;
+            text-align: justify;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header-img {
+            text-align: center;
+            margin-bottom: 15px;
+            display: block;
+            clear: both;
+        }
+        .header-img img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .titulo {
+            text-align: center;
+            font-size: 15pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 25px;
+            margin-bottom: 35px;
+        }
+        .titulo span {
+            display: inline-block;
+            border-bottom: 1.5px solid #000000;
+            padding-bottom: 2px;
+        }
+
+        .parrafo {
+            text-align: justify;
+            font-size: 12pt;
+            line-height: 1.8;
+            margin-bottom: 14px;
+            text-indent: 0;
+        }
+
+        .negrita { font-weight: bold; }
+        .subrayado { text-decoration: underline; }
+        .negrita-subrayado { font-weight: bold; text-decoration: underline; }
+
+        .espacios-firma { height: 60px; }
+        .firma-section { margin-top: 30px; width: 100%; table-layout: fixed; }
+        .firma-section td { text-align: center; vertical-align: top; padding: 0; }
+        
+        .firma-tabla-linea { width: 100%; border-collapse: collapse; margin: 0 auto; }
+        .firma-tabla-linea td { border-top: 1px solid #000000; width: 280px; height: 1px; padding: 0; }
+
+        .firma-nombre, .firma-ci, .firma-cargo {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;
+            line-height: 1.4;
+        }
+        .firma-cargo { text-transform: uppercase; }
+
+        #footer_content {
+            font-size: 9pt;
+            color: #222222;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            padding-top: 5px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ENCABEZADO INSTITUCIONAL -->
+    <div class="header-img">
+        <img src="/static/img/encabezado.png" alt="Encabezado Institucional">
+    </div>
+
+    <!-- TÍTULO -->
+    <div class="titulo"><span>CONSTANCIA DE CUPO</span></div>
+
+    <!-- PÁRRAFO PRINCIPAL -->
+    <p class="parrafo">
+        Quien suscribe <span class="negrita">{{ director_nombres|upper }}</span> titular de la Cédula de Identidad Nº 
+        <span class="negrita">{{ director_cedula }}</span> Director(a) de la Institución Educativa 
+        <span class="negrita">E.N CARMEN MAGALY VARGAS</span>, ubicada en 
+        <span class="negrita">EL HELECHAL</span> Municipio <span class="negrita">JUNIN</span> de la Parroquia 
+        <span class="negrita">BRAMON</span> adscrita al Centro de Desarrollo de la Calidad Educativa Estadal 
+        <span class="negrita">TACHIRA</span> y con código de dependencia <span class="negrita">18006970033</span> 
+        Por medio de la presente hago constar que el (la) estudiante 
+        <span class="negrita-subrayado">{{ estudiante.nombres }} {{ estudiante.apellidos }}</span>, 
+        natural de <span class="negrita-subrayado">{{ ciudad_nacimiento }}</span> del Estado 
+        <span class="negrita-subrayado">{{ estado_nacimiento }}</span> y de <span class="negrita">{{ estudiante.edad }}</span> años tiene cupo 
+        en este plantel para cursar el <span class="negrita">{{ nivel_display }}</span> Para el año escolar 
+        <span class="negrita">{{ anio_escolar }}</span>.
+    </p>
+
+    <br>
+
+    <!-- PÁRRAFO DEL REPRESENTANTE -->
+    <p class="parrafo">
+        Constancia que se expide a petición de la Madre, Padre y/o representante del estudiante (a)
+        <span class="negrita-subrayado">{{ rep_nombre_completo }}</span> Titular de la cédula de identidad
+        <span class="negrita-subrayado">{{ rep_cedula_completa }}</span>.
+    </p>
+
+    <br><br>
+
+    <!-- FECHA DE EXPEDICIÓN -->
+    <p class="parrafo">
+        En <span class="negrita">EL HELECHAL</span>, a los <span class="negrita">{{ dia_expedicion }}</span> días del mes de 
+        <span class="negrita">{{ mes_expedicion }}</span> del <span class="negrita">{{ anio_expedicion }}</span>
+    </p>
+
+    <!-- FIRMA -->
+    <table class="firma-section">
+        <tr>
+            <td>
+                <div class="espacios-firma"></div>
+                <div class="espacios-firma"></div>
+                
+                <table class="firma-tabla-linea" align="center">
+                    <tr><td>&nbsp;</td></tr>
+                </table>
+                <div class="firma-nombre">Prof. {{ director_nombres }}</div>
+                <div class="firma-ci">C.I N° {{ director_cedula }}</div>
+                <div class="firma-cargo">Director (a)</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- FOOTER -->
+    <div id="footer_content">
+        Dirección: Calle principal del Helechal, Parroquia Bramón, Municipio Junín, Estado<br>
+        Táchira Correo: coord.helechal282@gmail.com / Teléfono: 0276-8088144
+    </div>
+
+</body>
+</html>

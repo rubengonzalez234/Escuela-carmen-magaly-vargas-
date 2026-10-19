@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Principal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.cdnfonts.com/css/digital-numbers" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .navbar-custom { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
+        .card { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .stats-card { transition: all 0.3s; }
+        .stats-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(13,110,253,0.15); }
+        .navbar-brand i { color: white; }
+
+        /* RELOJ DIGITAL */
+        .reloj-retro {
+            background-color: white;
+            border: 4px solid #3498db;
+            border-radius: 25px;
+            padding: 10px 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .numeros-digitales {
+            font-family: 'Digital Numbers', sans-serif;
+            font-size: 3rem;
+            color: #333;
+            letter-spacing: 2px;
+        }
+        .periodo-dia {
+            display: flex;
+            flex-direction: column;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+        .fecha-actual {
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* TARJETAS DE ESTADÍSTICAS */
+        .stats-card .icono { font-size: 2.8rem; display: block; margin-bottom: 10px; }
+        .stats-card .numero { font-size: 2.8rem; font-weight: 800; color: #0d6efd; margin-bottom: 4px; }
+        .stats-card .etiqueta {
+            font-size: 0.95rem; font-weight: 700; color: #0d6efd;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0;
+        }
+        .stats-card .card-body { padding: 20px 15px; }
+
+        /* ============================================ */
+        /* DIRECTOR DEL PLANTEL (destacado)              */
+        /* ============================================ */
+        .directivo-principal {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 28px 32px;
+            box-shadow: 0 10px 30px rgba(13, 110, 253, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .directivo-principal::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .directivo-principal::after {
+            content: "\F4E1";
+            font-family: "bootstrap-icons";
+            position: absolute;
+            right: 20px;
+            bottom: -25px;
+            font-size: 7rem;
+            color: rgba(255,255,255,0.08);
+            pointer-events: none;
+        }
+        .directivo-principal:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 18px 45px rgba(13, 110, 253, 0.4);
+        }
+        .directivo-principal .avatar-grande {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            color: white;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .directivo-principal:hover .avatar-grande {
+            transform: scale(1.08) rotate(-5deg);
+            background: rgba(255, 255, 255, 0.28);
+        }
+        .directivo-principal .info { flex: 1; min-width: 0; z-index: 1; }
+        .directivo-principal .cargo {
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .directivo-principal .cargo .badge-titular {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 0.62rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .directivo-principal .nombre {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+        .directivo-principal .detalle {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .directivo-principal .detalle i { margin-right: 4px; }
+        .directivo-principal .vacio {
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        /* ============================================ */
+        /* TARJETAS SECUNDARIAS (Aula Anexa y CDC)       */
+        /* ============================================ */
+        .directivo-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 20px 22px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border: 2px solid transparent;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+        .directivo-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+        }
+        .directivo-card.anexa::before {
+            background: linear-gradient(180deg, #198754, #146c43);
+        }
+        .directivo-card.cdce::before {
+            background: linear-gradient(180deg, #6f42c1, #5a32a3);
+        }
+        .directivo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+        .directivo-card.anexa:hover { border-color: #198754; }
+        .directivo-card.cdce:hover  { border-color: #6f42c1; }
+
+        .directivo-card .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .directivo-card:hover .avatar { transform: scale(1.08) rotate(-3deg); }
+        .directivo-card.anexa .avatar {
+            background: linear-gradient(135deg, rgba(25,135,84,0.15), rgba(20,108,67,0.2));
+            color: #198754;
+            box-shadow: 0 0 0 4px rgba(25,135,84,0.08);
+        }
+        .directivo-card.cdce .avatar {
+            background: linear-gradient(135deg, rgba(111,66,193,0.15), rgba(90,50,163,0.2));
+            color: #6f42c1;
+            box-shadow: 0 0 0 4px rgba(111,66,193,0.08);
+        }
+        .directivo-card .info { flex: 1; min-width: 0; }
+        .directivo-card .cargo {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .directivo-card.anexa .cargo { color: #198754; }
+        .directivo-card.cdce .cargo  { color: #6f42c1; }
+        .directivo-card .badge-tipo {
+            padding: 2px 8px;
+            border-radius: 50px;
+            font-size: 0.58rem;
+            font-weight: 700;
+        }
+        .directivo-card.anexa .badge-tipo {
+            background: rgba(25, 135, 84, 0.12);
+            color: #198754;
+        }
+        .directivo-card.cdce .badge-tipo {
+            background: rgba(111, 66, 193, 0.12);
+            color: #6f42c1;
+        }
+        .directivo-card .nombre {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 3px;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .directivo-card .detalle {
+            font-size: 0.78rem;
+            color: #6c757d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .directivo-card .detalle i { font-size: 0.8rem; opacity: 0.75; }
+        .directivo-card .vacio {
+            font-style: italic;
+            color: #adb5bd;
+            font-weight: 500;
+        }
+        .directivo-card.anexa::after {
+            content: "\F26E";
+            font-family: "bootstrap-icons";
+            position: absolute;
+            right: -8px;
+            bottom: -18px;
+            font-size: 5rem;
+            color: rgba(25, 135, 84, 0.05);
+            pointer-events: none;
+        }
+        .directivo-card.cdce::after {
+            content: "\F2E7";
+            font-family: "bootstrap-icons";
+            position: absolute;
+            right: -8px;
+            bottom: -18px;
+            font-size: 5rem;
+            color: rgba(111, 66, 193, 0.05);
+            pointer-events: none;
+        }
+
+        /* ============================================ */
+        /* ACCESO RÁPIDO                                 */
+        /* ============================================ */
+        .btn-acceso {
+            border-radius: 10px;
+            padding: 14px 12px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: transparent !important;
+            text-align: center;
+            display: inline-block;
+            width: 100%;
+            text-decoration: none;
+            font-size: 1rem;
+            letter-spacing: 0.3px;
+        }
+        .btn-acceso.btn-primary { color: #0d6efd !important; }
+        .btn-acceso.btn-success { color: #198754 !important; }
+        .btn-acceso.btn-info    { color: #0dcaf0 !important; }
+        .btn-acceso.btn-danger  { color: #dc3545 !important; }
+
+        .btn-acceso.btn-primary:hover {
+            background-color: #0d6efd !important;
+            color: white !important;
+            border-color: #0d6efd;
+            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.15);
+            transform: translateY(-2px);
+        }
+        .btn-acceso.btn-success:hover {
+            background-color: #198754 !important;
+            color: white !important;
+            border-color: #198754;
+            box-shadow: 0 8px 25px rgba(25, 135, 84, 0.15);
+            transform: translateY(-2px);
+        }
+        .btn-acceso.btn-info:hover {
+            background-color: #0dcaf0 !important;
+            color: white !important;
+            border-color: #0dcaf0;
+            box-shadow: 0 8px 25px rgba(13, 202, 240, 0.15);
+            transform: translateY(-2px);
+        }
+        .btn-acceso.btn-danger:hover {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-color: #dc3545;
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.15);
+            transform: translateY(-2px);
+        }
+        .btn-acceso i { font-size: 1.2rem; margin-right: 8px; }
+
+        .card-header { font-weight: 700; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .animar-entrada { animation: fadeInUp 0.5s ease-out backwards; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+
+<!-- ==================== NAVBAR ==================== -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand mb-0 h1 fw-bold">
+            <i class="bi bi-mortarboard-fill"></i> E.N Carmen Magaly Vargas
+        </span>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+                <a href="{% url 'inicial' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-puzzle me-1"></i> Educación Inicial
+                </a>
+                <a href="{% url 'primaria' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-journal-richtext me-1"></i> Educación Básica
+                </a>
+                <a href="{% url 'dashboard_anexa' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-folder-plus me-1"></i> AULA ANEXA
+                </a>
+                <a href="{% url 'personal' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-person-badge-fill me-1"></i> Personal
+                </a>
+
+                <span class="text-white ms-2 me-2 small d-none d-md-inline">Usuario: <strong>{{ user.username }}</strong></span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <!-- ========== RELOJ ========== -->
+    <div class="d-flex justify-content-center mb-3">
+        <div class="reloj-retro">
+            <div id="reloj-digital" class="numeros-digitales">00:00</div>
+            <div class="periodo-dia">
+                <span id="txt-am">AM</span>
+                <span id="txt-pm">PM</span>
+            </div>
+        </div>
+    </div>
+    <div id="fecha-actual" class="text-center text-muted small fw-bold text-uppercase fecha-actual mb-4"></div>
+
+    <!-- ========== DIRECTOR DEL PLANTEL (destacado, centrado) ========== -->
+    <div class="animar-entrada delay-1 mb-4">
+        <div class="directivo-principal">
+            <div class="avatar-grande">
+                <i class="bi bi-person-badge-fill"></i>
+            </div>
+            <div class="info">
+                <div class="cargo">
+                    <i class="bi bi-award-fill"></i>
+                    Director(a) del Plantel
+                    <span class="badge-titular">E.N CARMEN MAGALY VARGAS</span>
+                </div>
+                {% if director_plantel %}
+                    <div class="nombre">{{ director_plantel.nombre_completo }}</div>
+                    <div class="detalle">
+                        <span><i class="bi bi-person-vcard"></i> {{ director_plantel.cedula_completa }}</span>
+                        {% if director_plantel.telefono %}
+                            <span><i class="bi bi-telephone-fill"></i> {{ director_plantel.telefono }}</span>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="nombre vacio">Sin registrar</div>
+                    <div class="detalle">
+                        <span><i class="bi bi-info-circle"></i> Regístralo en Personal → Cargo: Director</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== AULA ANEXA + CDC (lado a lado) ========== -->
+    <div class="row g-4 mb-4">
+        <!-- Director(a) del Aula Anexa -->
+        <div class="col-md-6 animar-entrada delay-2">
+            <div class="directivo-card anexa">
+                <div class="avatar">
+                    <i class="bi bi-building-fill"></i>
+                </div>
+                <div class="info">
+                    <div class="cargo">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        Director(a) Aula Anexa
+                        <span class="badge-tipo">JUAN PABLO ROJAS PAUL</span>
+                    </div>
+                    {% if director_anexa %}
+                        <div class="nombre">{{ director_anexa.nombre_completo }}</div>
+                        <div class="detalle">
+                            <span><i class="bi bi-person-vcard"></i> {{ director_anexa.cedula_completa }}</span>
+                            {% if director_anexa.telefono %}
+                                <span><i class="bi bi-telephone-fill"></i> {{ director_anexa.telefono }}</span>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="nombre vacio">Sin registrar</div>
+                        <div class="detalle">
+                            <span><i class="bi bi-info-circle"></i> Regístralo en Panel Admin → Firmantes</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Director(a) del CDC -->
+        <div class="col-md-6 animar-entrada delay-3">
+            <div class="directivo-card cdce">
+                <div class="avatar">
+                    <i class="bi bi-building-fill-check"></i>
+                </div>
+                <div class="info">
+                    <div class="cargo">
+                        <i class="bi bi-patch-check-fill"></i>
+                        Director(a) del CDC
+                        <span class="badge-tipo">SUPERVISOR</span>
+                    </div>
+                    {% if director_cdce %}
+                        <div class="nombre">{{ director_cdce.nombre_completo }}</div>
+                        <div class="detalle">
+                            <span><i class="bi bi-person-vcard"></i> {{ director_cdce.cedula_completa }}</span>
+                            {% if director_cdce.telefono %}
+                                <span><i class="bi bi-telephone-fill"></i> {{ director_cdce.telefono }}</span>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="nombre vacio">Sin registrar</div>
+                        <div class="detalle">
+                            <span><i class="bi bi-info-circle"></i> Regístralo en Panel Admin → Firmantes</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== TARJETAS (CONTADORES) ========== -->
+    <div class="row g-4 mt-3">
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-people-fill text-primary icono"></i>
+                    <div class="numero">{{ total_estudiantes }}</div>
+                    <p class="etiqueta">Estudiantes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-person-workspace text-success icono"></i>
+                    <div class="numero">{{ total_docentes }}</div>
+                    <p class="etiqueta">Docentes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-people-fill text-warning icono"></i>
+                    <div class="numero">{{ total_apoyo }}</div>
+                    <p class="etiqueta">Personal de Apoyo</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-calendar-check text-info icono"></i>
+                    <div class="numero">{{ total_asistencias }}</div>
+                    <p class="etiqueta">Marcajes de Personal</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== ACCESO RÁPIDO ========== -->
+    <div class="card mt-4">
+        <div class="card-header bg-white fw-bold text-primary">
+            <i class="bi bi-speedometer2 text-primary me-2"></i> Acceso Rápido
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="{% url 'registrar_estudiante' %}" class="btn-acceso btn-primary">
+                        <i class="bi bi-person-plus"></i> Registrar Estudiante
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'registrar_personal' %}" class="btn-acceso btn-success">
+                        <i class="bi bi-person-badge"></i> Registrar Personal
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'asistencias_personal' %}" class="btn-acceso btn-info">
+                        <i class="bi bi-calendar-check"></i> Asistencias
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'menu_admin' %}" class="btn-acceso btn-danger">
+                        <i class="bi bi-shield-lock"></i> Panel Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function actualizarReloj() {
+        const ahora = new Date();
+        let horas = ahora.getHours();
+        let minutes = ahora.getMinutes();
+        const ampm = horas >= 12 ? 'PM' : 'AM';
+
+        horas = horas % 12 || 12;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        horas = horas < 10 ? '0' + horas : horas;
+
+        document.getElementById('reloj-digital').textContent = horas + ':' + minutes;
+
+        const txtAm = document.getElementById('txt-am');
+        const txtPm = document.getElementById('txt-pm');
+
+        if (ampm === 'AM') {
+            txtAm.style.color = '#e74c3c';
+            txtPm.style.color = '#bdc3c7';
+        } else {
+            txtAm.style.color = '#bdc3c7';
+            txtPm.style.color = '#e74c3c';
+        }
+
+        const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
+        document.getElementById('fecha-actual').textContent = ahora.toLocaleDateString('es-VE', opciones);
+    }
+    setInterval(actualizarReloj, 1000);
+    actualizarReloj();
+</script>
+</body>
+</html>

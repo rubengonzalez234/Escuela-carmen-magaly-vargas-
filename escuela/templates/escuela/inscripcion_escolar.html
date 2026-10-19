@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscripción y Cierre Escolar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .table-acciones th { background-color: #f1f5f9; font-size: 0.85rem; text-transform: uppercase; }
+        .badge-nivel { font-size: 0.9rem; padding: 5px 10px; }
+        .btn-accion { width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; }
+        .btn-inscribir.active { background-color: #198754; color: white; border-color: #198754; }
+        .btn-repitiente.active { background-color: #ffc107; color: #212529; border-color: #ffc107; }
+        .btn-retirar.active { background-color: #dc3545; color: white; border-color: #dc3545; }
+        
+        #contenedorNotificaciones {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 600px; z-index: 9999; pointer-events: none;
+        }
+        .notificacion-custom {
+            pointer-events: auto; display: flex; align-items: center; gap: 10px;
+            padding: 15px 20px; border-radius: 10px; font-weight: 600; color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 10px; animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .notificacion-custom.exito { background: #198754; }
+        .notificacion-custom.error { background: #dc3545; }
+    </style>
+</head>
+<body>
+
+    <div id="contenedorNotificaciones"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand fw-bold"><i class="bi bi-mortarboard-fill me-2"></i> E.N Carmen Magaly Vargas</span>
+            <div class="ms-auto">
+                <a href="{% url 'menu_admin' %}" class="btn btn-outline-light btn-sm fw-bold">
+                    <i class="bi bi-arrow-left-circle me-1"></i> Volver al Panel
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark mb-1"><i class="bi bi-arrow-repeat text-success me-2"></i>Inscripción y Cierre Escolar</h2>
+                <p class="text-muted mb-0">Gestione el paso de año escolar de los estudiantes.</p>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-dark p-2 fs-6 mb-2 d-block">Año Escolar: {{ anio_escolar }}</span>
+                {% if puede_cerrar %}
+                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Fecha de cierre alcanzada</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i> Aún no se puede cerrar</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if not config %}
+            <div class="alert alert-danger shadow-sm border-0">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                No hay un año escolar activo. Debe configurarlo en el módulo de <a href="{% url 'calendario_escolar' %}" class="alert-link">Calendario Escolar</a> antes de realizar la inscripción.
+            </div>
+        {% else %}
+            <!-- Controles Globales -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="input-group" style="max-width: 400px;">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" id="buscarEstudiante" class="form-control border-start-0" placeholder="Buscar estudiante por nombre o cédula...">
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary" onclick="marcarTodos('inscribir')"><i class="bi bi-arrow-up-circle me-1"></i> Inscribir a Todos</button>
+                        <button class="btn btn-success" id="btnEjecutarCierre" {% if not puede_cerrar %}disabled{% endif %} data-bs-toggle="modal" data-bs-target="#modalCierre">
+                            <i class="bi bi-check2-circle me-1"></i> Ejecutar Cierre Anual
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Estudiantes -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="tablaInscripcion">
+                            <thead class="table-acciones text-secondary">
+                                <tr>
+                                    <th class="ps-4">Estudiante</th>
+                                    <th>Nivel Actual</th>
+                                    <th>Pasará a:</th>
+                                    <th class="text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpoTabla">
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <div class="spinner-border text-primary mb-2" role="status"></div>
+                                        <p class="mb-0">Cargando estudiantes...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal Confirmación Cierre -->
+    <div class="modal fade" id="modalCierre" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-circle me-2"></i> Confirmar Cierre Anual</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <i class="bi bi-calendar-check text-success" style="font-size: 4rem;"></i>
+                    <h5 class="mt-3 fw-bold">¿Estás seguro de ejecutar el cierre?</h5>
+                    <p class="text-muted">Esta acción es <strong>irreversible</strong>. Los estudiantes serán promovidos, los repitientes se mantendrán y los egresados/retirados serán movidos a sus respectivos historiales. Se creará un nuevo año escolar automáticamente.</p>
+                    <div class="mb-3 text-start">
+                        <label class="form-label fw-bold small">Observación General (Opcional):</label>
+                        <textarea id="observacionCierre" class="form-control" rows="2" placeholder="Ej: Cierre del año escolar según calendario..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success px-4 fw-bold" id="btnConfirmarCierre">Sí, Ejecutar Cierre</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let estudiantesGlobal = [];
+        let accionesTomadas = {}; // { id: 'inscribir' | 'repitiente' | 'retirar' }
+
+        // Notificaciones
+        function mostrarNotificacion(mensaje, tipo = 'exito') {
+            const contenedor = document.getElementById('contenedorNotificaciones');
+            const icono = tipo === 'exito' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+            const notif = document.createElement('div');
+            notif.className = `notificacion-custom ${tipo}`;
+            notif.innerHTML = `<i class="bi ${icono} fs-4"></i><div>${mensaje}</div>`;
+            contenedor.appendChild(notif);
+            setTimeout(() => { notif.style.opacity = '0'; setTimeout(() => notif.remove(), 300); }, 4000);
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Cargar Estudiantes
+        function cargarEstudiantes() {
+            fetch("{% url 'admin_inscripcion_json' %}")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok) {
+                        estudiantesGlobal = data.estudiantes;
+                        renderTabla(estudiantesGlobal);
+                    } else {
+                        mostrarNotificacion(data.error, 'error');
+                    }
+                });
+        }
+
+        function renderTabla(lista) {
+            const tbody = document.getElementById('cuerpoTabla');
+            tbody.innerHTML = '';
+            
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No hay estudiantes activos.</td></tr>';
+                return;
+            }
+
+            lista.forEach(est => {
+                const accion = accionesTomadas[est.id] || 'inscribir'; // Por defecto inscribir
+                
+                let colorNivel = 'bg-secondary';
+                if(est.nivel.includes('Nivel')) colorNivel = 'bg-info text-dark';
+                if(est.nivel.includes('Grado')) colorNivel = 'bg-primary';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">${est.apellidos}, ${est.nombres}</div>
+                            <small class="text-muted"><i class="bi bi-person-vcard me-1"></i>${est.cedula}</small>
+                        </td>
+                        <td><span class="badge ${colorNivel} badge-nivel">${est.nivel_display}</span></td>
+                        <td>
+                            <span class="fw-bold ${est.siguiente_nivel ? 'text-success' : 'text-warning'}">
+                                ${est.siguiente_nivel_display}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-success btn-accion btn-inscribir ${accion === 'inscribir' ? 'active' : ''}" 
+                                        onclick="cambiarAccion(${est.id}, 'inscribir')" title="Inscribir al siguiente nivel">
+                                    <i class="bi bi-arrow-up-circle"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-warning btn-accion btn-repitiente ${accion === 'repitiente' ? 'active' : ''}" 
+                                        onclick="cambiarAccion(${est.id}, 'repitiente')" title="Marcar como Repitiente">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-accion btn-retirar ${accion === 'retirar' ? 'active' : ''}" 
+                                        onclick="cambiarAccion(${est.id}, 'retirar')" title="Retirar Estudiante">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function cambiarAccion(id, accion) {
+            accionesTomadas[id] = accion;
+            const buscador = document.getElementById('buscarEstudiante').value;
+            filtrarTabla(buscador); // Re-renderizar manteniendo el filtro
+        }
+
+        function marcarTodos(accion) {
+            estudiantesGlobal.forEach(est => {
+                accionesTomadas[est.id] = accion;
+            });
+            const buscador = document.getElementById('buscarEstudiante').value;
+            filtrarTabla(buscador);
+            mostrarNotificacion(`Se marcaron todos como: ${accion.toUpperCase()}`, 'exito');
+        }
+
+        function filtrarTabla(texto) {
+            const filtro = texto.toLowerCase();
+            const filtrados = estudiantesGlobal.filter(est => 
+                est.nombres.toLowerCase().includes(filtro) || 
+                est.apellidos.toLowerCase().includes(filtro) || 
+                est.cedula.toLowerCase().includes(filtro)
+            );
+            renderTabla(filtrados);
+        }
+
+        document.getElementById('buscarEstudiante').addEventListener('input', function(e) {
+            filtrarTabla(e.target.value);
+        });
+
+        // Ejecutar Cierre
+        document.getElementById('btnConfirmarCierre').addEventListener('click', function() {
+            const btn = this;
+            const observacion = document.getElementById('observacionCierre').value;
+            
+            // Preparar array de acciones
+            const acciones = estudiantesGlobal.map(est => ({
+                id: est.id,
+                accion: accionesTomadas[est.id] || 'inscribir'
+            }));
+
+            if (acciones.length === 0) {
+                mostrarNotificacion('No hay estudiantes para procesar.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Procesando...';
+
+            fetch("{% url 'ejecutar_cierre_anual' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ acciones: acciones, observacion: observacion })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalCierre')).hide();
+                    mostrarNotificacion(data.mensaje, 'exito');
+                    setTimeout(() => window.location.reload(), 2500);
+                } else {
+                    mostrarNotificacion(data.error, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Sí, Ejecutar Cierre';
+                }
+            })
+            .catch(err => {
+                mostrarNotificacion('Error de conexión al procesar el cierre.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = 'Sí, Ejecutar Cierre';
+            });
+        });
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            {% if config %}
+                cargarEstudiantes();
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

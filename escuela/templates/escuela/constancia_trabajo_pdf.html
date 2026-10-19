@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia de Trabajo</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 1.5cm 2cm 2.5cm 2cm;
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 2cm;
+                right: 2cm;
+                bottom: 0.5cm;
+                height: 1.5cm;
+            }
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            color: #000000;
+            line-height: 1.4;
+            text-align: justify;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ============================================ */
+        /* ENCABEZADO INSTITUCIONAL                      */
+        /* ============================================ */
+        .header-img {
+            text-align: center;
+            margin-bottom: 15px;
+            display: block;
+            clear: both;
+        }
+        .header-img img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* ============================================ */
+        /* TÍTULO                                        */
+        /* ============================================ */
+        .titulo {
+            text-align: center;
+            font-size: 15pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .titulo span {
+            display: inline-block;
+            border-bottom: 1.5px solid #000000;
+            padding-bottom: 2px;
+        }
+
+        /* ============================================ */
+        /* PÁRRAFOS                                      */
+        /* ============================================ */
+        .parrafo {
+            text-align: justify;
+            font-size: 12pt;
+            line-height: 1.6;
+            margin-bottom: 14px;
+            text-indent: 0;
+        }
+
+        .negrita { font-weight: bold; }
+        .subrayado { text-decoration: underline; }
+        .negrita-subrayado { font-weight: bold; text-decoration: underline; }
+
+        /* ============================================ */
+        /* BLOQUE DESTACADO DEL PERSONAL                 */
+        /* ============================================ */
+        .bloque-personal-wrapper {
+            text-align: center;
+            margin: 18px 0;
+        }
+
+        .bloque-personal-texto {
+            display: inline-block;
+            font-size: 13pt;
+            font-weight: bold;
+            text-decoration: underline;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.4;
+        }
+
+        /* ============================================ */
+        /* FECHA DE EXPEDICIÓN                           */
+        /* ============================================ */
+        .fecha-expedicion {
+            margin-top: 15px;
+            margin-bottom: 20px;   /* ✅ reducido: los <br> hacen el espacio real */
+            font-size: 12pt;
+        }
+
+        /* ============================================ */
+        /* ESPACIOS EN BLANCO ANTES DE LA FIRMA         */
+        /* ============================================ */
+        .espacios-firma {
+            height: 60px;          /* cada línea = 60px de espacio vertical */
+        }
+
+        /* ============================================ */
+        /* FIRMA                                         */
+        /* ============================================ */
+        .firma-section {
+            margin-top: 0;
+            width: 100%;
+            table-layout: fixed;
+        }
+        .firma-section td {
+            text-align: center;
+            vertical-align: top;
+            padding: 0;
+        }
+
+        /* ✅ Línea de firma usando tabla con border-top (robusto en xhtml2pdf) */
+        .firma-tabla-linea {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        .firma-tabla-linea td {
+            border-top: 1px solid #000000;
+            width: 280px;
+            height: 1px;
+            font-size: 0;
+            line-height: 0;
+            padding: 0;
+        }
+
+        .firma-nombre {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .firma-ci {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .firma-cargo {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .firma-telefono {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* ============================================ */
+        /* FOOTER (PDF FRAME)                            */
+        /* ============================================ */
+        #footer_content {
+            font-size: 9pt;
+            color: #222222;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            padding-top: 5px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== ENCABEZADO INSTITUCIONAL ==================== -->
+    <div class="header-img">
+        <img src="/static/img/encabezado.png" alt="Encabezado Institucional">
+    </div>
+
+    <!-- ==================== TÍTULO ==================== -->
+    <br><br><div class="titulo"><span>Constancia de Trabajo</span></div>
+
+    <!-- ==================== PÁRRAFO 1: DIRECTOR Y CIUDADANO ==================== -->
+    <p class="parrafo">
+        Quien suscribe Director (a)
+        <span class="negrita-subrayado">{{ director_nombres }}</span>
+        titular de la cédula de identidad N°
+        <span class="negrita-subrayado">{{ director_cedula }}</span>,
+        de la
+        <span class="negrita-subrayado">ESCUELA NACIONAL CARMEN MAGALY VARGAS</span>,
+        Código de dependencia <span class="negrita">18006970033</span>, ubicada en la Aldea el Helechal,
+        Parroquia Bramón, Municipio Junín del Estado Táchira, por medio de la presente hace constar que
+        {{ articulo }} <span class="subrayado">{{ ciudadano_o_ciudadana }}</span>:
+    </p>
+
+    <!-- ==================== NOMBRE DEL PERSONAL DESTACADO ==================== -->
+    <div class="bloque-personal-wrapper">
+        <span class="bloque-personal-texto">
+            {{ persona.nombres }} {{ persona.apellidos }}
+        </span>
+    </div>
+
+    <!-- ==================== PÁRRAFO 2: DATOS LABORALES ==================== -->
+    <p class="parrafo">
+        titular de la cédula de identidad N°
+        <span class="negrita-subrayado">{{ persona.nacionalidad|default:"V" }}-{{ persona.cedula }}</span>,
+        quien es personal <span class="negrita-subrayado">{{ categoria_personal }}</span> del Ministerio del Poder Popular
+        para la Educación, y cumple funciones en esta institución como
+        <span class="negrita-subrayado">{{ cargo_personal }}</span>,
+        código de cargo <span class="negrita-subrayado">{{ codigo_cargo }}</span>,
+        Carga horaria <span class="negrita-subrayado">{{ carga_horaria }}</span>.
+    </p>
+
+    <!-- ==================== PÁRRAFO 3: FECHA DE EXPEDICIÓN ==================== -->
+    <p class="parrafo fecha-expedicion">
+        Constancia que se expide por parte de la interesada, en El Helechal
+        a los <span class="negrita-subrayado">{{ dia_expedicion }}</span>
+        días del mes de <span class="subrayado">{{ mes_expedicion }}</span>
+        de <span class="negrita-subrayado">{{ anio_expedicion }}</span>.<br><br><br>
+    </p>
+
+    <!-- ==================== ESPACIOS EN BLANCO ANTES DE LA FIRMA ==================== -->
+    <!-- ✅ 3 líneas de espacio para la firma manuscrita -->
+    <div class="espacios-firma"></div>
+    <div class="espacios-firma"></div>
+    <div class="espacios-firma"></div>
+
+    <!-- ==================== FIRMA ==================== -->
+    <br><br><br><table class="firma-section">
+        <tr>
+            <td>
+                <!-- Línea de firma: tabla con border-top (siempre se renderiza) -->
+                <table class="firma-tabla-linea" align="center">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+
+                <div class="firma-nombre">Prof. {{ director_nombres }}</div>
+                <div class="firma-ci">C.I N° {{ director_cedula }}</div>
+                <div class="firma-cargo">Director (a)</div>
+                <div class="firma-telefono">Teléf. {{ director_telefono }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- ==================== FOOTER ==================== -->
+    <div id="footer_content">
+        Dirección: Calle principal del Helechal, Parroquia Bramón, Municipio Junín, Estado<br>
+        Táchira Correo: coord.helechal282@gmail.com / Teléfono: 0276-8088144
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Estudiantes — E.N Carmen Magaly Vargas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+
+        /* Navbar */
+        .navbar-custom { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
+
+        /* Tarjetas */
+        .card { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card-header {
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 700;
+            color: #0d6efd;
+            border-radius: 15px 15px 0 0 !important;
+        }
+
+        /* Tabs de nivel */
+        .tipo-tabs { display: flex; gap: 12px; flex-wrap: wrap; }
+        .tipo-tab {
+            flex: 1;
+            min-width: 180px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 14px 18px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            color: #495057;
+            text-align: left;
+        }
+        .tipo-tab i { font-size: 1.6rem; color: #adb5bd; transition: color 0.25s; }
+        .tipo-tab:hover {
+            border-color: #0d6efd;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(13, 110, 253, 0.1);
+        }
+        .tipo-tab.active {
+            border-color: #0d6efd;
+            background: #f0f6ff;
+            color: #0d6efd;
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
+        }
+        .tipo-tab.active i { color: #0d6efd; }
+
+        /* Barra de búsqueda */
+        .buscador-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+        }
+        .buscador-input-group .form-control {
+            border-radius: 12px 0 0 12px;
+            border: 2px solid #e9ecef;
+            padding: 12px 18px;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+        }
+        .buscador-input-group .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+        .buscador-input-group .btn-buscar {
+            background: #0d6efd;
+            color: white;
+            border: 2px solid #0d6efd;
+            border-radius: 0 12px 12px 0;
+            padding: 0 22px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .buscador-input-group .btn-buscar:hover {
+            background: #0b5ed7;
+            border-color: #0b5ed7;
+        }
+        .buscador-input-group .btn-limpiar {
+            background: #f1f5f9;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+            border-left: none;
+            border-radius: 0 12px 12px 0;
+            padding: 0 18px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .buscador-input-group .btn-limpiar:hover {
+            background: #e2e8f0;
+            color: #495057;
+        }
+
+        /* Tabla */
+        .tabla-estudiantes { font-size: 0.9rem; }
+        .tabla-estudiantes thead th {
+            background-color: #f8f9fa;
+            color: #1a1a2e;
+            font-weight: 700;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .tabla-estudiantes tbody td {
+            padding: 10px 12px;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+        .tabla-estudiantes tbody tr:hover { background-color: #f8faff; }
+
+        /* Botones mini de acción */
+        .btn-accion-mini {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            border: none;
+        }
+        .btn-editar-mini {
+            background: rgba(255, 193, 7, 0.15);
+            color: #cc9a06;
+        }
+        .btn-editar-mini:hover {
+            background: #ffc107;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .btn-retirar-mini {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        .btn-retirar-mini:hover {
+            background: #dc3545;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Notificaciones */
+        #contenedorNotificaciones {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 900px;
+            z-index: 99999;
+            pointer-events: none;
+        }
+        .notificacion-custom {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            animation: slideDown 0.35s ease-out;
+        }
+        .notificacion-custom.ocultando { animation: slideUp 0.35s ease-in forwards; }
+        .notificacion-custom .notif-icono { font-size: 1.6rem; flex-shrink: 0; }
+        .notificacion-custom .notif-texto { flex: 1; font-size: 0.98rem; line-height: 1.3; }
+        .notificacion-custom .notif-cerrar {
+            background: transparent; border: none; color: white;
+            font-size: 1.4rem; cursor: pointer; opacity: 0.8;
+            transition: opacity 0.2s; padding: 0 4px; line-height: 1;
+        }
+        .notificacion-custom .notif-cerrar:hover { opacity: 1; }
+
+        .notificacion-custom.error    { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        .notificacion-custom.exito    { background: linear-gradient(135deg, #198754, #146c43); }
+        .notificacion-custom.advertencia { background: linear-gradient(135deg, #ffc107, #e0a800); color: #212529; }
+        .notificacion-custom.advertencia .notif-cerrar { color: #212529; }
+        .notificacion-custom.info     { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-25px); } }
+    </style>
+</head>
+<body>
+
+<div id="contenedorNotificaciones"></div>
+
+<!-- ==================== NAVBAR ==================== -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm mb-4">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand mb-0 h1 fw-bold">
+            <i class="bi bi-mortarboard-fill"></i> E.N Carmen Magaly Vargas
+        </span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+                <a href="{% url 'menu_admin' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Volver al Panel Admin
+                </a>
+                <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-house-fill me-1"></i> Inicio
+                </a>
+                <span class="text-white ms-2 me-2 small d-none d-md-inline">
+                    Usuario: <strong>{{ user.username }}</strong>
+                </span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- ================= ENCABEZADO ================= -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">
+                <i class="bi bi-people-fill text-primary me-2"></i>Gestión de Estudiantes
+            </h2>
+            <p class="text-secondary mb-0">Administrar todos los estudiantes registrados en el sistema</p>
+        </div>
+        <a href="{% url 'registrar_estudiante' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-person-plus-fill me-1"></i> Nuevo Estudiante
+        </a>
+    </div>
+
+    <!-- ================= TABS DE NIVEL ================= -->
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <label class="form-label fw-bold text-secondary text-uppercase small mb-3">
+                <i class="bi bi-diagram-3 me-1"></i> Filtrar por nivel:
+            </label>
+            <div class="tipo-tabs">
+                <button type="button"
+                        class="tipo-tab active"
+                        id="tab-est-inicial"
+                        onclick="cambiarTipoEstudiante('inicial', this)">
+                    <i class="bi bi-balloon-fill"></i>
+                    <div>
+                        <div>Inicial</div>
+                        <small class="text-muted" style="font-size:0.75rem;">
+                            <span id="badge-count-inicial">0</span> estudiantes
+                        </small>
+                    </div>
+                </button>
+
+                <button type="button"
+                        class="tipo-tab"
+                        id="tab-est-primaria"
+                        onclick="cambiarTipoEstudiante('primaria', this)">
+                    <i class="bi bi-book-fill"></i>
+                    <div>
+                        <div>Primaria</div>
+                        <small class="text-muted" style="font-size:0.75rem;">
+                            <span id="badge-count-primaria">0</span> estudiantes
+                        </small>
+                    </div>
+                </button>
+
+                <button type="button"
+                        class="tipo-tab"
+                        id="tab-est-todos"
+                        onclick="cambiarTipoEstudiante('todos', this)">
+                    <i class="bi bi-people-fill"></i>
+                    <div>
+                        <div>Todos</div>
+                        <small class="text-muted" style="font-size:0.75rem;">
+                            <span id="badge-count-todos">0</span> estudiantes
+                        </small>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= BARRA DE BÚSQUEDA ================= -->
+    <div class="buscador-card">
+        <label class="form-label fw-bold text-secondary text-uppercase small mb-2">
+            <i class="bi bi-search me-1"></i> Buscar estudiante:
+        </label>
+        <div class="input-group buscador-input-group">
+            <input type="text"
+                   id="inputBusquedaEstudiante"
+                   class="form-control"
+                   placeholder="Buscar por nombre, apellido o cédula..."
+                   autocomplete="off">
+            <button type="button" class="btn btn-buscar" onclick="ejecutarBusqueda()">
+                <i class="bi bi-search"></i>
+            </button>
+            <button type="button"
+                    class="btn btn-limpiar d-none"
+                    id="btnLimpiarBusqueda"
+                    onclick="limpiarBusqueda()"
+                    title="Limpiar búsqueda">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <small class="text-muted mt-2 d-block" id="infoBusqueda"></small>
+    </div>
+
+    <!-- ================= CONTENEDOR DE LA TABLA ================= -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <i class="bi bi-table text-primary me-2"></i> Listado de Estudiantes
+        </div>
+        <div class="card-body p-4">
+            <div id="contenido-estudiantes">
+                <div class="text-center text-muted py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">Cargando estudiantes...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL: CONFIRMACIÓN DE RETIRO (CON MOTIVO Y OBSERVACIÓN)       -->
+<!-- ============================================================ -->
+<div class="modal fade" id="modalConfirmarRetirar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 16px;">
+            <div class="modal-header bg-danger text-white" style="border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Retiro de Estudiante
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <div style="font-size: 3.5rem; color: #dc3545; margin-bottom: 10px;">
+                        <i class="bi bi-person-dash-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">¿Estás seguro de que deseas retirar a este estudiante?</h5>
+                    <p class="text-muted mb-0">
+                        <strong id="nombreRetirar" class="text-dark">-</strong>
+                    </p>
+                </div>
+
+                <div class="alert alert-warning small mb-4">
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    Al retirar al estudiante, dejará de aparecer en los listados activos. Se generará la Boleta de Retiro de forma automática.
+                </div>
+
+                <!-- FORMULARIO DE RETIRO -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Motivo del Retiro <span class="text-danger">*</span></label>
+                    <input type="text" id="inputMotivoRetiro" class="form-control" placeholder="Ej: Mudanza, cambio de colegio, salud..." required maxlength="150">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Observación adicional (Opcional)</label>
+                    <textarea id="inputObservacionRetiro" class="form-control" rows="2" placeholder="Ej: Se retira a mitad del segundo lapso, etc." maxlength="200"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-outline-secondary btn-lg px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <button type="button" id="btnConfirmarRetirar" class="btn btn-danger btn-lg px-4">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> Confirmar y Generar Boleta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ==================================================
+    // SISTEMA DE NOTIFICACIONES
+    // ==================================================
+    function mostrarNotificacion(mensaje, tipo = 'error', duracion = 3500) {
+        const contenedor = document.getElementById('contenedorNotificaciones');
+        const iconos = {
+            error: 'bi-exclamation-triangle-fill',
+            exito: 'bi-check-circle-fill',
+            advertencia: 'bi-exclamation-circle-fill',
+            info: 'bi-info-circle-fill'
+        };
+        const notif = document.createElement('div');
+        notif.className = `notificacion-custom ${tipo}`;
+        notif.innerHTML = `
+            <i class="bi ${iconos[tipo] || iconos.error} notif-icono"></i>
+            <div class="notif-texto">${mensaje}</div>
+            <button type="button" class="notif-cerrar" aria-label="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        `;
+        contenedor.appendChild(notif);
+        const cerrar = () => {
+            if (notif.classList.contains('ocultando')) return;
+            notif.classList.add('ocultando');
+            setTimeout(() => notif.remove(), 350);
+        };
+        notif.querySelector('.notif-cerrar').addEventListener('click', cerrar);
+        if (duracion > 0) setTimeout(cerrar, duracion);
+        return notif;
+    }
+
+    // ==================================================
+    // ESTADO
+    // ==================================================
+    let nivelActual = 'inicial';
+    let retirarUrlActual = '';
+    let retirarNivelActual = '';
+    let modalConfirmarRetirar = null;
+    let terminoBusqueda = '';
+
+    // ==================================================
+    // CAMBIAR NIVEL
+    // ==================================================
+    function cambiarTipoEstudiante(nivel, btn) {
+        nivelActual = nivel;
+        document.querySelectorAll('.tipo-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        cargarEstudiantes(nivel);
+    }
+
+    // ==================================================
+    // CARGAR ESTUDIANTES
+    // ==================================================
+    function cargarEstudiantes(nivel) {
+        const contenedor = document.getElementById('contenido-estudiantes');
+
+        contenedor.innerHTML = `
+            <div class="text-center text-muted py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Cargando estudiantes...</p>
+            </div>
+        `;
+
+        let url = `/admin-panel/estudiantes/${nivel}/`;
+        if (terminoBusqueda) {
+            url += `?buscar=${encodeURIComponent(terminoBusqueda)}`;
+        }
+
+        fetch(url, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.ok) {
+                contenedor.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        ${data.error || 'Error al cargar los estudiantes.'}
+                    </div>
+                `;
+                return;
+            }
+            renderTablaEstudiantes(data.estudiantes, nivel);
+            actualizarInfoBusqueda(data.estudiantes.length);
+        })
+        .catch(err => {
+            console.error(err);
+            contenedor.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Error de conexión al cargar los estudiantes.
+                </div>
+            `;
+        });
+    }
+
+    // ==================================================
+    // RENDERIZAR TABLA
+    // ==================================================
+    function renderTablaEstudiantes(lista, nivel) {
+        const contenedor = document.getElementById('contenido-estudiantes');
+
+        const badge = document.getElementById(`badge-count-${nivel}`);
+        if (badge) badge.textContent = lista.length;
+
+        if (!lista || lista.length === 0) {
+            const mensajeVacio = terminoBusqueda
+                ? `No se encontraron resultados para "<strong>${terminoBusqueda}</strong>" en esta categoría.`
+                : 'No hay estudiantes registrados en esta categoría.';
+
+            contenedor.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox" style="font-size: 2.5rem;"></i>
+                    <p class="mt-2">${mensajeVacio}</p>
+                </div>
+            `;
+            return;
+        }
+
+        let filas = '';
+        lista.forEach(e => {
+            filas += `
+                <tr>
+                    <td>${e.nombres}</td>
+                    <td>${e.apellidos}</td>
+                    <td>${e.cedula}</td>
+                    <td>${e.nivel}</td>
+                    <td>${e.edad}</td>
+                    <td>${e.rep_nombre}</td>
+                    <td class="text-center">
+                        <div class="d-flex gap-1 justify-content-center">
+                            <a href="${e.url_editar}"
+                               class="btn-accion-mini btn-editar-mini"
+                               title="Editar datos">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <button type="button"
+                                    class="btn-accion-mini btn-retirar-mini"
+                                    title="Retirar estudiante"
+                                    onclick="confirmarRetirar('${e.nombre_completo}', '${e.url_retirar}', ${e.id}, '${nivel}')">
+                                <i class="bi bi-person-dash-fill"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        contenedor.innerHTML = `
+            <div class="table-responsive" style="border-radius: 12px; border: 1px solid #eef2f7;">
+                <table class="table table-hover tabla-estudiantes mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombres</th>
+                            <th>Apellidos</th>
+                            <th>Cédula</th>
+                            <th>Nivel</th>
+                            <th>Edad</th>
+                            <th>Representante</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filas}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Total: <strong>${lista.length}</strong> estudiante(s)
+                </small>
+                <small class="text-muted">
+                    <i class="bi bi-pencil-square me-1 text-warning"></i> Editar
+                    &nbsp;|&nbsp;
+                    <i class="bi bi-person-dash-fill me-1 text-danger"></i> Retirar
+                </small>
+            </div>
+        `;
+    }
+
+    // ==================================================
+    // BÚSQUEDA
+    // ==================================================
+    function ejecutarBusqueda() {
+        const input = document.getElementById('inputBusquedaEstudiante');
+        const valor = input.value.trim();
+        terminoBusqueda = valor;
+
+        const btnLimpiar = document.getElementById('btnLimpiarBusqueda');
+        if (valor) {
+            btnLimpiar.classList.remove('d-none');
+        } else {
+            btnLimpiar.classList.add('d-none');
+        }
+
+        cargarEstudiantes(nivelActual);
+    }
+
+    function limpiarBusqueda() {
+        const input = document.getElementById('inputBusquedaEstudiante');
+        input.value = '';
+        terminoBusqueda = '';
+        document.getElementById('btnLimpiarBusqueda').classList.add('d-none');
+        document.getElementById('infoBusqueda').textContent = '';
+        cargarEstudiantes(nivelActual);
+    }
+
+    function actualizarInfoBusqueda(cantidad) {
+        const info = document.getElementById('infoBusqueda');
+        if (terminoBusqueda) {
+            const plural = cantidad === 1 ? 'resultado' : 'resultados';
+            info.innerHTML = `<i class="bi bi-funnel-fill me-1"></i> Mostrando <strong>${cantidad}</strong> ${plural} para "<strong>${terminoBusqueda}</strong>"`;
+        } else {
+            info.textContent = '';
+        }
+    }
+
+    // ==================================================
+    // CONFIRMAR RETIRO (ABRE MODAL)
+    // ==================================================
+    function confirmarRetirar(nombre, urlRetirar, id, nivel) {
+        retirarUrlActual = urlRetirar;
+        retirarNivelActual = nivel;
+
+        document.getElementById('nombreRetirar').textContent = `"${nombre}"`;
+        
+        // Limpiar campos del modal por si quedaron datos previos
+        document.getElementById('inputMotivoRetiro').value = '';
+        document.getElementById('inputObservacionRetiro').value = '';
+
+        if (!modalConfirmarRetirar) {
+            modalConfirmarRetirar = new bootstrap.Modal(document.getElementById('modalConfirmarRetirar'));
+        }
+        modalConfirmarRetirar.show();
+    }
+
+    // ==================================================
+    // RETIRAR ESTUDIANTE (AJAX POST + GENERAR PDF)
+    // ==================================================
+    function retirarEstudiante(urlRetirar, nivel) {
+        const motivo = document.getElementById('inputMotivoRetiro').value.trim();
+        const observacion = document.getElementById('inputObservacionRetiro').value.trim();
+
+        if (!motivo) {
+            mostrarNotificacion('Por favor, ingrese el motivo del retiro.', 'advertencia', 3500);
+            document.getElementById('inputMotivoRetiro').focus();
+            return;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        // Deshabilitar botón temporalmente
+        const btnSubmit = document.getElementById('btnConfirmarRetirar');
+        const textoOriginal = btnSubmit.innerHTML;
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+
+        fetch(urlRetirar, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ motivo: motivo, observacion: observacion })
+        })
+        .then(r => r.json())
+        .then(data => {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = textoOriginal;
+
+            if (data.ok) {
+                if (modalConfirmarRetirar) modalConfirmarRetirar.hide();
+                mostrarNotificacion(`✅ ${data.mensaje}`, 'exito', 3500);
+                
+                // Abrir el PDF en una nueva pestaña
+                if (data.url_pdf) {
+                    window.open(data.url_pdf, '_blank');
+                }
+                
+                cargarEstudiantes(nivel);
+            } else {
+                mostrarNotificacion(`Error: ${data.error}`, 'error', 4500);
+            }
+        })
+        .catch(err => {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = textoOriginal;
+            console.error(err);
+            mostrarNotificacion('Error de conexión al retirar.', 'error', 4500);
+        });
+    }
+
+    // ==================================================
+    // CSRF
+    // ==================================================
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // ==================================================
+    // LISTENERS
+    // ==================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cargar primera pestaña automáticamente
+        cargarEstudiantes('inicial');
+
+        // Enter en el buscador → ejecutar búsqueda
+        const inputBusqueda = document.getElementById('inputBusquedaEstudiante');
+        if (inputBusqueda) {
+            inputBusqueda.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    ejecutarBusqueda();
+                }
+            });
+        }
+
+        // Confirmar retiro
+        const btnConfirmar = document.getElementById('btnConfirmarRetirar');
+        if (btnConfirmar) {
+            btnConfirmar.addEventListener('click', function() {
+                if (retirarUrlActual) {
+                    retirarEstudiante(retirarUrlActual, retirarNivelActual);
+                }
+            });
+        }
+
+        // Mensajes Django → notificaciones
+        document.querySelectorAll('.alert').forEach(alertEl => {
+            const texto = alertEl.textContent.trim();
+            let tipo = 'info';
+            if (alertEl.classList.contains('alert-danger') || alertEl.classList.contains('alert-error')) tipo = 'error';
+            else if (alertEl.classList.contains('alert-success')) tipo = 'exito';
+            else if (alertEl.classList.contains('alert-warning')) tipo = 'advertencia';
+            if (texto) mostrarNotificacion(texto, tipo, 3500);
+            alertEl.remove();
+        });
+    });
+</script>
+</body>
+</html>

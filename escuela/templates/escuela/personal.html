@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        .btn-group .active { background-color: #0d6efd !important; color: white !important; }
+        .table-hover tbody tr:hover { background-color: #f2f7ff; }
+        .stats-card { border-left: 4px solid #0d6efd; }
+
+        .calle-acordeon {
+            border: 1px solid #eef2f7;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            background: #ffffff;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .calle-acordeon:hover {
+            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.08);
+            border-color: #0d6efd;
+        }
+        .calle-acordeon .calle-header {
+            cursor: pointer;
+            padding: 14px 20px;
+            background: #fafbfc;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .calle-acordeon .calle-header:hover { background: #f0f4ff; }
+        .calle-acordeon .calle-header .icon-box {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .calle-acordeon .calle-header .calle-titulo {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1a1a2e;
+            flex: 1;
+            margin-left: 12px;
+        }
+        .calle-acordeon .calle-header .calle-flecha {
+            font-size: 1.2rem;
+            color: #6c757d;
+            transition: transform 0.3s ease;
+            margin-left: 10px;
+        }
+        .calle-acordeon .calle-header .calle-flecha.rotada { transform: rotate(180deg); }
+        .calle-acordeon .calle-body { padding: 0; background: #ffffff; }
+
+        .calle-tabla { font-size: 0.9rem; }
+        .calle-tabla thead th {
+            background-color: #f8f9fa;
+            color: #1a1a2e;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 12px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .calle-tabla tbody td {
+            padding: 8px 12px;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+        .calle-tabla tbody tr:hover { background-color: #f8faff; }
+
+        .calle-acordeon.admin .calle-header .icon-box {
+            background: rgba(25, 135, 84, 0.1);
+            color: #198754;
+        }
+        .calle-acordeon.admin .calle-header:hover { background: #f0fff6; }
+
+        .calle-acordeon.apoyo .calle-header .icon-box {
+            background: rgba(255, 193, 7, 0.15);
+            color: #cc9a06;
+        }
+        .calle-acordeon.apoyo .calle-header:hover { background: #fffdf0; }
+
+        .calle-acordeon.cocina .calle-header .icon-box {
+            background: rgba(13, 202, 240, 0.15);
+            color: #0dcaf0;
+        }
+        .calle-acordeon.cocina .calle-header:hover { background: #f0fdff; }
+
+        .btn-ver-personal,
+        .btn-pdf-personal {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            border: none;
+        }
+        .btn-ver-personal {
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+        }
+        .btn-ver-personal:hover {
+            background: #0d6efd;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3);
+        }
+        .btn-pdf-personal {
+            background: rgba(25, 135, 84, 0.1);
+            color: #198754;
+        }
+        .btn-pdf-personal:hover {
+            background: #198754;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(25, 135, 84, 0.3);
+        }
+        .btn-ver-personal i,
+        .btn-pdf-personal i { transition: transform 0.2s; }
+        .btn-ver-personal:hover i,
+        .btn-pdf-personal:hover i { transform: scale(1.15); }
+
+        .stats-card .card-body { padding: 12px 15px; }
+        .stats-card .numero {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0d6efd;
+            margin-bottom: 0;
+        }
+        .stats-card .etiqueta {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #0d6efd;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-custom {
+            background-color: white;
+            border: 2px solid #0d6efd;
+            color: #0d6efd;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-custom:hover { background-color: #0d6efd; color: white; }
+        .btn-custom i { color: #0d6efd; transition: all 0.3s ease; }
+        .btn-custom:hover i { color: white; }
+
+        .btn-custom-pdf {
+            background-color: white;
+            border: 2px solid #dc3545;
+            color: #dc3545;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-custom-pdf:hover { background-color: #dc3545; color: white; }
+        .btn-custom-pdf i { color: #dc3545; transition: all 0.3s ease; }
+        .btn-custom-pdf:hover i { color: white; }
+
+        .card-constancia {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .card-constancia:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #0d6efd;
+        }
+        .card-constancia.selected {
+            border-color: #0d6efd;
+            background-color: #f0f7ff;
+        }
+        .card-constancia.disabled-card {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background-color: #f8f9fa;
+            position: relative;
+        }
+        .card-constancia.disabled-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.4);
+            border-radius: 6px;
+            pointer-events: none;
+        }
+        .card-constancia.disabled-card:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: transparent;
+        }
+        .card-constancia.disabled-card:hover::after {
+            background: rgba(255,255,255,0.4);
+        }
+        .card-constancia.disabled-card .card-body {
+            pointer-events: none;
+        }
+
+        #contenedorNotificaciones {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 900px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .notificacion-custom {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            animation: slideDown 0.35s ease-out;
+        }
+        .notificacion-custom.ocultando { animation: slideUp 0.35s ease-in forwards; }
+        .notificacion-custom .notif-icono { font-size: 1.6rem; flex-shrink: 0; }
+        .notificacion-custom .notif-texto { flex: 1; font-size: 0.98rem; line-height: 1.3; }
+        .notificacion-custom .notif-cerrar {
+            background: transparent; border: none; color: white;
+            font-size: 1.4rem; cursor: pointer; opacity: 0.8;
+            transition: opacity 0.2s; padding: 0 4px; line-height: 1;
+        }
+        .notificacion-custom .notif-cerrar:hover { opacity: 1; }
+
+        .notificacion-custom.error    { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        .notificacion-custom.exito    { background: linear-gradient(135deg, #198754, #146c43); }
+        .notificacion-custom.advertencia { background: linear-gradient(135deg, #ffc107, #e0a800); color: #212529; }
+        .notificacion-custom.advertencia .notif-cerrar { color: #212529; }
+        .notificacion-custom.info     { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-25px); } }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div id="contenedorNotificaciones"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h1 fw-bold">
+                <i class="bi bi-mortarboard-fill"></i> E.N Carmen Magaly Vargas
+            </span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+                    <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                        <i class="bi bi-house-fill me-1"></i> Inicio
+                    </a>
+                    <a href="{% url 'inicial' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                        <i class="bi bi-puzzle me-1"></i> Educación Inicial
+                    </a>
+                    <a href="{% url 'primaria' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                        <i class="bi bi-journal-richtext me-1"></i> Educación Básica
+                    </a>
+                    <span class="text-white ms-2 me-2 small d-none d-md-inline">Usuario: <strong>{{ user.username }}</strong></span>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-person-badge-fill text-primary me-2"></i>Personal
+                </h2>
+                <p class="text-secondary mb-0"></p>
+            </div>
+        </div>
+
+        <div class="row mb-4 align-items-center">
+            <div class="col-lg-7">
+                <div class="card shadow-sm p-3">
+                    <form method="GET" class="input-group" id="formBusqueda">
+                        <input type="text" name="buscar" id="inputBusqueda"
+                               class="form-control form-control-lg"
+                               placeholder="Buscar por nombre, apellido o cédula..."
+                               value="{{ busqueda|default:'' }}">
+                        <button class="btn btn-primary px-4" type="submit"><i class="bi bi-search"></i></button>
+                        {% if busqueda %}
+                        <a href="{% url 'personal' %}" class="btn btn-outline-secondary px-3" title="Limpiar búsqueda">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-5 text-end">
+                {% if user.is_superuser %}
+                <a href="{% url 'registrar_personal' %}" class="btn btn-custom btn-lg shadow-sm">
+                    <i class="bi bi-plus-circle-fill"></i> Registrar
+                </a>
+                {% endif %}
+
+                {% if user.is_superuser %}
+                <div class="dropdown d-inline-block shadow-sm ms-2">
+                    <button class="btn btn-custom-pdf btn-lg dropdown-toggle" type="button" id="dropdownMenuPDF" data-bs-toggle="dropdown">
+                        <i class="bi bi-file-earmark-pdf"></i> PDF
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownMenuPDF">
+                        <li><h6 class="dropdown-header">Reportes Disponibles</h6></li>
+                        <li>
+                            <a class="dropdown-item py-2" href="{% url 'exportar_personal_pdf' %}{% if busqueda %}?buscar={{ busqueda }}{% endif %}" target="_blank">
+                                <i class="bi bi-people-fill text-primary me-2"></i>Generar listado PDF
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mb-4 g-3">
+            <div class="col-md">
+                <div class="card stats-card shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <small class="text-muted text-uppercase">Total Personal</small>
+                        <h2 class="fw-bold mb-0 text-primary">{{ total_personal }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="card stats-card shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <small class="text-muted text-uppercase">Docentes</small>
+                        <h2 class="fw-bold mb-0 text-primary">{{ total_docentes }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="card stats-card shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <small class="text-muted text-uppercase">Administrativos</small>
+                        <h2 class="fw-bold mb-0 text-success">{{ total_administrativos }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="card stats-card shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <small class="text-muted text-uppercase">Apoyo</small>
+                        <h2 class="fw-bold mb-0 text-warning">{{ total_apoyo }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="card stats-card shadow-sm h-100" style="border-left-color: #0dcaf0;">
+                    <div class="card-body py-2">
+                        <small class="text-muted text-uppercase">Cocina</small>
+                        <h2 class="fw-bold mb-0" style="color: #0dcaf0;">{{ total_cocina }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ACORDEÓN: DOCENTES ========== -->
+        <div class="calle-acordeon mb-3">
+            <div class="calle-header" data-bs-toggle="collapse" data-bs-target="#acordeonDocentes" aria-expanded="false">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box"><i class="bi bi-person-workspace"></i></div>
+                    <span class="calle-titulo">
+                        Docentes
+                        <span class="badge bg-primary ms-2">{{ docentes|length }}</span>
+                    </span>
+                </div>
+                <i class="bi bi-chevron-down calle-flecha"></i>
+            </div>
+            <div class="collapse" id="acordeonDocentes">
+                <div class="calle-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover calle-tabla mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Nivel / Grado</th>
+                                    <th>Cédula</th>
+                                    <th>Teléfono</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in docentes %}
+                                <tr>
+                                    <td>{{ p.primer_nombre }}</td>
+                                    <td>{{ p.primer_apellido }}</td>
+                                    <td>{{ p.nivel_grado|default:"—" }}</td>
+                                    <td>{{ p.nacionalidad|default:"V" }}-{{ p.cedula }}</td>
+                                    <td>{{ p.telefono|default:"—" }}</td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a href="{% url 'ver_personal' 'docente' p.pk %}"
+                                               class="btn-ver-personal"
+                                               title="Ver detalles del docente">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn-pdf-personal"
+                                                    title="Generar constancia PDF"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalConstancia"
+                                                    data-personal-id="{{ p.pk }}"
+                                                    data-personal-nombre="{{ p.nombres|title }} {{ p.apellidos|title }}"
+                                                    data-personal-tipo="Docente"
+                                                    data-personal-cargo="{{ p.nivel_grado|default:'—' }}"
+                                                    data-personal-genero="{{ p.genero }}">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr class="fila-vacia">
+                                    <td colspan="6" class="text-center text-muted py-3">
+                                        <i class="bi bi-inbox me-2"></i>
+                                        {% if busqueda %}Sin resultados en este grupo{% else %}Sin docentes registrados{% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ACORDEÓN: ADMINISTRATIVOS ========== -->
+        <div class="calle-acordeon admin mb-3">
+            <div class="calle-header" data-bs-toggle="collapse" data-bs-target="#acordeonAdmin" aria-expanded="false">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box"><i class="bi bi-briefcase-fill"></i></div>
+                    <span class="calle-titulo">
+                        Administrativos
+                        <span class="badge bg-success ms-2">{{ administrativos|length }}</span>
+                    </span>
+                </div>
+                <i class="bi bi-chevron-down calle-flecha"></i>
+            </div>
+            <div class="collapse" id="acordeonAdmin">
+                <div class="calle-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover calle-tabla mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Cargo</th>
+                                    <th>Cédula</th>
+                                    <th>Teléfono</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in administrativos %}
+                                <tr>
+                                    <td>{{ p.primer_nombre }}</td>
+                                    <td>{{ p.primer_apellido }}</td>
+                                    <td>{{ p.cargo|default:"—" }}</td>
+                                    <td>{{ p.nacionalidad|default:"V" }}-{{ p.cedula }}</td>
+                                    <td>{{ p.telefono|default:"—" }}</td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a href="{% url 'ver_personal' 'administrativo' p.pk %}"
+                                               class="btn-ver-personal"
+                                               title="Ver detalles del administrativo">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn-pdf-personal"
+                                                    title="Generar constancia PDF"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalConstancia"
+                                                    data-personal-id="{{ p.pk }}"
+                                                    data-personal-nombre="{{ p.nombres|title }} {{ p.apellidos|title }}"
+                                                    data-personal-tipo="Administrativo"
+                                                    data-personal-cargo="{{ p.cargo|default:'—' }}"
+                                                    data-personal-genero="{{ p.genero }}">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr class="fila-vacia">
+                                    <td colspan="6" class="text-center text-muted py-3">
+                                        <i class="bi bi-inbox me-2"></i>
+                                        {% if busqueda %}Sin resultados en este grupo{% else %}Sin personal administrativo registrado{% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ACORDEÓN: PERSONAL DE APOYO ========== -->
+        <div class="calle-acordeon apoyo mb-3">
+            <div class="calle-header" data-bs-toggle="collapse" data-bs-target="#acordeonApoyo" aria-expanded="false">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box"><i class="bi bi-people-fill"></i></div>
+                    <span class="calle-titulo">
+                        Personal de Apoyo
+                        <span class="badge bg-warning text-dark ms-2">{{ apoyo|length }}</span>
+                    </span>
+                </div>
+                <i class="bi bi-chevron-down calle-flecha"></i>
+            </div>
+            <div class="collapse" id="acordeonApoyo">
+                <div class="calle-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover calle-tabla mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Cargo</th>
+                                    <th>Cédula</th>
+                                    <th>Teléfono</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in apoyo %}
+                                <tr>
+                                    <td>{{ p.primer_nombre }}</td>
+                                    <td>{{ p.primer_apellido }}</td>
+                                    <td>{{ p.cargo|default:"—" }}</td>
+                                    <td>{{ p.nacionalidad|default:"V" }}-{{ p.cedula }}</td>
+                                    <td>{{ p.telefono|default:"—" }}</td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a href="{% url 'ver_personal' 'apoyo' p.pk %}"
+                                               class="btn-ver-personal"
+                                               title="Ver detalles del personal de apoyo">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn-pdf-personal"
+                                                    title="Generar constancia PDF"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalConstancia"
+                                                    data-personal-id="{{ p.pk }}"
+                                                    data-personal-nombre="{{ p.nombres|title }} {{ p.apellidos|title }}"
+                                                    data-personal-tipo="Apoyo"
+                                                    data-personal-cargo="{{ p.cargo|default:'—' }}"
+                                                    data-personal-genero="{{ p.genero }}">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr class="fila-vacia">
+                                    <td colspan="6" class="text-center text-muted py-3">
+                                        <i class="bi bi-inbox me-2"></i>
+                                        {% if busqueda %}Sin resultados en este grupo{% else %}Sin personal de apoyo registrado{% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ACORDEÓN: PERSONAL DE COCINA ========== -->
+        <div class="calle-acordeon cocina mb-3">
+            <div class="calle-header" data-bs-toggle="collapse" data-bs-target="#acordeonCocina" aria-expanded="false">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box"><i class="bi bi-egg-fried"></i></div>
+                    <span class="calle-titulo">
+                        Personal de Cocina
+                        <span class="badge bg-info text-dark ms-2">{{ cocina|length }}</span>
+                    </span>
+                </div>
+                <i class="bi bi-chevron-down calle-flecha"></i>
+            </div>
+            <div class="collapse" id="acordeonCocina">
+                <div class="calle-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover calle-tabla mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Cargo</th>
+                                    <th>Cédula</th>
+                                    <th>Teléfono</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in cocina %}
+                                <tr>
+                                    <td>{{ p.primer_nombre }}</td>
+                                    <td>{{ p.primer_apellido }}</td>
+                                    <td>{{ p.get_cargo_display|default:p.cargo|default:"—" }}</td>
+                                    <td>{{ p.nacionalidad|default:"V" }}-{{ p.cedula }}</td>
+                                    <td>{{ p.telefono|default:"—" }}</td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a href="{% url 'ver_personal' 'cocina' p.pk %}"
+                                               class="btn-ver-personal"
+                                               title="Ver detalles del personal de cocina">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn-pdf-personal"
+                                                    title="Generar constancia PDF"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalConstancia"
+                                                    data-personal-id="{{ p.pk }}"
+                                                    data-personal-nombre="{{ p.nombres|title }} {{ p.apellidos|title }}"
+                                                    data-personal-tipo="Cocina"
+                                                    data-personal-cargo="{{ p.get_cargo_display|default:p.cargo|default:'—' }}"
+                                                    data-personal-genero="{{ p.genero }}">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr class="fila-vacia">
+                                    <td colspan="6" class="text-center text-muted py-3">
+                                        <i class="bi bi-inbox me-2"></i>
+                                        {% if busqueda %}Sin resultados en este grupo{% else %}Sin personal de cocina registrado{% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% if user.is_superuser %}
+    <!-- ============================================================ -->
+    <!-- MODAL 1: Selección de tipo de constancia                     -->
+    <!-- ============================================================ -->
+    <div class="modal fade" id="modalConstancia" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-earmark-pdf-fill me-2"></i> Seleccionar tipo de constancia
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Personal:</label>
+                        <p class="border-bottom pb-2" id="nombrePersonalSeleccion">-</p>
+                        <label class="form-label fw-bold">Tipo / Cargo:</label>
+                        <p class="border-bottom pb-2" id="tipoPersonalSeleccion">-</p>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <!-- ✅ Placeholder único 999999 para reemplazar por el pk real -->
+                            <div class="card card-constancia" data-tipo="trabajo" data-url="{% url 'constancia_trabajo_pdf' 999999 %}">
+                                <div class="card-body text-center py-4">
+                                    <i class="bi bi-briefcase-fill fs-1 text-primary mb-2"></i>
+                                    <h5 class="card-title mb-1">Constancia de Trabajo</h5>
+                                    <small class="text-muted">Certifica que la persona labora actualmente en la institución</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="avisoConstancia" class="alert alert-info small mt-3 d-none">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        <span id="avisoTexto"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL 2: Datos del Cargo (Código + Carga Horaria)             -->
+    <!-- ============================================================ -->
+    <div class="modal fade" id="modalDatosCargo" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-clipboard-data-fill me-2"></i> Datos del Cargo
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Personal:</label>
+                        <p class="border-bottom pb-2" id="nombrePersonalCargo">-</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="codigoCargo" class="form-label fw-bold">
+                            Código de Cargo <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control form-control-lg"
+                               id="codigoCargo" placeholder="Ej: 1124 DB" maxlength="20">
+                        <small class="text-muted">Ejemplo: 1124 DB</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cargaHoraria" class="form-label fw-bold">
+                            Carga Horaria <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control form-control-lg"
+                               id="cargaHoraria" placeholder="Ej: 53.33" maxlength="6">
+                        <small class="text-muted">
+                            Debe ser un número real (ej: 53.33, 55.55). Máximo 2 decimales.
+                        </small>
+                    </div>
+
+                    <div id="avisoCargo" class="alert alert-warning small mt-3 d-none">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <span id="avisoCargoTexto"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="button" id="btnGenerarConstanciaTrabajo" class="btn btn-primary">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> Generar Constancia
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function mostrarNotificacion(mensaje, tipo = 'error', duracion = 3000) {
+            const contenedor = document.getElementById('contenedorNotificaciones');
+            const iconos = {
+                error: 'bi-exclamation-triangle-fill',
+                exito: 'bi-check-circle-fill',
+                advertencia: 'bi-exclamation-circle-fill',
+                info: 'bi-info-circle-fill'
+            };
+            const notif = document.createElement('div');
+            notif.className = `notificacion-custom ${tipo}`;
+            notif.innerHTML = `
+                <i class="bi ${iconos[tipo] || iconos.error} notif-icono"></i>
+                <div class="notif-texto">${mensaje}</div>
+                <button type="button" class="notif-cerrar" aria-label="Cerrar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            `;
+            contenedor.appendChild(notif);
+            const cerrar = () => {
+                if (notif.classList.contains('ocultando')) return;
+                notif.classList.add('ocultando');
+                setTimeout(() => notif.remove(), 350);
+            };
+            notif.querySelector('.notif-cerrar').addEventListener('click', cerrar);
+            if (duracion > 0) setTimeout(cerrar, duracion);
+            return notif;
+        }
+
+        document.querySelectorAll('.calle-header').forEach(header => {
+            const targetId = header.getAttribute('data-bs-target');
+            const collapseEl = document.querySelector(targetId);
+            const flecha = header.querySelector('.calle-flecha');
+
+            if (collapseEl && flecha) {
+                if (collapseEl.classList.contains('show')) {
+                    flecha.classList.add('rotada');
+                }
+                collapseEl.addEventListener('show.bs.collapse', () => flecha.classList.add('rotada'));
+                collapseEl.addEventListener('hide.bs.collapse', () => flecha.classList.remove('rotada'));
+            }
+        });
+
+        {% if busqueda %}
+        ['acordeonDocentes', 'acordeonAdmin', 'acordeonApoyo', 'acordeonCocina'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            const filasVacias = el.querySelectorAll('tr.fila-vacia').length;
+            const totalFilas = el.querySelectorAll('tbody tr').length;
+            const filasReales = totalFilas - filasVacias;
+
+            if (filasReales > 0) {
+                new bootstrap.Collapse(el, { show: true });
+            }
+        });
+        {% endif %}
+
+        {% if busqueda and total_personal == 0 %}
+        mostrarNotificacion(
+            'No se encontraron resultados para "{{ busqueda }}". Intenta con otro nombre, apellido o cédula.',
+            'advertencia',
+            3000
+        );
+        {% endif %}
+
+        {% if user.is_superuser %}
+        let personalIdActual = null;
+        let personalNombreActual = "";
+        let personalTipoActual = "";
+        let personalCargoActual = "";
+        let personalGeneroActual = "";
+        let urlConstanciaActual = "";
+
+        let modalConstanciaInstance = null;
+        let modalDatosCargoInstance = null;
+
+        const modalConstanciaEl = document.getElementById('modalConstancia');
+        const modalDatosCargoEl = document.getElementById('modalDatosCargo');
+
+        if (modalConstanciaEl) {
+            modalConstanciaInstance = new bootstrap.Modal(modalConstanciaEl);
+            modalConstanciaEl.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+
+                personalIdActual = button.getAttribute('data-personal-id');
+                personalNombreActual = button.getAttribute('data-personal-nombre');
+                personalTipoActual = button.getAttribute('data-personal-tipo');
+                personalCargoActual = button.getAttribute('data-personal-cargo');
+                personalGeneroActual = button.getAttribute('data-personal-genero') || 'M';
+
+                document.getElementById('nombrePersonalSeleccion').innerHTML =
+                    `<strong>${personalNombreActual}</strong>`;
+                document.getElementById('tipoPersonalSeleccion').innerHTML =
+                    `<strong>${personalTipoActual}</strong> — ${personalCargoActual}`;
+
+                document.querySelectorAll('#modalConstancia .card-constancia').forEach(card => {
+                    card.classList.remove('selected', 'disabled-card');
+                    card.removeAttribute('data-razon');
+                });
+
+                document.getElementById('avisoConstancia').classList.add('d-none');
+            });
+        }
+
+        if (modalDatosCargoEl) {
+            modalDatosCargoInstance = new bootstrap.Modal(modalDatosCargoEl);
+            modalDatosCargoEl.addEventListener('show.bs.modal', function() {
+                document.getElementById('nombrePersonalCargo').innerHTML =
+                    `<strong>${personalNombreActual}</strong>`;
+
+                document.getElementById('codigoCargo').value = '';
+                document.getElementById('cargaHoraria').value = '';
+                document.getElementById('avisoCargo').classList.add('d-none');
+            });
+        }
+
+        document.querySelectorAll('#modalConstancia .card-constancia').forEach(card => {
+            card.addEventListener('click', function(e) {
+                const urlBase = this.getAttribute('data-url');
+                const nombre = this.querySelector('h5').innerText;
+
+                if (this.classList.contains('disabled-card')) {
+                    e.stopPropagation();
+                    const razon = this.getAttribute('data-razon') || 'No disponible.';
+                    const aviso = document.getElementById('avisoConstancia');
+                    document.getElementById('avisoTexto').textContent = razon;
+                    aviso.className = 'alert alert-warning small mt-3';
+                    aviso.classList.remove('d-none');
+                    setTimeout(() => aviso.classList.add('d-none'), 4500);
+                    return;
+                }
+
+                document.querySelectorAll('#modalConstancia .card-constancia').forEach(c => {
+                    c.classList.remove('selected');
+                });
+
+                this.classList.add('selected');
+                urlConstanciaActual = urlBase;
+
+                if (urlConstanciaActual && urlConstanciaActual !== '#') {
+                    if (modalConstanciaInstance) modalConstanciaInstance.hide();
+
+                    setTimeout(() => {
+                        if (modalDatosCargoInstance) modalDatosCargoInstance.show();
+                    }, 300);
+                    return;
+                }
+
+                const aviso = document.getElementById('avisoConstancia');
+                document.getElementById('avisoTexto').textContent =
+                    `"${nombre}" estará disponible próximamente.`;
+                aviso.className = 'alert alert-info small mt-3';
+                aviso.classList.remove('d-none');
+            });
+        });
+
+        const btnGenerarConstanciaTrabajo = document.getElementById('btnGenerarConstanciaTrabajo');
+        if (btnGenerarConstanciaTrabajo) {
+            btnGenerarConstanciaTrabajo.addEventListener('click', function() {
+                const codigoCargo = document.getElementById('codigoCargo').value.trim();
+                const cargaHoraria = document.getElementById('cargaHoraria').value.trim();
+                const avisoCargo = document.getElementById('avisoCargo');
+                const avisoCargoTexto = document.getElementById('avisoCargoTexto');
+
+                const mostrarAviso = (msg) => {
+                    avisoCargoTexto.textContent = msg;
+                    avisoCargo.className = 'alert alert-danger small mt-3';
+                    avisoCargo.classList.remove('d-none');
+                    setTimeout(() => avisoCargo.classList.add('d-none'), 4500);
+                };
+
+                if (!codigoCargo) {
+                    mostrarAviso('Debe ingresar el código de cargo.');
+                    return;
+                }
+
+                if (!/^[A-Za-z0-9]+\s?[A-Za-z0-9]*$/.test(codigoCargo)) {
+                    mostrarAviso('El código de cargo solo puede contener letras y números (ej: 1124 DB).');
+                    return;
+                }
+
+                if (!cargaHoraria) {
+                    mostrarAviso('Debe ingresar la carga horaria.');
+                    return;
+                }
+
+                if (!/^\d{1,2}(\.\d{1,2})?$/.test(cargaHoraria)) {
+                    mostrarAviso('La carga horaria debe ser un número real con máximo 2 decimales (ej: 53.33, 55.55).');
+                    return;
+                }
+
+                const numero = parseFloat(cargaHoraria);
+                if (isNaN(numero) || numero <= 0 || numero > 99.99) {
+                    mostrarAviso('La carga horaria debe ser mayor a 0 y menor a 100.');
+                    return;
+                }
+
+                // ✅ Construir URL con placeholder único + tipo + datos del cargo
+                const url = urlConstanciaActual.replace('999999', personalIdActual)
+                    + `?tipo=${encodeURIComponent(personalTipoActual)}`
+                    + `&codigo_cargo=${encodeURIComponent(codigoCargo)}`
+                    + `&carga_horaria=${encodeURIComponent(cargaHoraria)}`;
+
+                if (modalDatosCargoInstance) modalDatosCargoInstance.hide();
+                window.open(url, '_blank');
+            });
+        }
+        {% endif %}
+
+        document.querySelectorAll('.alert').forEach(alertEl => {
+            const texto = alertEl.textContent.trim();
+            let tipo = 'info';
+            if (alertEl.classList.contains('alert-danger') || alertEl.classList.contains('alert-error')) tipo = 'error';
+            else if (alertEl.classList.contains('alert-success')) tipo = 'exito';
+            else if (alertEl.classList.contains('alert-warning')) tipo = 'advertencia';
+            if (texto) mostrarNotificacion(texto, tipo, 3000);
+            alertEl.remove();
+        });
+    </script>
+</body>
+</html>

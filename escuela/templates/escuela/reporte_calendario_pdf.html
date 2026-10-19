@@ -1,0 +1,438 @@
+{% load static %}
+{% load dict_extras %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendario Escolar {{ mes_nombre }} {{ anio }}</title>
+    <style>
+        @page {
+            size: letter landscape;
+            margin: 0.4cm 0.4cm;
+            margin-bottom: 1cm;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 8pt;
+            color: #333333;
+            line-height: 1.2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 27cm;
+            margin: 0 auto;
+        }
+
+        /* ============================================ */
+        /* ENCABEZADO INSTITUCIONAL                      */
+        /* ============================================ */
+        .header-img {
+            width: 100%;
+            max-width: 20cm;
+            height: auto;
+            display: block;
+            margin: 0 auto 4px auto;
+        }
+
+        .header-table {
+            width: 100%;
+            border-bottom: 3px solid #0d6efd;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+        }
+        .header-table td { vertical-align: middle; padding: 0; }
+        .header-titles { text-align: center; }
+        .header-title {
+            font-size: 12pt; font-weight: bold; color: #0d6efd;
+            margin: 0; text-transform: uppercase;
+        }
+        .header-subtitle {
+            font-size: 7.5pt; color: #555555; margin-top: 1px;
+            text-transform: uppercase;
+        }
+        .header-meta {
+            text-align: right; font-size: 7.5pt;
+            color: #666666; line-height: 1.3;
+        }
+        .header-meta .meta-label { color: #0d6efd; font-weight: bold; }
+
+        /* ============================================ */
+        /* TÍTULO                                        */
+        /* ============================================ */
+        .title-section { text-align: center; margin: 6px 0 6px 0; }
+        .title-section h2 {
+            font-size: 12pt; font-weight: bold; color: #212529;
+            margin: 0; text-transform: uppercase;
+        }
+        .title-section .nivel-tag {
+            display: inline-block; background-color: #0d6efd; color: #ffffff;
+            padding: 3px 14px; font-size: 9pt; font-weight: bold;
+            border-radius: 10px; margin-top: 3px;
+        }
+        .title-section .periodo {
+            font-size: 7.5pt;
+            color: #555555;
+            margin-top: 3px;
+        }
+
+        /* ============================================ */
+        /* LEYENDA                                       */
+        /* ============================================ */
+        .leyenda {
+            margin: 6px 0 6px 0;
+            padding: 4px 10px;
+            background: #f0f6ff;
+            border: 1px solid #0d6efd;
+            border-radius: 5px;
+            font-size: 7.5pt;
+            text-align: center;
+        }
+        .leyenda-item {
+            display: inline-block;
+            margin: 0 10px;
+            font-weight: 600;
+            color: #495057;
+        }
+        .leyenda-cuadro {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            vertical-align: middle;
+            margin-right: 3px;
+            border: 1px solid #adb5bd;
+        }
+        .leyenda-cuadro.feriado { background: #fff3cd; border-color: #ffc107; }
+        .leyenda-cuadro.evento { background: #e2d9f3; border-color: #6f42c1; }
+        .leyenda-cuadro.vacaciones { background: #d1e7dd; border-color: #198754; }
+
+        /* ============================================ */
+        /* TABLA DEL CALENDARIO (formato compacto)       */
+        /* ============================================ */
+        .tabla-calendario-pdf {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 7pt;
+            border: 2px solid #0d6efd;
+            margin-bottom: 8px;
+        }
+        .tabla-calendario-pdf thead th {
+            background: #e7f0ff;
+            color: #0a58ca;
+            font-weight: 800;
+            font-size: 6pt;
+            text-transform: uppercase;
+            text-align: center;
+            padding: 3px 0;
+            border: 1px solid #0d6efd;
+            vertical-align: middle;
+            line-height: 1.1;
+        }
+        .tabla-calendario-pdf thead th .letra-dia {
+            display: block;
+            font-size: 7pt;
+            font-weight: 800;
+            color: #0d6efd;
+        }
+        .tabla-calendario-pdf thead th .fecha-dia {
+            display: block;
+            font-size: 5.5pt;
+            color: #0a58ca;
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        .tabla-calendario-pdf tbody td {
+            border: 1px solid #0d6efd;
+            padding: 0;
+            vertical-align: middle;
+            height: 22px;
+            text-align: center;
+            font-size: 10pt;
+        }
+
+        /* Estados de cada celda */
+        .tabla-calendario-pdf tbody td.celda {
+            background: #f0f6ff;
+        }
+        .tabla-calendario-pdf tbody td.celda.estado-feriado {
+            background: #fff3cd;
+            color: #856404;
+            font-size: 12pt;
+        }
+        .tabla-calendario-pdf tbody td.celda.estado-eventos {
+            background: #e2d9f3;
+            color: #6f42c1;
+            font-size: 12pt;
+        }
+        .tabla-calendario-pdf tbody td.celda.estado-vacaciones {
+            background: #d1e7dd;
+            color: #198754;
+            font-size: 12pt;
+        }
+
+        /* ============================================ */
+        /* VACACIONES DEL MES                            */
+        /* ============================================ */
+        .vacaciones-lista {
+            margin-top: 6px;
+            padding: 4px 10px;
+            background: #d1e7dd;
+            border-left: 4px solid #198754;
+            border-radius: 4px;
+            font-size: 7.5pt;
+        }
+        .vacaciones-lista strong { color: #0f5132; }
+        .vacaciones-lista ul { margin: 3px 0 0 0; padding-left: 16px; }
+        .vacaciones-lista li { margin-bottom: 1px; }
+
+        /* ============================================ */
+        /* CONTADORES                                    */
+        /* ============================================ */
+        .contadores-titulo {
+            text-align: center;
+            font-size: 9pt;
+            font-weight: bold;
+            color: #0d6efd;
+            text-transform: uppercase;
+            margin: 6px 0 4px 0;
+        }
+        .contadores-grid {
+            width: 100%;
+            margin: 0 auto 8px auto;
+            border-collapse: separate;
+            border-spacing: 10px 0;
+        }
+        .contadores-grid td {
+            width: 33.33%;
+            vertical-align: top;
+            text-align: center;
+        }
+        .tarjeta-contador {
+            border-radius: 5px;
+            padding: 6px 5px;
+            border: 2px solid;
+        }
+        .tarjeta-contador .contador-label {
+            font-size: 8pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            display: block;
+        }
+        .tarjeta-contador .contador-numero {
+            font-size: 18pt;
+            font-weight: 800;
+            line-height: 1;
+            display: block;
+        }
+        .tarjeta-habiles { border-color: #0d6efd; background-color: #e7f0ff; }
+        .tarjeta-habiles .contador-label { color: #0a58ca; }
+        .tarjeta-habiles .contador-numero { color: #0d6efd; }
+
+        .tarjeta-feriados { border-color: #ffc107; background-color: #fff3cd; }
+        .tarjeta-feriados .contador-label { color: #856404; }
+        .tarjeta-feriados .contador-numero { color: #b8860b; }
+
+        .tarjeta-vacaciones { border-color: #198754; background-color: #d1e7dd; }
+        .tarjeta-vacaciones .contador-label { color: #0f5132; }
+        .tarjeta-vacaciones .contador-numero { color: #198754; }
+
+        /* ============================================ */
+        /* FIRMAS                                        */
+        /* ============================================ */
+        .firma-section {
+            margin-top: 25px;
+            width: 100%;
+        }
+        .firma-section td {
+            text-align: center;
+            padding: 0 20px;
+            vertical-align: bottom;
+        }
+        .firma-line {
+            border-top: 1px solid #333333;
+            margin: 0 auto 3px auto;
+            width: 70%;
+            height: 25px;
+        }
+        .firma-nombre {
+            font-size: 8pt;
+            font-weight: bold;
+            color: #212529;
+            text-transform: uppercase;
+        }
+        .firma-cargo {
+            font-size: 7pt;
+            color: #666666;
+            text-transform: uppercase;
+        }
+
+        /* ============================================ */
+        /* FOOTER                                        */
+        /* ============================================ */
+        .footer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            font-size: 7pt; color: #777777; text-align: center;
+            border-top: 1px solid #dee2e6; padding-top: 3px;
+        }
+        .footer strong { color: #0d6efd; }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+
+    <!-- ==================== ENCABEZADO INSTITUCIONAL ==================== -->
+    <img src="{% static 'img/encabezado.png' %}" class="header-img" alt="Encabezado Institucional">
+
+    <!-- ==================== ENCABEZADO ==================== -->
+    <table class="header-table">
+        <tr>
+            <td class="header-titles">
+                <div class="header-title">E.N Carmen Magaly Vargas</div>
+                <div class="header-subtitle">Sistema de Control Escolar</div>
+            </td>
+            <td class="header-meta" style="width: 180px;">
+                <span class="meta-label">FECHA:</span> {{ fecha|date:"d/m/Y" }}<br>
+                <span class="meta-label">HORA:</span> {{ hora }}<br>
+                <span class="meta-label">USUARIO:</span> {{ usuario }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- ==================== TÍTULO ==================== -->
+    <div class="title-section">
+        <h2>Calendario Escolar Institucional</h2>
+        <div class="nivel-tag">{{ mes_nombre }} {{ anio }}</div>
+        {% if config %}
+        <div class="periodo">
+            Año Escolar: <strong>{{ config.anio_escolar }}</strong>
+            {% if config.fecha_inicio %} | Inicio: {{ config.fecha_inicio|date:'d/m/Y' }}{% endif %}
+            {% if config.fecha_fin %} | Fin: {{ config.fecha_fin|date:'d/m/Y' }}{% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ==================== LEYENDA ==================== -->
+    <div class="leyenda">
+        <span class="leyenda-item">
+            <span class="leyenda-cuadro feriado"></span> Feriado
+        </span>
+        <span class="leyenda-item">
+            <span class="leyenda-cuadro evento"></span> Evento Especial
+        </span>
+        <span class="leyenda-item">
+            <span class="leyenda-cuadro vacaciones"></span> Vacaciones
+        </span>
+    </div>
+
+    <!-- ==================== TABLA DEL CALENDARIO (SIN COLUMNA # NI NOMBRE) ==================== -->
+    <table class="tabla-calendario-pdf">
+        <thead>
+            <tr>
+                {% for d in dias %}
+                    {% if d.weekday < 5 %}
+                    <th class="th-dia">
+                        <span class="letra-dia">
+                            {% if d.weekday == 0 %}L
+                            {% elif d.weekday == 1 %}M
+                            {% elif d.weekday == 2 %}M
+                            {% elif d.weekday == 3 %}J
+                            {% elif d.weekday == 4 %}V
+                            {% endif %}
+                        </span>
+                        <span class="fecha-dia">{{ d.day }}</span>
+                    </th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% for d in dias %}
+                    {% if d.weekday < 5 %}
+                        {% with fecha_str=d|date:'Y-m-d' %}
+                        <td class="celda
+                            {% if fecha_str in eventos_map %}
+                                {% if eventos_map|get_item:fecha_str == 'feriado' %}estado-feriado{% endif %}
+                                {% if eventos_map|get_item:fecha_str == 'eventos' %}estado-eventos{% endif %}
+                            {% endif %}
+                            {% if fecha_str in vacaciones_map %}estado-vacaciones{% endif %}">
+                            {% if fecha_str in vacaciones_map %}
+                                ★
+                            {% elif fecha_str in eventos_map %}
+                                {% if eventos_map|get_item:fecha_str == 'feriado' %}★{% endif %}
+                                {% if eventos_map|get_item:fecha_str == 'eventos' %}★{% endif %}
+                            {% endif %}
+                        </td>
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ==================== VACACIONES DEL MES ==================== -->
+    {% if vacaciones_mes %}
+    <div class="vacaciones-lista">
+        <strong><i>Períodos de Vacaciones que cruzan este mes:</i></strong>
+        <ul>
+            {% for v in vacaciones_mes %}
+            <li>
+                <strong>{{ v.descripcion }}</strong>:
+                {{ v.fecha_inicio|date:'d/m/Y' }} → {{ v.fecha_fin|date:'d/m/Y' }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- ==================== CONTADORES ==================== -->
+    <div class="contadores-titulo">Resumen del Mes</div>
+
+    <table class="contadores-grid">
+        <tr>
+            <td>
+                <div class="tarjeta-contador tarjeta-habiles">
+                    <span class="contador-label">Días Hábiles</span>
+                    <span class="contador-numero">{{ total_habiles }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="tarjeta-contador tarjeta-feriados">
+                    <span class="contador-label">Feriados / Eventos</span>
+                    <span class="contador-numero">{{ total_feriados }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="tarjeta-contador tarjeta-vacaciones">
+                    <span class="contador-label">Días de Vacaciones</span>
+                    <span class="contador-numero">{{ total_vacaciones }}</span>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- ==================== FIRMAS ==================== -->
+    <table class="firma-section">
+        <tr>
+            <td>
+                <div class="firma-line"></div>
+                <div class="firma-nombre">Dirección del Plantel</div>
+                <div class="firma-cargo">Sello y Firma</div>
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <div class="footer">
+        <strong>E.N Carmen Magaly Vargas</strong> — Documento generado automáticamente | {{ fecha|date:"d/m/Y" }} - {{ hora }}
+    </div>
+
+</body>
+</html>

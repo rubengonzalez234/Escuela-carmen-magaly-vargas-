@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Firmantes - E.N Carmen Magaly Vargas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --azul-institucional: #0d6efd;
+            --verde-institucional: #198754;
+            --amarillo-institucional: #ffc107;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9eef5 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* ============================================ */
+        /* ENCABEZADO DEL PANEL                          */
+        /* ============================================ */
+        .encabezado-panel {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px 35px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+            border-left: 6px solid var(--azul-institucional);
+            margin-bottom: 40px;
+        }
+
+        .encabezado-panel h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+        }
+
+        .encabezado-panel p {
+            color: #6c757d;
+            margin-bottom: 0;
+            font-size: 1rem;
+        }
+
+        .encabezado-panel .badge-institucion {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(13, 110, 253, 0.1);
+            color: var(--azul-institucional);
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 50px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ============================================ */
+        /* TARJETAS DE FIRMANTES                         */
+        /* ============================================ */
+        .tarjeta-firmante {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: visible;
+            height: 100%;
+            cursor: help;
+        }
+
+        .tarjeta-firmante::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: var(--azul-institucional);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.35s ease;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .tarjeta-firmante:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(13, 110, 253, 0.15);
+            border-color: var(--azul-institucional);
+            z-index: 10;
+        }
+
+        .tarjeta-firmante:hover::before {
+            transform: scaleX(1);
+        }
+
+        .tarjeta-firmante .avatar-firmante {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(13, 110, 253, 0.12);
+            color: var(--azul-institucional);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .tarjeta-firmante .tipo-firmante {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--azul-institucional);
+            background: rgba(13, 110, 253, 0.08);
+            padding: 4px 12px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .tarjeta-firmante .nombre-firmante {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+
+        .tarjeta-firmante .detalle-firmante {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 2px;
+        }
+
+        /* ============================================ */
+        /* TOOLTIP PERSONALIZADO                         */
+        /* ============================================ */
+        .tooltip-detalle {
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%) scale(0.95);
+            background: #1a1a2e;
+            color: #ffffff;
+            padding: 14px 18px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            min-width: 260px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            line-height: 1.5;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+            z-index: 1000;
+            text-align: left;
+        }
+
+        .tooltip-detalle::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: #1a1a2e;
+        }
+
+        .tarjeta-firmante:hover .tooltip-detalle {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .tooltip-detalle .tooltip-titulo {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #6ea8fe;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .tooltip-detalle .tooltip-fila {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .tooltip-detalle .tooltip-fila:last-child {
+            margin-bottom: 0;
+        }
+
+        .tooltip-detalle .tooltip-fila i {
+            color: #6ea8fe;
+            font-size: 0.9rem;
+            width: 16px;
+            flex-shrink: 0;
+        }
+
+        .tooltip-detalle .tooltip-fila strong {
+            color: #ffc107;
+            font-weight: 700;
+        }
+
+        /* ============================================ */
+        /* BOTÓN FLOTANTE (+)                            */
+        /* ============================================ */
+        .btn-flotante-agregar {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: var(--azul-institucional);
+            color: #ffffff;
+            border: none;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .btn-flotante-agregar:hover {
+            transform: scale(1.1) rotate(90deg);
+            background: #0b5ed7;
+            box-shadow: 0 12px 35px rgba(13, 110, 253, 0.6);
+        }
+
+        .btn-flotante-agregar:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.7;
+        }
+
+        .btn-flotante-agregar:disabled:hover {
+            transform: none;
+            background: #adb5bd;
+        }
+
+        /* ============================================ */
+        /* MODAL PERSONALIZADO                           */
+        /* ============================================ */
+        .modal-content {
+            border-radius: 25px;
+            border: none;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--azul-institucional) 0%, #0b5ed7 100%);
+            color: #ffffff;
+            border-bottom: none;
+            padding: 25px 30px;
+            border-radius: 25px 25px 0 0;
+        }
+
+        .modal-header .modal-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+
+        .modal-body {
+            padding: 30px;
+            background: #ffffff;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 20px 30px 30px 30px;
+            background: #ffffff;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--azul-institucional);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+
+        .btn-guardar {
+            background: var(--azul-institucional);
+            color: #ffffff;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-guardar:hover {
+            background: #0b5ed7;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+        }
+
+        .btn-cancelar {
+            background: #f1f5f9;
+            color: #495057;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancelar:hover {
+            background: #e2e8f0;
+        }
+
+        .modal.fade .modal-dialog {
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s ease-out;
+        }
+        .modal.show .modal-dialog {
+            transform: scale(1) translateY(0);
+        }
+
+        .btn-eliminar-firmante {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            z-index: 20;
+        }
+
+        .tarjeta-firmante:hover .btn-eliminar-firmante {
+            opacity: 1;
+        }
+
+        .btn-eliminar-firmante:hover {
+            background: #dc3545;
+            color: #ffffff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #adb5bd;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #dee2e6;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animar-entrada { animation: fadeInUp 0.6s ease-out backwards; }
+
+        /* ============================================ */
+        /* SISTEMA DE NOTIFICACIONES PERSONALIZADO        */
+        /* ============================================ */
+        #contenedorNotificaciones {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 900px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .notificacion-custom {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            animation: slideDown 0.35s ease-out;
+        }
+        .notificacion-custom.ocultando { animation: slideUp 0.35s ease-in forwards; }
+        .notificacion-custom .notif-icono { font-size: 1.6rem; flex-shrink: 0; }
+        .notificacion-custom .notif-texto { flex: 1; font-size: 0.98rem; line-height: 1.3; }
+        .notificacion-custom .notif-cerrar {
+            background: transparent; border: none; color: white;
+            font-size: 1.4rem; cursor: pointer; opacity: 0.8;
+            transition: opacity 0.2s; padding: 0 4px; line-height: 1;
+        }
+        .notificacion-custom .notif-cerrar:hover { opacity: 1; }
+
+        .notificacion-custom.error    { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        .notificacion-custom.exito    { background: linear-gradient(135deg, #198754, #146c43); }
+        .notificacion-custom.advertencia { background: linear-gradient(135deg, #ffc107, #e0a800); color: #212529; }
+        .notificacion-custom.advertencia .notif-cerrar { color: #212529; }
+        .notificacion-custom.info     { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-25px); } }
+
+        /* ============================================ */
+        /* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN          */
+        /* ============================================ */
+        #modalConfirmarEliminar .modal-header {
+            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+        }
+        #modalConfirmarEliminar .modal-body {
+            text-align: center;
+            padding: 40px 30px;
+        }
+        #modalConfirmarEliminar .icono-advertencia {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 20px auto;
+        }
+        #modalConfirmarEliminar .titulo-confirmar {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+        }
+        #modalConfirmarEliminar .texto-confirmar {
+            color: #6c757d;
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+        .btn-eliminar-confirmar {
+            background: #dc3545;
+            color: #ffffff;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .btn-eliminar-confirmar:hover {
+            background: #b02a37;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+        }
+
+        /* Badge de "ya registrado" en el select */
+        .opcion-bloqueada {
+            color: #adb5bd !important;
+            font-style: italic;
+        }
+
+        /* ============================================ */
+        /* FILA DOBLE (Cédula + Teléfono)                */
+        /* ============================================ */
+        .fila-doble {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 576px) {
+            .fila-doble {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CONTENEDOR DE NOTIFICACIONES -->
+    <div id="contenedorNotificaciones"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h1 fw-bold">
+                <i class="bi bi-shield-lock-fill"></i> E.N Carmen Magaly Vargas
+            </span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+                    <a href="{% url 'menu_admin' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                        <i class="bi bi-arrow-left me-1"></i> Volver al Panel Admin
+                    </a>
+                    <span class="text-white ms-2 me-2 small d-none d-md-inline">
+                        Usuario: <strong>{{ user.username }}</strong>
+                    </span>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Encabezado -->
+        <div class="encabezado-panel animar-entrada">
+            <span class="badge-institucion">
+                <i class="bi bi-person-badge-fill"></i> Gestión de Firmantes
+            </span>
+            <h1>
+                <i class="bi bi-people-fill text-primary me-2"></i>
+                Firmantes Autorizados
+            </h1>
+            <p>Administre los firmantes para constancias y documentos oficiales. Solo se permite <strong>1 firmante por tipo</strong>.</p>
+        </div>
+
+        <!-- Contenedor de Tarjetas -->
+        <div class="row g-4" id="contenedor-firmantes">
+            <!-- Se llena dinámicamente con JS -->
+        </div>
+
+        <!-- Estado vacío -->
+        <div id="empty-state" class="empty-state d-none">
+            <i class="bi bi-person-x"></i>
+            <h4>No hay firmantes registrados</h4>
+            <p>Haga clic en el botón <strong>+</strong> para agregar el primer firmante.</p>
+        </div>
+    </div>
+
+    <!-- Botón Flotante (+) -->
+    <button class="btn-flotante-agregar" id="btnFlotanteAgregar" data-bs-toggle="modal" data-bs-target="#modalFirmante" title="Agregar Firmante">
+        <i class="bi bi-plus"></i>
+    </button>
+
+    <!-- MODAL DE REGISTRO / EDICIÓN -->
+    <div class="modal fade" id="modalFirmante" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitulo">
+                        <i class="bi bi-person-plus-fill me-2"></i> Registrar Firmante
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formFirmante">
+                        <input type="hidden" id="firmanteId" value="">
+
+                        <div class="mb-4">
+                            <label for="tipoFirmante" class="form-label">Tipo de Firmante <span class="text-danger">*</span></label>
+                            <select class="form-select" id="tipoFirmante" required>
+                                <option value="">Seleccione una opción...</option>
+                                <option value="director_anexa" data-tipo="director_anexa">Director(a) Aula Anexa Juan Pablo Rojas Paul</option>
+                                <option value="centro_desarrollo" data-tipo="centro_desarrollo">Centro de Desarrollo de la Calidad Educativa Estadal</option>
+                            </select>
+                            <small class="text-muted d-block mt-2" id="ayudaTipo">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Solo puede registrar 1 firmante por cada tipo.
+                            </small>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="nombresFirmante" class="form-label">Nombres <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nombresFirmante" placeholder="Ej: María Alejandra" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="apellidosFirmante" class="form-label">Apellidos <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="apellidosFirmante" placeholder="Ej: Pérez Rodríguez" required>
+                            </div>
+                        </div>
+
+                        <div class="fila-doble mb-4">
+                            <div>
+                                <label for="cedulaFirmante" class="form-label">Cédula de Identidad <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cedulaFirmante" placeholder="Ej: 12345678" required>
+                            </div>
+                            <div>
+                                <label for="telefonoFirmante" class="form-label">Número Telefónico <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="telefonoFirmante" placeholder="Ej: 0414-1234567" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn-guardar" id="btnGuardarFirmante">
+                        <i class="bi bi-save me-1"></i> Guardar Firmante
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN                          -->
+    <!-- ============================================================ -->
+    <div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Eliminación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="icono-advertencia">
+                        <i class="bi bi-trash-fill"></i>
+                    </div>
+                    <div class="titulo-confirmar">¿Estás seguro?</div>
+                    <p class="texto-confirmar" id="textoConfirmarEliminar">Esta acción eliminará permanentemente al firmante y no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn-eliminar-confirmar" id="btnConfirmarEliminar">
+                        <i class="bi bi-trash-fill me-1"></i> Sí, eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ============================================================
+        // SISTEMA DE NOTIFICACIONES PERSONALIZADO
+        // ============================================================
+        function mostrarNotificacion(mensaje, tipo = 'info', duracion = 4000) {
+            const contenedor = document.getElementById('contenedorNotificaciones');
+            const iconos = {
+                error: 'bi-exclamation-triangle-fill',
+                exito: 'bi-check-circle-fill',
+                advertencia: 'bi-exclamation-circle-fill',
+                info: 'bi-info-circle-fill'
+            };
+            const notif = document.createElement('div');
+            notif.className = `notificacion-custom ${tipo}`;
+            notif.innerHTML = `
+                <i class="bi ${iconos[tipo] || iconos.info} notif-icono"></i>
+                <div class="notif-texto">${mensaje}</div>
+                <button type="button" class="notif-cerrar" aria-label="Cerrar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            `;
+            contenedor.appendChild(notif);
+            const cerrar = () => {
+                if (notif.classList.contains('ocultando')) return;
+                notif.classList.add('ocultando');
+                setTimeout(() => notif.remove(), 350);
+            };
+            notif.querySelector('.notif-cerrar').addEventListener('click', cerrar);
+            if (duracion > 0) setTimeout(cerrar, duracion);
+            return notif;
+        }
+
+        // ============================================================
+        // VARIABLES GLOBALES
+        // ============================================================
+        const contenedor = document.getElementById('contenedor-firmantes');
+        const emptyState = document.getElementById('empty-state');
+        const modalElement = document.getElementById('modalFirmante');
+        const modalInstance = new bootstrap.Modal(modalElement);
+        const formFirmante = document.getElementById('formFirmante');
+        const btnGuardar = document.getElementById('btnGuardarFirmante');
+        const btnFlotanteAgregar = document.getElementById('btnFlotanteAgregar');
+
+        const firmanteIdInput = document.getElementById('firmanteId');
+        const tipoSelect = document.getElementById('tipoFirmante');
+        const nombresInput = document.getElementById('nombresFirmante');
+        const apellidosInput = document.getElementById('apellidosFirmante');
+        const cedulaInput = document.getElementById('cedulaFirmante');
+        const telefonoInput = document.getElementById('telefonoFirmante');
+        const modalTitulo = document.getElementById('modalTitulo');
+
+        // Variables para el modal de confirmación
+        const modalConfirmarElement = document.getElementById('modalConfirmarEliminar');
+        const modalConfirmarInstance = new bootstrap.Modal(modalConfirmarElement);
+        const btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar');
+        const textoConfirmarEliminar = document.getElementById('textoConfirmarEliminar');
+        let firmanteIdAEliminar = null;
+
+        // Cache de tipos ya ocupados
+        let tiposOcupados = new Set();
+
+        // ============================================================
+        // CARGAR FIRMANTES AL INICIAR
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarFirmantes();
+        });
+
+        function cargarFirmantes() {
+            fetch('{% url "admin_firmantes_json" %}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        renderizarFirmantes(data.firmantes);
+                    } else {
+                        mostrarNotificacion('Error al cargar firmantes: ' + data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error de red:', error);
+                    mostrarNotificacion('Error de conexión al cargar los firmantes.', 'error');
+                });
+        }
+
+        function renderizarFirmantes(firmantes) {
+            contenedor.innerHTML = '';
+            tiposOcupados.clear();
+
+            if (firmantes.length === 0) {
+                emptyState.classList.remove('d-none');
+                btnFlotanteAgregar.disabled = false;
+                return;
+            }
+            emptyState.classList.add('d-none');
+
+            firmantes.forEach(f => {
+                tiposOcupados.add(f.tipo);
+
+                // Detalle rápido en la tarjeta
+                const detalle = `<div class="detalle-firmante"><i class="bi bi-person-vcard me-1"></i> ${f.cedula_completa || '—'}</div>`;
+
+                // Tooltip con TODOS los detalles
+                const tooltipHtml = `
+                    <div class="tooltip-detalle">
+                        <div class="tooltip-titulo">
+                            <i class="bi bi-info-circle-fill me-1"></i> Detalles del Firmante
+                        </div>
+                        <div class="tooltip-fila">
+                            <i class="bi bi-person-badge-fill"></i>
+                            <span><strong>Tipo:</strong> ${f.tipo_display}</span>
+                        </div>
+                        <div class="tooltip-fila">
+                            <i class="bi bi-person-fill"></i>
+                            <span><strong>Nombre:</strong> ${f.nombre_completo}</span>
+                        </div>
+                        <div class="tooltip-fila">
+                            <i class="bi bi-person-vcard"></i>
+                            <span><strong>Cédula:</strong> ${f.cedula_completa || '—'}</span>
+                        </div>
+                        <div class="tooltip-fila">
+                            <i class="bi bi-telephone-fill"></i>
+                            <span><strong>Teléfono:</strong> ${f.telefono || '—'}</span>
+                        </div>
+                    </div>
+                `;
+
+                const html = `
+                    <div class="col-lg-4 col-md-6 animar-entrada">
+                        <div class="tarjeta-firmante">
+                            <button class="btn-eliminar-firmante" onclick="abrirModalEliminar(${f.id}, '${f.nombre_completo}')" title="Eliminar">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                            ${tooltipHtml}
+                            <div class="avatar-firmante">${f.iniciales}</div>
+                            <span class="tipo-firmante">${f.tipo_display}</span>
+                            <div class="nombre-firmante">${f.nombre_completo}</div>
+                            ${detalle}
+                        </div>
+                    </div>
+                `;
+                contenedor.insertAdjacentHTML('beforeend', html);
+            });
+
+            // Deshabilitar botón flotante si ya hay 2 firmantes (uno de cada tipo)
+            if (firmantes.length >= 2) {
+                btnFlotanteAgregar.disabled = true;
+                btnFlotanteAgregar.title = 'Ya hay 2 firmantes registrados (máximo permitido)';
+            } else {
+                btnFlotanteAgregar.disabled = false;
+                btnFlotanteAgregar.title = 'Agregar Firmante';
+            }
+
+            // Actualizar el select del modal con las opciones bloqueadas
+            actualizarOpcionesSelect();
+        }
+
+        // ============================================================
+        // ACTUALIZAR OPCIONES DEL SELECT (BLOQUEAR TIPOS OCUPADOS)
+        // ============================================================
+        function actualizarOpcionesSelect() {
+            const opciones = tipoSelect.querySelectorAll('option');
+            opciones.forEach(opt => {
+                const tipoOpt = opt.getAttribute('data-tipo');
+                if (!tipoOpt) return; // Ignorar la opción placeholder
+
+                if (tiposOcupados.has(tipoOpt)) {
+                    opt.disabled = true;
+                    opt.classList.add('opcion-bloqueada');
+                    if (!opt.textContent.includes('(Ya registrado)')) {
+                        opt.textContent = opt.textContent.replace(' (Ya registrado)', '') + ' (Ya registrado)';
+                    }
+                } else {
+                    opt.disabled = false;
+                    opt.classList.remove('opcion-bloqueada');
+                    opt.textContent = opt.textContent.replace(' (Ya registrado)', '');
+                }
+            });
+        }
+
+        // ============================================================
+        // ABRIR MODAL PARA NUEVO
+        // ============================================================
+        btnFlotanteAgregar.addEventListener('click', function() {
+            if (tiposOcupados.size >= 2) {
+                mostrarNotificacion(
+                    'Ya hay 2 firmantes registrados (uno de cada tipo). Debe eliminar uno antes de registrar otro.',
+                    'advertencia',
+                    5000
+                );
+                return;
+            }
+
+            formFirmante.reset();
+            firmanteIdInput.value = '';
+            modalTitulo.innerHTML = '<i class="bi bi-person-plus-fill me-2"></i> Registrar Firmante';
+            actualizarOpcionesSelect();
+        });
+
+        // ============================================================
+        // GUARDAR FIRMANTE
+        // ============================================================
+        btnGuardar.addEventListener('click', function() {
+            if (!formFirmante.checkValidity()) {
+                formFirmante.reportValidity();
+                return;
+            }
+
+            const tipoSeleccionado = tipoSelect.value;
+
+            if (tiposOcupados.has(tipoSeleccionado)) {
+                mostrarNotificacion(
+                    `Ya existe un firmante registrado para el tipo "${tipoSelect.options[tipoSelect.selectedIndex].text.split(' (')[0]}". Solo se permite 1 por tipo.`,
+                    'advertencia',
+                    5000
+                );
+                return;
+            }
+
+            const payload = {
+                id: firmanteIdInput.value || null,
+                tipo: tipoSeleccionado,
+                nombres: nombresInput.value.trim(),
+                apellidos: apellidosInput.value.trim(),
+                cedula: cedulaInput.value.trim(),
+                telefono: telefonoInput.value.trim()
+            };
+
+            fetch('{% url "guardar_firmante" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    modalInstance.hide();
+                    cargarFirmantes();
+                    mostrarNotificacion(data.mensaje, 'exito', 4000);
+                } else {
+                    mostrarNotificacion('Error: ' + data.error, 'error', 5000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarNotificacion('Error de conexión al guardar.', 'error', 5000);
+            });
+        });
+
+        // ============================================================
+        // LÓGICA DE ELIMINACIÓN CON MODAL PERSONALIZADO
+        // ============================================================
+        function abrirModalEliminar(id, nombre) {
+            firmanteIdAEliminar = id;
+            textoConfirmarEliminar.innerHTML =
+                `¿Estás seguro de que deseas eliminar a <strong>${nombre}</strong>? Esta acción no se puede deshacer y liberará el tipo para registrar uno nuevo.`;
+            modalConfirmarInstance.show();
+        }
+
+        btnConfirmarEliminar.addEventListener('click', function() {
+            if (!firmanteIdAEliminar) return;
+
+            fetch(`/admin-panel/firmantes/eliminar/${firmanteIdAEliminar}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                modalConfirmarInstance.hide();
+                if (data.ok) {
+                    cargarFirmantes();
+                    mostrarNotificacion('Firmante eliminado correctamente. Ya puede registrar uno nuevo de ese tipo.', 'exito', 4000);
+                } else {
+                    mostrarNotificacion('Error: ' + data.error, 'error', 5000);
+                }
+                firmanteIdAEliminar = null;
+            })
+            .catch(error => {
+                modalConfirmarInstance.hide();
+                console.error('Error:', error);
+                mostrarNotificacion('Error de conexión al eliminar.', 'error', 5000);
+                firmanteIdAEliminar = null;
+            });
+        });
+    </script>
+</body>
+</html>

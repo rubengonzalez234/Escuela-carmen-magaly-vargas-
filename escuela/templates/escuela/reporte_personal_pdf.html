@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado General - Personal</title>
+    <style>
+        @page {
+            size: letter landscape;
+            margin: 1cm 0.8cm;
+            margin-bottom: 1.5cm;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 9pt;
+            color: #333333;
+            line-height: 1.3;
+            margin: 0;
+            padding: 0;
+        }
+        .header-table {
+            width: 100%;
+            border-bottom: 3px solid #0d6efd;
+            padding-bottom: 8px;
+            margin-bottom: 4px;
+        }
+        .header-table td { vertical-align: middle; padding: 0; }
+        .header-logo { width: 90px; text-align: left; }
+        .header-logo img { width: 80px; height: auto; }
+        .header-titles { text-align: center; }
+        .header-title {
+            font-size: 15pt; font-weight: bold; color: #0d6efd;
+            margin: 0; letter-spacing: 0.5px; text-transform: uppercase;
+        }
+        .header-subtitle {
+            font-size: 9pt; color: #555555; margin-top: 3px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .header-meta {
+            text-align: right; font-size: 8.5pt;
+            color: #666666; line-height: 1.4;
+        }
+        .header-meta .meta-label { color: #0d6efd; font-weight: bold; }
+
+        .title-section { text-align: center; margin: 14px 0 10px 0; }
+        .title-section h2 {
+            font-size: 13pt; font-weight: bold; color: #212529;
+            margin: 0; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+            border-top: 1px solid #dee2e6;
+            border-right: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 14px; margin-bottom: 14px;
+        }
+        .info-box table { width: 100%; border-collapse: collapse; }
+        .info-box td { padding: 3px 6px; font-size: 9pt; vertical-align: middle; }
+        .info-box .label {
+            color: #0d6efd; font-weight: bold;
+            text-transform: uppercase; font-size: 8pt; letter-spacing: 0.5px;
+        }
+        .info-box .value { color: #212529; font-weight: bold; font-size: 9.5pt; }
+
+        /* ============================================ */
+        /* SECCIÓN POR TIPO DE PERSONAL                  */
+        /* ============================================ */
+        .tipo-section {
+            margin-top: 18px;
+            page-break-inside: auto;
+        }
+        .tipo-section:first-of-type { margin-top: 8px; }
+
+        .tipo-header-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #0d6efd;
+            margin: 0;
+        }
+        .tipo-header-table td {
+            color: #ffffff;
+            padding: 7px 12px;
+            vertical-align: middle;
+        }
+        .tipo-header-table .titulo-tipo {
+            font-size: 11pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            text-align: left;
+        }
+        .tipo-header-table .badge-total {
+            font-size: 9pt;
+            font-weight: normal;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        /* Variantes de color por tipo */
+        .tipo-section.admin .tipo-header-table { background-color: #198754; }
+        .tipo-section.apoyo .tipo-header-table { background-color: #cc9a06; }
+        .tipo-section.cocina .tipo-header-table { background-color: #0dcaf0; }
+
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table thead th {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+            font-weight: bold;
+            font-size: 7.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 7px 4px;
+            border: 1px solid #b6d4fe;
+            text-align: left;
+        }
+        .data-table thead th.center { text-align: center; }
+        .data-table tbody td {
+            padding: 5px 4px;
+            border: 1px solid #dee2e6;
+            font-size: 8.5pt;
+            vertical-align: middle;
+        }
+        .data-table tbody tr:nth-child(even) { background-color: #f8f9fa; }
+        .data-table tbody td.center { text-align: center; }
+        .data-table tbody td.cedula {
+            font-family: 'Courier New', monospace;
+            font-weight: bold; color: #495057;
+            font-size: 8pt;
+        }
+        .data-table tbody td.bold { font-weight: bold; color: #212529; }
+
+        /* Encabezados de tabla según tipo */
+        .tipo-section.admin .data-table thead th {
+            background-color: #d1e7dd; color: #0f5132;
+            border-color: #a3cfbb;
+        }
+        .tipo-section.apoyo .data-table thead th {
+            background-color: #fff3cd; color: #664d03;
+            border-color: #ffe69c;
+        }
+        .tipo-section.cocina .data-table thead th {
+            background-color: #cff4fc; color: #055160;
+            border-color: #9eeaf9;
+        }
+
+        .badge-genero {
+            display: inline-block; padding: 2px 7px;
+            font-size: 7pt; font-weight: bold; border-radius: 8px;
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .badge-m { background-color: #0d6efd; color: #ffffff; }
+        .badge-f { background-color: #d63384; color: #ffffff; }
+
+        /* Resumen discriminado */
+        .resumen-box {
+            margin-top: 25px; margin-bottom: 5px;
+            border: 2px solid #0d6efd; border-radius: 6px;
+            overflow: hidden; background-color: #ffffff;
+            page-break-inside: avoid;
+        }
+        .resumen-box .resumen-titulo {
+            background-color: #0d6efd; color: #ffffff;
+            padding: 6px 14px; font-size: 10pt; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            text-align: center;
+        }
+        .resumen-box .resumen-body {
+            padding: 12px 16px; background-color: #f8f9fa;
+        }
+        .resumen-box .resumen-body table {
+            width: 100%; border-collapse: collapse;
+        }
+        .resumen-box .resumen-body td {
+            padding: 8px 10px; font-size: 11pt;
+            text-align: center; border-right: 1px solid #dee2e6;
+        }
+        .resumen-box .resumen-body td:last-child { border-right: none; }
+        .resumen-box .resumen-label {
+            font-size: 8.5pt; color: #495057; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 4px; display: block;
+        }
+        .resumen-box .resumen-numero {
+            font-size: 20pt; font-weight: 800;
+            color: #0d6efd; line-height: 1; display: block;
+        }
+        .resumen-box .resumen-numero.docentes { color: #0d6efd; }
+        .resumen-box .resumen-numero.administrativos { color: #198754; }
+        .resumen-box .resumen-numero.apoyo { color: #cc9a06; }
+        .resumen-box .resumen-numero.cocina { color: #0dcaf0; }
+        .resumen-box .resumen-numero.total { color: #212529; }
+
+        /* Firmas */
+        .firma-section {
+            margin-top: 50px;
+            width: 100%;
+            table-layout: fixed;
+            page-break-inside: avoid;
+        }
+        .firma-section td {
+            text-align: center;
+            padding: 0 20px;
+            vertical-align: bottom;
+        }
+        .firma-line {
+            border-top: 1px solid #333333;
+            margin: 0 auto 4px auto;
+            width: 80%;
+            height: 30px;
+        }
+        .firma-nombre {
+            font-size: 8.5pt; font-weight: bold; color: #212529;
+            text-transform: uppercase;
+        }
+        .firma-cargo {
+            font-size: 7.5pt; color: #666666;
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+
+        .empty-row td {
+            text-align: center; padding: 25px;
+            color: #adb5bd; font-style: italic;
+        }
+
+        .footer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            font-size: 8pt; color: #777777; text-align: center;
+            border-top: 1px solid #dee2e6; padding-top: 6px;
+        }
+        .footer strong { color: #0d6efd; }
+    </style>
+</head>
+<body>
+
+    <!-- IMAGEN DE ENCABEZADO INSTITUCIONAL -->
+    <div style="text-align: center; margin-bottom: 5px; display: block; clear: both;">
+        <img src="/static/img/encabezado.png" style="width: 100%; max-width: 100%; height: auto;" alt="Encabezado Institucional">
+    </div>
+
+    <!-- ENCABEZADO -->
+    <table class="header-table">
+        <tr>
+            <td class="header-logo"></td>
+            <td class="header-titles">
+                <div class="header-title">E.N Carmen Magaly Vargas</div>
+                <div class="header-subtitle">Sistema de Control Escolar</div>
+            </td>
+            <td class="header-meta">
+                <span class="meta-label">FECHA:</span> {{ fecha|date:"d/m/Y" }}<br>
+                <span class="meta-label">HORA:</span> {{ hora }}<br>
+                <span class="meta-label">USUARIO:</span> {{ usuario }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- TÍTULO -->
+    <div class="title-section">
+        <h2>Listado General de Personal</h2>
+        {% if busqueda %}
+        <div style="font-size: 9pt; color: #6c757d; margin-top: 4px;">
+            <strong>Filtro aplicado:</strong> "{{ busqueda }}"
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- INFO BOX -->
+    <div class="info-box">
+        <table>
+            <tr>
+                <td style="width: 20%;">
+                    <span class="label">Docentes:</span><br>
+                    <span class="value">{{ total_docentes }} persona{{ total_docentes|pluralize:"s" }}</span>
+                </td>
+                <td style="width: 20%;">
+                    <span class="label">Administrativos:</span><br>
+                    <span class="value">{{ total_administrativos }} persona{{ total_administrativos|pluralize:"s" }}</span>
+                </td>
+                <td style="width: 20%;">
+                    <span class="label">Apoyo:</span><br>
+                    <span class="value">{{ total_apoyo }} persona{{ total_apoyo|pluralize:"s" }}</span>
+                </td>
+                <td style="width: 20%;">
+                    <span class="label">Cocina:</span><br>
+                    <span class="value">{{ total_cocina }} persona{{ total_cocina|pluralize:"s" }}</span>
+                </td>
+                <td style="width: 20%;">
+                    <span class="label">Total General:</span><br>
+                    <span class="value">{{ total_personal }} persona{{ total_personal|pluralize:"s" }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ==================== SECCIÓN: DOCENTES ==================== -->
+    <div class="tipo-section">
+        <table class="tipo-header-table">
+            <tr>
+                <td class="titulo-tipo">Docentes</td>
+                <td class="badge-total">{{ docentes|length }} persona{{ docentes|length|pluralize:"s" }}</td>
+            </tr>
+        </table>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="center" style="width: 3%;">N°</th>
+                    <th class="center" style="width: 10%;">Cédula</th>
+                    <th style="width: 14%;">Apellidos</th>
+                    <th style="width: 14%;">Nombres</th>
+                    <th class="center" style="width: 6%;">Género</th>
+                    <th class="center" style="width: 8%;">F. Nacimiento</th>
+                    <th class="center" style="width: 4%;">Edad</th>
+                    <th style="width: 14%;">Nivel / Grado</th>
+                    <th style="width: 14%;">Especialidad</th>
+                    <th class="center" style="width: 13%;">Teléfono</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in docentes %}
+                <tr>
+                    <td class="center">{{ forloop.counter }}</td>
+                    <td class="center cedula">{{ p.nacionalidad }}-{{ p.cedula }}</td>
+                    <td>{{ p.apellidos|title }}</td>
+                    <td>{{ p.nombres|title }}</td>
+                    <td class="center">
+                        {% if p.genero == 'M' %}
+                            <span class="badge-genero badge-m">M</span>
+                        {% else %}
+                            <span class="badge-genero badge-f">F</span>
+                        {% endif %}
+                    </td>
+                    <td class="center">{{ p.fecha_nacimiento|date:"d/m/Y" }}</td>
+                    <td class="center bold">{{ p.edad }}</td>
+                    <td>{{ p.nivel_grado|default:"—" }}</td>
+                    <td>{{ p.especialidad|default:"—" }}</td>
+                    <td class="center">{{ p.telefono|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="10">Sin docentes registrados</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ==================== SECCIÓN: ADMINISTRATIVOS ==================== -->
+    <div class="tipo-section admin">
+        <table class="tipo-header-table">
+            <tr>
+                <td class="titulo-tipo">Personal Administrativo</td>
+                <td class="badge-total">{{ administrativos|length }} persona{{ administrativos|length|pluralize:"s" }}</td>
+            </tr>
+        </table>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="center" style="width: 3%;">N°</th>
+                    <th class="center" style="width: 10%;">Cédula</th>
+                    <th style="width: 16%;">Apellidos</th>
+                    <th style="width: 16%;">Nombres</th>
+                    <th class="center" style="width: 6%;">Género</th>
+                    <th class="center" style="width: 9%;">F. Nacimiento</th>
+                    <th class="center" style="width: 5%;">Edad</th>
+                    <th style="width: 19%;">Cargo</th>
+                    <th class="center" style="width: 16%;">Teléfono</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in administrativos %}
+                <tr>
+                    <td class="center">{{ forloop.counter }}</td>
+                    <td class="center cedula">{{ p.nacionalidad }}-{{ p.cedula }}</td>
+                    <td>{{ p.apellidos|title }}</td>
+                    <td>{{ p.nombres|title }}</td>
+                    <td class="center">
+                        {% if p.genero == 'M' %}
+                            <span class="badge-genero badge-m">M</span>
+                        {% else %}
+                            <span class="badge-genero badge-f">F</span>
+                        {% endif %}
+                    </td>
+                    <td class="center">{{ p.fecha_nacimiento|date:"d/m/Y" }}</td>
+                    <td class="center bold">{{ p.edad }}</td>
+                    <td>{{ p.get_cargo_display|default:p.cargo|default:"—" }}</td>
+                    <td class="center">{{ p.telefono|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="9">Sin personal administrativo registrado</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ==================== SECCIÓN: PERSONAL DE APOYO ==================== -->
+    <div class="tipo-section apoyo">
+        <table class="tipo-header-table">
+            <tr>
+                <td class="titulo-tipo">Personal de Apoyo</td>
+                <td class="badge-total">{{ apoyo|length }} persona{{ apoyo|length|pluralize:"s" }}</td>
+            </tr>
+        </table>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="center" style="width: 3%;">N°</th>
+                    <th class="center" style="width: 10%;">Cédula</th>
+                    <th style="width: 16%;">Apellidos</th>
+                    <th style="width: 16%;">Nombres</th>
+                    <th class="center" style="width: 6%;">Género</th>
+                    <th class="center" style="width: 9%;">F. Nacimiento</th>
+                    <th class="center" style="width: 5%;">Edad</th>
+                    <th style="width: 19%;">Cargo</th>
+                    <th class="center" style="width: 16%;">Teléfono</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in apoyo %}
+                <tr>
+                    <td class="center">{{ forloop.counter }}</td>
+                    <td class="center cedula">{{ p.nacionalidad }}-{{ p.cedula }}</td>
+                    <td>{{ p.apellidos|title }}</td>
+                    <td>{{ p.nombres|title }}</td>
+                    <td class="center">
+                        {% if p.genero == 'M' %}
+                            <span class="badge-genero badge-m">M</span>
+                        {% else %}
+                            <span class="badge-genero badge-f">F</span>
+                        {% endif %}
+                    </td>
+                    <td class="center">{{ p.fecha_nacimiento|date:"d/m/Y" }}</td>
+                    <td class="center bold">{{ p.edad }}</td>
+                    <td>{{ p.get_cargo_display|default:p.cargo|default:"—" }}</td>
+                    <td class="center">{{ p.telefono|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="9">Sin personal de apoyo registrado</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ==================== SECCIÓN: PERSONAL DE COCINA ==================== -->
+    <div class="tipo-section cocina">
+        <table class="tipo-header-table">
+            <tr>
+                <td class="titulo-tipo">Personal de Cocina</td>
+                <td class="badge-total">{{ cocina|length }} persona{{ cocina|length|pluralize:"s" }}</td>
+            </tr>
+        </table>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="center" style="width: 3%;">N°</th>
+                    <th class="center" style="width: 10%;">Cédula</th>
+                    <th style="width: 18%;">Apellidos</th>
+                    <th style="width: 18%;">Nombres</th>
+                    <th class="center" style="width: 6%;">Género</th>
+                    <th class="center" style="width: 10%;">F. Nacimiento</th>
+                    <th class="center" style="width: 5%;">Edad</th>
+                    <th style="width: 14%;">Cargo</th>
+                    <th class="center" style="width: 16%;">Teléfono</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in cocina %}
+                <tr>
+                    <td class="center">{{ forloop.counter }}</td>
+                    <td class="center cedula">{{ p.nacionalidad }}-{{ p.cedula }}</td>
+                    <td>{{ p.apellidos|title }}</td>
+                    <td>{{ p.nombres|title }}</td>
+                    <td class="center">
+                        {% if p.genero == 'M' %}
+                            <span class="badge-genero badge-m">M</span>
+                        {% else %}
+                            <span class="badge-genero badge-f">F</span>
+                        {% endif %}
+                    </td>
+                    <td class="center">{{ p.fecha_nacimiento|date:"d/m/Y" }}</td>
+                    <td class="center bold">{{ p.edad }}</td>
+                    <td>{{ p.get_cargo_display|default:p.cargo|default:"—" }}</td>
+                    <td class="center">{{ p.telefono|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="9">Sin personal de cocina registrado</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- RESUMEN DISCRIMINADO -->
+    <div class="resumen-box">
+        <div class="resumen-titulo">
+            Resumen General de Personal
+        </div>
+        <div class="resumen-body">
+            <table>
+                <tr>
+                    <td style="width: 20%;">
+                        <span class="resumen-label">Docentes</span>
+                        <span class="resumen-numero docentes">{{ total_docentes }}</span>
+                    </td>
+                    <td style="width: 20%;">
+                        <span class="resumen-label">Administrativos</span>
+                        <span class="resumen-numero administrativos">{{ total_administrativos }}</span>
+                    </td>
+                    <td style="width: 20%;">
+                        <span class="resumen-label">Apoyo</span>
+                        <span class="resumen-numero apoyo">{{ total_apoyo }}</span>
+                    </td>
+                    <td style="width: 20%;">
+                        <span class="resumen-label">Cocina</span>
+                        <span class="resumen-numero cocina">{{ total_cocina }}</span>
+                    </td>
+                    <td style="width: 20%;">
+                        <span class="resumen-label">Total General</span>
+                        <span class="resumen-numero total">{{ total_personal }}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- FIRMAS -->
+    <table class="firma-section">
+        <tr>
+            <td>
+                <div class="firma-line"></div>
+                <div class="firma-nombre">Dirección del Plantel</div>
+                <div class="firma-cargo">Sello y Firma</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <strong>E.N Carmen Magaly Vargas</strong> — Documento generado automáticamente por el sistema | {{ fecha|date:"d/m/Y" }} - {{ hora }}
+    </div>
+
+</body>
+</html>

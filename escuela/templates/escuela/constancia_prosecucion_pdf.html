@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia de Prosecución</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 1.5cm 2cm 2.5cm 2cm;
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 2.5cm;
+                width: 21.59cm;   /* ✅ Ancho total de la hoja carta */
+            }
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            color: #000000;
+            line-height: 1.5;
+            text-align: justify;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ENCABEZADO */
+        .header-img {
+            text-align: left;
+            margin-bottom: 5px;
+            display: block;
+            clear: both;
+        }
+        .header-img img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* ESCUDO */
+        .escudo {
+            text-align: center;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        .escudo img {
+            width: 110px;
+            height: auto;
+        }
+
+        /* TÍTULO */
+        .titulo {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        .titulo span {
+            display: inline-block;
+            border-bottom: 1.5px solid #000000;
+            padding-bottom: 2px;
+        }
+
+        /* PÁRRAFOS */
+        .parrafo {
+            text-align: justify;
+            font-size: 12pt;
+            line-height: 1.6;
+            margin-bottom: 14px;
+            text-indent: 0;
+        }
+
+        .negrita { font-weight: bold; }
+        .subrayado { text-decoration: underline; }
+        .negrita-subrayado { font-weight: bold; text-decoration: underline; }
+
+        /* TABLA DE FIRMAS */
+        .tabla-firmas {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            table-layout: fixed;
+        }
+
+        .tabla-firmas th,
+        .tabla-firmas td {
+            border: 1px solid #000000;
+            padding: 6px 8px;
+            font-size: 11pt;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        .tabla-firmas th {
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            background-color: #f2f2f2;
+        }
+
+        .tabla-firmas .fila-espacio {
+            height: 45px;
+        }
+
+        .tabla-firmas .etiqueta {
+            font-weight: bold;
+        }
+
+        /* FOOTER */
+        #footer_content {
+            text-align: right;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        #footer_content img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin-left: auto;
+            margin-right: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ENCABEZADO INSTITUCIONAL -->
+    <div class="header-img">
+        <img src="/static/img/encabezado_certificado.png" alt="Encabezado Institucional">
+    </div>
+
+    <!-- ESCUDO -->
+    <div class="escudo">
+        <img src="/static/img/escudo.png" alt="Escudo">
+    </div>
+
+    <!-- TÍTULO DINÁMICO (INICIAL O PRIMARIA) -->
+    <div class="titulo">
+        <span>{{ titulo_documento }}</span>
+    </div>
+
+    <!-- PÁRRAFO PRINCIPAL -->
+    <p class="parrafo">
+        Quien suscribe
+        <span class="negrita-subrayado">{{ director_nombres }}</span>,
+        titular de la Cédula de Identidad Nº
+        <span class="negrita-subrayado">{{ director_cedula }}</span>,
+        Director(a) de la Institución Educativa
+        <span class="negrita-subrayado">ESCUELA NACIONAL CARMEN MAGALY VARGAS</span>,
+        ubicada en el Municipio
+        <span class="negrita-subrayado">{{ municipio }}</span>
+        de la Parroquia
+        <span class="negrita-subrayado">{{ parroquia }}</span>,
+        adscrita al Centro de Desarrollo de la Calidad Educativa Estadal
+        <span class="negrita-subrayado">{{ centro_desarrollo }}</span>.
+        Por la presente hace constar que el (la) estudiante
+        <span class="negrita-subrayado">{{ estudiante.nombres }} {{ estudiante.apellidos }}</span>,
+        portador(a) de la {{ tipo_doc_str }} Nº
+        <span class="negrita-subrayado">{{ cedula_estudiante }}</span>,
+        nacido (a) en el Municipio
+        <span class="negrita-subrayado">{{ municipio_nacimiento }}</span>
+        del Estado
+        <span class="negrita-subrayado">{{ estado_nacimiento }}</span>,
+        en fecha
+        <span class="negrita-subrayado">{{ fecha_nacimiento }}</span>,
+        {{ texto_cursa|safe }} 
+        {{ texto_promocion|safe }} 
+        durante el periodo escolar
+        <span class="negrita-subrayado">{{ anio_escolar }}</span>,
+        previo cumplimiento de los requisitos establecidos en la normativa legal vigente.
+    </p>
+
+    <!-- PÁRRAFO DE EXPEDICIÓN -->
+    <p class="parrafo">
+        Constancia que se expide en
+        <span class="negrita-subrayado">{{ ciudad_expedicion }}</span>,
+        a los
+        <span class="negrita-subrayado">{{ dia_expedicion }}</span>
+        días del mes de
+        <span class="negrita-subrayado">{{ mes_expedicion }}</span>
+        de
+        <span class="negrita-subrayado">{{ anio_expedicion }}</span>.
+    </p>
+
+    <!-- TABLA DE FIRMAS -->
+    <table class="tabla-firmas">
+        <thead>
+            <tr>
+                <th>Institución Educativa</th>
+                <th>Centro de Desarrollo de la Calidad Educativa Estadal</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="etiqueta">Director(a)</td>
+                <td class="etiqueta">Director(a)</td>
+            </tr>
+            <tr>
+                <td>Nombre y Apellido: <span class="negrita">{{ director_nombres }}</span></td>
+                <td>Nombre y Apellido: <span class="negrita">{{ director_cdc_nombres }}</span></td>
+            </tr>
+            <tr>
+                <td>Número de C.I: <span class="negrita">{{ director_cedula }}</span></td>
+                <td>Número de C.I: <span class="negrita">{{ director_cdc_cedula }}</span></td>
+            </tr>
+            <tr class="fila-espacio">
+                <td>Firma y Sello:</td>
+                <td>Firma y Sello:</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- FOOTER -->
+    <div id="footer_content">
+        <img src="/static/img/pie_pagina.png" alt="Pie de Página" width="100%" height="auto">
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Encabezado Institucional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .card { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card-header {
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 700;
+            color: #198754;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        .drop-zone {
+            border: 3px dashed #198754;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            background: #f0fff4;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            background: #d1f0dc;
+            border-color: #146c43;
+        }
+        .drop-zone i {
+            font-size: 3.5rem;
+            color: #198754;
+            margin-bottom: 15px;
+        }
+        .preview-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .preview-container img {
+            max-width: 100%;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        .info-pill {
+            display: inline-block;
+            background: #e7f1ff;
+            color: #0d6efd;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 3px;
+        }
+        .info-pill.ok { background: #d1f0dc; color: #146c43; }
+        .info-pill.warn { background: #fff3cd; color: #856404; }
+        .info-pill.error { background: #f8d7da; color: #842029; }
+
+        /* ========================================== */
+        /* NOTIFICACIONES PERSISTENTES                 */
+        /* ========================================== */
+        #contenedorNotificaciones {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 900px;
+            z-index: 99999;
+            pointer-events: none;
+        }
+        .notificacion-custom {
+            pointer-events: auto;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            animation: slideDown 0.35s ease-out;
+        }
+        .notificacion-custom.ocultando { animation: slideUp 0.35s ease-in forwards; }
+        .notificacion-custom .notif-icono { font-size: 1.6rem; flex-shrink: 0; margin-top: 2px; }
+        .notificacion-custom .notif-texto { flex: 1; font-size: 0.98rem; line-height: 1.4; }
+        .notificacion-custom .notif-cerrar {
+            background: transparent; border: none; color: white;
+            font-size: 1.4rem; cursor: pointer; opacity: 0.8;
+            padding: 0 4px; line-height: 1;
+            transition: opacity 0.2s;
+        }
+        .notificacion-custom .notif-cerrar:hover { opacity: 1; }
+
+        .notificacion-custom.error    { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        .notificacion-custom.exito    { background: linear-gradient(135deg, #198754, #146c43); }
+        .notificacion-custom.advertencia { background: linear-gradient(135deg, #ffc107, #e0a800); color: #212529; }
+        .notificacion-custom.advertencia .notif-cerrar { color: #212529; }
+        .notificacion-custom.info     { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-25px); } }
+    </style>
+</head>
+<body>
+
+<div id="contenedorNotificaciones"></div>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand mb-0 h1 fw-bold">
+            <i class="bi bi-mortarboard-fill"></i> E.N Carmen Magaly Vargas
+        </span>
+        <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+            <a href="{% url 'menu_admin' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                <i class="bi bi-arrow-left-circle me-1"></i> Volver al Panel
+            </a>
+            <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <!-- ================= MENSAJES DE DJANGO (ocultos, se convierten en notificaciones) ================= -->
+    {% if messages %}
+        <div id="mensajes-django" style="display:none;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" data-tipo="{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">
+                <i class="bi bi-image-fill text-success me-2"></i>Actualizar Encabezado Institucional
+            </h2>
+            <p class="text-secondary mb-0">
+                Reemplaza la imagen que aparece en el encabezado de todos los PDFs generados
+            </p>
+        </div>
+    </div>
+
+    <!-- ================= ADVERTENCIAS ================= -->
+    <div class="alert alert-warning shadow-sm mb-4">
+        <h5 class="fw-bold mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>Requisitos del archivo
+        </h5>
+        <ul class="mb-0">
+            <li><strong>Obligatorio:</strong> El archivo debe llamarse exactamente <code>encabezado.png</code> (todo en minúsculas).</li>
+            <li><strong>Obligatorio:</strong> Formato <strong>PNG</strong> (no JPG, no GIF, no WEBP).</li>
+            <li><strong>Obligatorio:</strong> Peso máximo de <strong>5 MB</strong>.</li>
+            <li><strong>Recomendado:</strong> Resolución <strong>1408 x 162 píxeles</strong> (ancho x alto).</li>
+            <li>Si la imagen tiene otras dimensiones, <strong>se mostrará deformada</strong> en los PDFs. La plataforma aceptará el archivo igualmente.</li>
+            <li>El cambio afecta a <strong>todos los PDFs futuros</strong> (los ya generados no se modifican).</li>
+            <li>La imagen anterior será <strong>reemplazada permanentemente</strong>.</li>
+        </ul>
+    </div>
+
+    <!-- ================= ENCABEZADO ACTUAL ================= -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-eye-fill me-2"></i>Encabezado Actual
+        </div>
+        <div class="card-body">
+            {% if encabezado_existe %}
+                <div class="preview-container">
+                    <img src="{{ ruta_encabezado }}?v={{ fecha_modificacion|date:'U' }}" alt="Encabezado actual" style="max-height: 160px;">
+                    <p class="text-muted small mt-3 mb-0">
+                        <i class="bi bi-clock-history me-1"></i>
+                        Última actualización: <strong>{{ fecha_modificacion|date:"d/m/Y H:i" }}</strong>
+                    </p>
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Aún no se ha subido un encabezado personalizado.
+                    Los PDFs usarán la imagen por defecto (si existe) o no mostrarán encabezado.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ================= FORMULARIO ================= -->
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-upload me-2"></i>Subir Nueva Imagen
+        </div>
+        <div class="card-body">
+
+            <form method="POST" enctype="multipart/form-data" id="formEncabezado" novalidate>
+                {% csrf_token %}
+
+                <div class="drop-zone" id="dropZone">
+                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                    <h5 class="fw-bold mb-2">Arrastra y suelta tu archivo aquí</h5>
+                    <p class="text-muted mb-3">o haz clic en el botón para explorar tus archivos</p>
+                    <input type="file" id="inputArchivo" name="encabezado" accept=".png,image/png" hidden>
+                    <button type="button" class="btn btn-success btn-lg" onclick="document.getElementById('inputArchivo').click()">
+                        <i class="bi bi-folder2-open me-1"></i> Explorar Archivos del Dispositivo
+                    </button>
+                </div>
+
+                <!-- Info del archivo seleccionado -->
+                <div id="infoArchivo" class="mt-3" style="display:none;">
+                    <div class="preview-container">
+                        <img id="previewImagen" src="" alt="Previsualización">
+                        <div class="mt-3">
+                            <span class="info-pill" id="pillNombre"></span>
+                            <span class="info-pill" id="pillTamaño"></span>
+                            <span class="info-pill" id="pillDimensiones"></span>
+                        </div>
+                        <div id="mensajeValidacion" class="mt-3"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{% url 'menu_admin' %}" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success btn-lg" id="btnSubir" disabled>
+                        <i class="bi bi-check-circle-fill"></i> Guardar Encabezado
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ==================================================
+    // SISTEMA DE NOTIFICACIONES PERSISTENTES
+    // ==================================================
+    // Por defecto duracion=0 → NO se cierra sola, solo con la X.
+    function mostrarNotificacion(mensaje, tipo = 'error', duracion = 0) {
+        const contenedor = document.getElementById('contenedorNotificaciones');
+        const iconos = {
+            error: 'bi-exclamation-triangle-fill',
+            exito: 'bi-check-circle-fill',
+            advertencia: 'bi-exclamation-circle-fill',
+            info: 'bi-info-circle-fill'
+        };
+        const notif = document.createElement('div');
+        notif.className = `notificacion-custom ${tipo}`;
+        notif.innerHTML = `
+            <i class="bi ${iconos[tipo] || iconos.error} notif-icono"></i>
+            <div class="notif-texto">${mensaje}</div>
+            <button type="button" class="notif-cerrar" aria-label="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        `;
+        contenedor.appendChild(notif);
+        const cerrar = () => {
+            if (notif.classList.contains('ocultando')) return;
+            notif.classList.add('ocultando');
+            setTimeout(() => notif.remove(), 350);
+        };
+        notif.querySelector('.notif-cerrar').addEventListener('click', cerrar);
+        if (duracion > 0) setTimeout(cerrar, duracion);
+        return notif;
+    }
+
+    // ==================================================
+    // CONFIGURACIÓN
+    // ==================================================
+    const RESOLUCION_RECOMENDADA = { ancho: 1408, alto: 162 };
+    const NOMBRE_OBLIGATORIO = 'encabezado.png';
+    const TAMAÑO_MAXIMO = 5 * 1024 * 1024; // 5 MB
+
+    const dropZone = document.getElementById('dropZone');
+    const inputArchivo = document.getElementById('inputArchivo');
+    const infoArchivo = document.getElementById('infoArchivo');
+    const previewImagen = document.getElementById('previewImagen');
+    const pillNombre = document.getElementById('pillNombre');
+    const pillTamaño = document.getElementById('pillTamaño');
+    const pillDimensiones = document.getElementById('pillDimensiones');
+    const mensajeValidacion = document.getElementById('mensajeValidacion');
+    const btnSubir = document.getElementById('btnSubir');
+
+    // ==================================================
+    // EVENTOS DE LA DROP ZONE
+    // ==================================================
+    dropZone.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'BUTTON') inputArchivo.click();
+    });
+
+    ['dragenter', 'dragover'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+        });
+    });
+    dropZone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            inputArchivo.files = files;
+            validarArchivo(files[0]);
+        }
+    });
+
+    inputArchivo.addEventListener('change', () => {
+        if (inputArchivo.files.length > 0) validarArchivo(inputArchivo.files[0]);
+    });
+
+    // ==================================================
+    // VALIDACIÓN DEL ARCHIVO
+    // ==================================================
+    function validarArchivo(archivo) {
+        infoArchivo.style.display = 'block';
+        mensajeValidacion.innerHTML = '';
+        btnSubir.disabled = true;
+
+        const errores = [];       // Bloquean el envío
+        const advertencias = [];  // Solo avisan
+
+        // ---------- VALIDACIONES OBLIGATORIAS ----------
+        if (archivo.name.toLowerCase() !== NOMBRE_OBLIGATORIO) {
+            errores.push(`El archivo debe llamarse exactamente <code>${NOMBRE_OBLIGATORIO}</code>. Tu archivo se llama <strong>${archivo.name}</strong>.`);
+        }
+        if (!archivo.name.toLowerCase().endsWith('.png')) {
+            errores.push('El archivo debe tener extensión <strong>.png</strong>.');
+        }
+        if (archivo.type !== 'image/png') {
+            errores.push('El tipo de archivo debe ser <strong>image/png</strong>.');
+        }
+        if (archivo.size > TAMAÑO_MAXIMO) {
+            errores.push('El archivo es demasiado grande (máx. 5 MB).');
+        }
+
+        // ---------- INFO VISUAL ----------
+        pillNombre.textContent = `📄 ${archivo.name}`;
+        pillTamaño.textContent = `📦 ${(archivo.size / 1024).toFixed(1)} KB`;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImagen.src = e.target.result;
+            const img = new Image();
+            img.onload = () => {
+                const ancho = img.naturalWidth;
+                const alto = img.naturalHeight;
+
+                const esResolucionCorrecta =
+                    ancho === RESOLUCION_RECOMENDADA.ancho &&
+                    alto === RESOLUCION_RECOMENDADA.alto;
+
+                pillDimensiones.classList.remove('ok', 'warn', 'error');
+                if (esResolucionCorrecta) {
+                    pillDimensiones.classList.add('ok');
+                    pillDimensiones.textContent = `📐 ${ancho} x ${alto} px ✔`;
+                } else {
+                    pillDimensiones.classList.add('warn');
+                    pillDimensiones.textContent = `📐 ${ancho} x ${alto} px ⚠`;
+                    advertencias.push(
+                        `La resolución recomendada es <strong>${RESOLUCION_RECOMENDADA.ancho} x ${RESOLUCION_RECOMENDADA.alto} px</strong>. ` +
+                        `Tu imagen tiene ${ancho} x ${alto} px. Puede deformarse en los PDFs, pero se subirá igualmente.`
+                    );
+                }
+
+                mostrarResultado(errores, advertencias);
+            };
+            img.onerror = () => {
+                errores.push('El archivo no es una imagen válida.');
+                mostrarResultado(errores, advertencias);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(archivo);
+    }
+
+    // ==================================================
+    // MOSTRAR RESULTADO DE LA VALIDACIÓN LOCAL
+    // ==================================================
+    function mostrarResultado(errores, advertencias) {
+        let html = '';
+
+        if (errores.length > 0) {
+            html += `
+                <div class="alert alert-danger mb-2">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>No se puede subir. Corrige lo siguiente:</strong>
+                    <ul class="mb-0 mt-2">${errores.map(e => `<li>${e}</li>`).join('')}</ul>
+                </div>
+            `;
+        }
+
+        if (advertencias.length > 0) {
+            html += `
+                <div class="alert alert-warning mb-2">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>
+                    <strong>Advertencia:</strong>
+                    <ul class="mb-0 mt-2">${advertencias.map(a => `<li>${a}</li>`).join('')}</ul>
+                </div>
+            `;
+        }
+
+        if (errores.length === 0) {
+            if (advertencias.length === 0) {
+                html += `
+                    <div class="alert alert-success mb-0">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Archivo válido.</strong> Puedes proceder a guardar.
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Puedes proceder a guardar.</strong> Revisa la advertencia de resolución si deseas.
+                    </div>
+                `;
+            }
+            btnSubir.disabled = false;
+        } else {
+            btnSubir.disabled = true;
+        }
+
+        mensajeValidacion.innerHTML = html;
+    }
+
+    // ==================================================
+    // CONVERTIR MENSAJES DE DJANGO A NOTIFICACIONES PERSISTENTES
+    // ==================================================
+    document.addEventListener('DOMContentLoaded', function () {
+        const contenedorMensajes = document.getElementById('mensajes-django');
+        if (contenedorMensajes) {
+            contenedorMensajes.querySelectorAll('.alert').forEach(alertEl => {
+                const texto = alertEl.textContent.trim();
+                const tipoRaw = alertEl.getAttribute('data-tipo') || 'info';
+
+                let tipo = 'info';
+                if (tipoRaw.includes('danger') || tipoRaw.includes('error')) tipo = 'error';
+                else if (tipoRaw.includes('success')) tipo = 'exito';
+                else if (tipoRaw.includes('warning')) tipo = 'advertencia';
+                else if (tipoRaw.includes('info')) tipo = 'info';
+
+                if (texto) {
+                    // duracion = 0 → NO se cierra sola, solo con la X
+                    mostrarNotificacion(texto, tipo, 0);
+                }
+            });
+            contenedorMensajes.remove();
+        }
+    });
+</script>
+</body>
+</html>

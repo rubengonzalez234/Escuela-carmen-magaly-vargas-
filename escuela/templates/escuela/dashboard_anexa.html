@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Anexa Juan Pablo Rojas Paul</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --azul-institucional: #0d6efd;
+            --verde-institucional: #198754;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9eef5 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .tarjeta-modulo {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            padding: 45px 25px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+        .tarjeta-modulo::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 6px;
+            background: var(--azul-institucional);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.35s ease;
+        }
+        .tarjeta-modulo:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 45px rgba(13, 110, 253, 0.18);
+            border-color: var(--azul-institucional);
+            color: inherit;
+        }
+        .tarjeta-modulo:hover::before { transform: scaleX(1); }
+
+        .tarjeta-modulo .icono-wrapper {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            font-size: 3rem;
+            transition: all 0.35s ease;
+        }
+        .tarjeta-modulo:hover .icono-wrapper { transform: scale(1.1) rotate(-5deg); }
+
+        .tarjeta-modulo.estudio .icono-wrapper {
+            background: rgba(13, 110, 253, 0.12);
+            color: var(--azul-institucional);
+        }
+        .tarjeta-modulo.estudio:hover {
+            border-color: var(--azul-institucional);
+            box-shadow: 0 20px 45px rgba(13, 110, 253, 0.22);
+        }
+        .tarjeta-modulo.estudio::before { background: var(--azul-institucional); }
+
+        .tarjeta-modulo.trabajo .icono-wrapper {
+            background: rgba(25, 135, 84, 0.12);
+            color: var(--verde-institucional);
+        }
+        .tarjeta-modulo.trabajo:hover {
+            border-color: var(--verde-institucional);
+            box-shadow: 0 20px 45px rgba(25, 135, 84, 0.22);
+        }
+        .tarjeta-modulo.trabajo::before { background: var(--verde-institucional); }
+
+        .tarjeta-modulo .titulo-modulo {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+        .tarjeta-modulo .subtitulo-modulo {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        .tarjeta-modulo .btn-entrar {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: 50px;
+            background: #f1f5f9;
+            color: #1a1a2e;
+            transition: all 0.3s ease;
+        }
+        .tarjeta-modulo:hover .btn-entrar {
+            background: var(--azul-institucional);
+            color: #ffffff;
+            gap: 14px;
+        }
+        .tarjeta-modulo.trabajo:hover .btn-entrar {
+            background: var(--verde-institucional);
+            color: #ffffff;
+        }
+
+        .encabezado-panel {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px 35px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+            border-left: 6px solid var(--azul-institucional);
+            margin-bottom: 40px;
+        }
+        .encabezado-panel h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+        }
+        .encabezado-panel .badge-institucion {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(13, 110, 253, 0.1);
+            color: var(--azul-institucional);
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 50px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .fecha-encabezado {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #495057;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 6px;
+        }
+        .fecha-encabezado i { color: var(--azul-institucional); font-size: 1rem; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animar-entrada { animation: fadeInUp 0.6s ease-out backwards; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+
+        .modal-content {
+            border-radius: 25px;
+            border: none;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, var(--azul-institucional) 0%, #0b5ed7 100%);
+            color: #ffffff;
+            border-bottom: none;
+            padding: 22px 30px;
+        }
+        .modal-header.verde {
+            background: linear-gradient(135deg, var(--verde-institucional) 0%, #146c43 100%);
+        }
+        .modal-header .modal-title { font-weight: 700; font-size: 1.2rem; }
+        .modal-body {
+            padding: 28px 30px;
+            background: #ffffff;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+        .modal-footer {
+            border-top: none;
+            padding: 18px 30px 28px 30px;
+            background: #ffffff;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 0.88rem;
+            margin-bottom: 5px;
+        }
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            padding: 10px 14px;
+            font-size: 0.92rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--azul-institucional);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+
+        .form-control.is-invalid,
+        .form-select.is-invalid {
+            border-color: #dc3545;
+            background-image: none;
+        }
+        .form-control.is-invalid:focus {
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.15);
+        }
+
+        .btn-guardar {
+            background: var(--azul-institucional);
+            color: #ffffff;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .btn-guardar:hover {
+            background: #0b5ed7;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+        }
+        .btn-guardar.verde { background: var(--verde-institucional); }
+        .btn-guardar.verde:hover {
+            background: #146c43;
+            box-shadow: 0 8px 20px rgba(25, 135, 84, 0.3);
+        }
+        .btn-cancelar {
+            background: #f1f5f9;
+            color: #495057;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .btn-cancelar:hover { background: #e2e8f0; }
+
+        .seccion-formulario {
+            border-left: 4px solid var(--azul-institucional);
+            padding-left: 14px;
+            margin-bottom: 20px;
+            margin-top: 10px;
+            font-weight: 800;
+            color: #1a1a2e;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .seccion-formulario.verde { border-left-color: var(--verde-institucional); }
+
+        .alerta-info {
+            background: rgba(13, 110, 253, 0.08);
+            border-left: 4px solid var(--azul-institucional);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            color: #495057;
+            margin-bottom: 20px;
+        }
+        .alerta-info.verde {
+            background: rgba(25, 135, 84, 0.08);
+            border-left-color: var(--verde-institucional);
+        }
+        .alerta-info i { color: var(--azul-institucional); margin-right: 6px; }
+        .alerta-info.verde i { color: var(--verde-institucional); }
+
+        /* ✅ Bloque de cédula de identidad (V/E + número) */
+        .bloque-identidad {
+            display: none;
+        }
+        .bloque-identidad.activo {
+            display: block;
+        }
+        .bloque-escolar.oculto {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h1 fw-bold">
+                <i class="bi bi-folder-plus"></i> E.N Juan Pablo Rojas Paul
+            </span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+                    <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                        <i class="bi bi-house-fill me-1"></i> E.N Carmen Magaly Vargas
+                    </a>
+                    <span class="text-white ms-2 me-2 small d-none d-md-inline">
+                        Usuario: <strong>{{ user.username }}</strong>
+                    </span>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Encabezado -->
+        <div class="encabezado-panel animar-entrada">
+            <span class="badge-institucion">
+                <i class="bi bi-geo-alt-fill"></i> Aula Anexa
+            </span>
+            <h1>
+                <i class="bi bi-folder-plus text-primary me-2"></i>
+                E.N Juan Pablo Rojas Paul
+            </h1>
+            <div class="fecha-encabezado">
+                <i class="bi bi-calendar-event-fill"></i>
+                <span id="fecha-dia-mes">Cargando fecha...</span>
+            </div>
+        </div>
+
+        <!-- Tarjetas -->
+        <div class="row g-4 justify-content-center">
+            <!-- CONSTANCIA DE ESTUDIO -->
+            <div class="col-lg-5 col-md-6 animar-entrada delay-1">
+                <a href="#" class="tarjeta-modulo estudio" data-bs-toggle="modal" data-bs-target="#modalConstanciaEstudio">
+                    <div class="icono-wrapper">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                    </div>
+                    <h3 class="titulo-modulo">Constancia de Estudio</h3>
+                    <p class="subtitulo-modulo">Genera constancias de estudio para estudiantes</p>
+                    <span class="btn-entrar">
+                        Generar <i class="bi bi-arrow-right"></i>
+                    </span>
+                </a>
+            </div>
+
+            <!-- CONSTANCIA DE TRABAJO -->
+            <div class="col-lg-5 col-md-6 animar-entrada delay-2">
+                <a href="#" class="tarjeta-modulo trabajo" data-bs-toggle="modal" data-bs-target="#modalConstanciaTrabajo">
+                    <div class="icono-wrapper">
+                        <i class="bi bi-briefcase-fill"></i>
+                    </div>
+                    <h3 class="titulo-modulo">Constancia de Trabajo</h3>
+                    <p class="subtitulo-modulo">Genera constancias laborales para el personal</p>
+                    <span class="btn-entrar">
+                        Generar <i class="bi bi-arrow-right"></i>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL: CONSTANCIA DE ESTUDIO                                  -->
+    <!-- ============================================================ -->
+    <div class="modal fade" id="modalConstanciaEstudio" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-earmark-text-fill me-2"></i> Constancia de Estudio
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{% url 'constancia_estudio_anexa_pdf' %}" target="_blank" id="formConstanciaEstudio" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-body">
+
+                        <div class="alerta-info">
+                            <i class="bi bi-info-circle-fill"></i>
+                            El <strong>Año Escolar</strong> y los datos del <strong>Director(a)</strong> se toman automáticamente
+                            del sistema. Solo completa los datos del estudiante.
+                        </div>
+
+                        <div class="seccion-formulario">Datos del Estudiante</div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombres <span class="text-danger">*</span></label>
+                                <input type="text" name="nombres" id="nombresEstudio"
+                                       class="form-control" placeholder="Ej: María Alejandra"
+                                       maxlength="60" required>
+                                <div class="invalid-feedback">Solo letras y espacios (mín. 2 caracteres).</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Apellidos <span class="text-danger">*</span></label>
+                                <input type="text" name="apellidos" id="apellidosEstudio"
+                                       class="form-control" placeholder="Ej: Castillo Flores"
+                                       maxlength="60" required>
+                                <div class="invalid-feedback">Solo letras y espacios (mín. 2 caracteres).</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Tipo de Documento <span class="text-danger">*</span></label>
+                                <select name="tipo_documento" id="tipoDocumentoEstudio" class="form-select" required>
+                                    <option value="escolar" selected>Cédula Escolar</option>
+                                    <option value="identidad">Cédula de Identidad</option>
+                                </select>
+                            </div>
+
+                            <!-- ✅ BLOQUE CÉDULA ESCOLAR -->
+                            <div class="col-md-8 bloque-escolar" id="bloqueEscolarEstudio">
+                                <label class="form-label">Cédula Escolar <span class="text-danger">*</span></label>
+                                <input type="text" name="cedula" id="inputCedulaEscolarEstudio"
+                                       class="form-control" placeholder="Ej: 12345678"
+                                       inputmode="numeric" maxlength="10" required>
+                                <div class="invalid-feedback">Solo números (mín. 5 dígitos).</div>
+                            </div>
+
+                            <!-- ✅ BLOQUE CÉDULA DE IDENTIDAD (Nacionalidad + Número) -->
+                            <div class="col-md-8 bloque-identidad" id="bloqueIdentidadEstudio">
+                                <div class="row g-3">
+                                    <div class="col-md-5">
+                                        <label class="form-label">Nacionalidad <span class="text-danger">*</span></label>
+                                        <select name="nacionalidad" id="inputNacionalidadEstudio" class="form-select">
+                                            <option value="V">Venezolano/a (V)</option>
+                                            <option value="E">Extranjero/a (E)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <label class="form-label">Cédula de Identidad <span class="text-danger">*</span></label>
+                                        <input type="text" name="cedula_identidad" id="inputCedulaIdentidadEstudio"
+                                               class="form-control" placeholder="Ej: 12345678"
+                                               inputmode="numeric" maxlength="10">
+                                        <div class="invalid-feedback">Solo números (mín. 5 dígitos).</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Género <span class="text-danger">*</span></label>
+                                <select name="genero" class="form-select" required>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Femenino</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Nivel / Grado <span class="text-danger">*</span></label>
+                                <select name="nivel" class="form-select" required>
+                                    <option value="Primer Nivel">Primer Nivel</option>
+                                    <option value="Segundo Nivel">Segundo Nivel</option>
+                                    <option value="Tercer Nivel">Tercer Nivel</option>
+                                    <option value="Primer Grado">Primer Grado</option>
+                                    <option value="Segundo Grado">Segundo Grado</option>
+                                    <option value="Tercer Grado">Tercer Grado</option>
+                                    <option value="Cuarto Grado">Cuarto Grado</option>
+                                    <option value="Quinto Grado">Quinto Grado</option>
+                                    <option value="Sexto Grado">Sexto Grado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Sección <span class="text-danger">*</span></label>
+                                <input type="text" name="seccion" id="seccionEstudio"
+                                       class="form-control" value="A"
+                                       maxlength="1" style="text-transform: uppercase;" required>
+                                <div class="invalid-feedback">Solo 1 letra (A, B, C...).</div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn-guardar">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Generar PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL: CONSTANCIA DE TRABAJO                                  -->
+    <!-- ============================================================ -->
+    <div class="modal fade" id="modalConstanciaTrabajo" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header verde">
+                    <h5 class="modal-title">
+                        <i class="bi bi-briefcase-fill me-2"></i> Constancia de Trabajo
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{% url 'constancia_trabajo_anexa_pdf' %}" target="_blank" id="formConstanciaTrabajo" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-body">
+
+                        <div class="alerta-info verde">
+                            <i class="bi bi-info-circle-fill"></i>
+                            Los datos del <strong>Director(a)</strong> se toman automáticamente del sistema.
+                            Solo completa los datos del trabajador.
+                        </div>
+
+                        <div class="seccion-formulario verde">Datos del Trabajador</div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombres <span class="text-danger">*</span></label>
+                                <input type="text" name="nombres" id="nombresTrabajo"
+                                       class="form-control" placeholder="Ej: María Alejandra"
+                                       maxlength="60" required>
+                                <div class="invalid-feedback">Solo letras y espacios (mín. 2 caracteres).</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Apellidos <span class="text-danger">*</span></label>
+                                <input type="text" name="apellidos" id="apellidosTrabajo"
+                                       class="form-control" placeholder="Ej: Castillo Flores"
+                                       maxlength="60" required>
+                                <div class="invalid-feedback">Solo letras y espacios (mín. 2 caracteres).</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Nacionalidad <span class="text-danger">*</span></label>
+                                <select name="nacionalidad" class="form-select" required>
+                                    <option value="V">Venezolano/a (V)</option>
+                                    <option value="E">Extranjero/a (E)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Número de Cédula <span class="text-danger">*</span></label>
+                                <input type="text" name="cedula" id="cedulaTrabajo"
+                                       class="form-control" placeholder="Ej: 12345678"
+                                       inputmode="numeric" maxlength="10" required>
+                                <div class="invalid-feedback">Solo números (mín. 5 dígitos).</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Género <span class="text-danger">*</span></label>
+                                <select name="genero" class="form-select" required>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Femenino</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Cargo <span class="text-danger">*</span></label>
+                                <input type="text" name="cargo" id="cargoTrabajo"
+                                       class="form-control" placeholder="Ej: Docente de Aula, Vigilante..."
+                                       maxlength="60" required>
+                                <div class="invalid-feedback">Solo letras y espacios (mín. 3 caracteres).</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Categoría del Personal <span class="text-danger">*</span></label>
+                                <select name="categoria_personal" class="form-select" required>
+                                    <option value="DOCENTE">DOCENTE</option>
+                                    <option value="ADMINISTRATIVO">ADMINISTRATIVO</option>
+                                    <option value="DE APOYO">DE APOYO</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Código de Cargo <span class="text-danger">*</span></label>
+                                <input type="text" name="codigo_cargo" id="codigoCargoTrabajo"
+                                       class="form-control" placeholder="Ej: DOC-001, A1B2"
+                                       maxlength="20" required>
+                                <div class="invalid-feedback">Solo letras, números y guiones (mín. 2 caracteres).</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Carga Horaria <span class="text-danger">*</span></label>
+                                <input type="text" name="carga_horaria" id="cargaHorariaTrabajo"
+                                       class="form-control" placeholder="Ej: 36 o 36.5"
+                                       inputmode="decimal" maxlength="8" required>
+                                <div class="invalid-feedback">Solo números, puede llevar decimales con . o , (mín. 1 dígito).</div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn-guardar verde">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Generar PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function actualizarFecha() {
+            const ahora = new Date();
+            const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
+            const fechaTexto = ahora.toLocaleDateString('es-VE', opciones);
+            document.getElementById('fecha-dia-mes').textContent = fechaTexto.toUpperCase();
+        }
+        actualizarFecha();
+
+        /* ============================================================ */
+        /* ✅ UTILIDADES DE VALIDACIÓN                                   */
+        /* ============================================================ */
+        const REGEX_SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü'’\- ]+$/;
+        const REGEX_SOLO_NUMEROS = /^[0-9]+$/;
+        /* ✅ Código de cargo: letras, números, guiones, guion bajo y espacios */
+        const REGEX_CODIGO_CARGO = /^[A-Za-z0-9\-_ ]+$/;
+        /* ✅ Carga horaria: entero o decimal con . o , */
+        const REGEX_CARGA_HORARIA = /^[0-9]+([.,][0-9]+)?$/;
+
+        function marcarInvalido(input, invalido) {
+            if (invalido) {
+                input.classList.add('is-invalid');
+                input.classList.remove('is-valid');
+            } else {
+                input.classList.remove('is-invalid');
+                if (input.value.trim() !== '') {
+                    input.classList.add('is-valid');
+                } else {
+                    input.classList.remove('is-valid');
+                }
+            }
+        }
+
+        /* ============================================================ */
+        /* ✅ FORZAR SOLO LETRAS                                         */
+        /* ============================================================ */
+        function forzarSoloLetras(input, minLen = 2) {
+            input.addEventListener('input', function () {
+                const limpio = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñÜü'’\- ]/g, '');
+                if (limpio !== this.value) this.value = limpio;
+                const valido = this.value.trim().length >= minLen && REGEX_SOLO_LETRAS.test(this.value.trim());
+                marcarInvalido(this, !valido);
+            });
+            input.addEventListener('blur', function () {
+                const valido = this.value.trim().length >= minLen && REGEX_SOLO_LETRAS.test(this.value.trim());
+                marcarInvalido(this, !valido);
+            });
+        }
+
+        /* ============================================================ */
+        /* ✅ FORZAR SOLO NÚMEROS                                        */
+        /* ============================================================ */
+        function forzarSoloNumeros(input, minLen = 5) {
+            input.addEventListener('input', function () {
+                const limpio = this.value.replace(/[^0-9]/g, '');
+                if (limpio !== this.value) this.value = limpio;
+                const valido = this.value.length >= minLen && REGEX_SOLO_NUMEROS.test(this.value);
+                marcarInvalido(this, !valido);
+            });
+            input.addEventListener('blur', function () {
+                const valido = this.value.length >= minLen && REGEX_SOLO_NUMEROS.test(this.value);
+                marcarInvalido(this, !valido);
+            });
+        }
+
+        /* ============================================================ */
+        /* ✅ FORZAR 1 SOLA LETRA (sección)                              */
+        /* ============================================================ */
+        function forzarUnaLetra(input) {
+            input.addEventListener('input', function () {
+                let limpio = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ]/g, '').toUpperCase().slice(0, 1);
+                if (limpio !== this.value) this.value = limpio;
+                marcarInvalido(this, limpio.length !== 1);
+            });
+            input.addEventListener('blur', function () {
+                marcarInvalido(this, this.value.length !== 1);
+            });
+        }
+
+        /* ============================================================ */
+        /* ✅ FORZAR CÓDIGO DE CARGO (letras, números, guiones)          */
+        /* ============================================================ */
+        function forzarCodigoCargo(input, minLen = 2) {
+            input.addEventListener('input', function () {
+                // Permitir letras, números, guiones, guion bajo y espacios
+                const limpio = this.value.replace(/[^A-Za-z0-9\-_ ]/g, '');
+                if (limpio !== this.value) this.value = limpio;
+                const valido = this.value.trim().length >= minLen && REGEX_CODIGO_CARGO.test(this.value.trim());
+                marcarInvalido(this, !valido);
+            });
+            input.addEventListener('blur', function () {
+                const valido = this.value.trim().length >= minLen && REGEX_CODIGO_CARGO.test(this.value.trim());
+                marcarInvalido(this, !valido);
+            });
+        }
+
+        /* ============================================================ */
+        /* ✅ FORZAR CARGA HORARIA (entero o decimal con . o ,)          */
+        /* ============================================================ */
+        function forzarCargaHoraria(input) {
+            input.addEventListener('input', function () {
+                // Permitir solo dígitos y un único separador decimal (. o ,)
+                let limpio = this.value.replace(/[^0-9.,]/g, '');
+
+                // Reemplazar múltiples separadores dejando solo el primero
+                const primeraComa = limpio.indexOf(',');
+                const primerPunto = limpio.indexOf('.');
+
+                // Detectar cuál aparece primero
+                let separador = null;
+                if (primeraComa !== -1 && (primerPunto === -1 || primeraComa < primerPunto)) {
+                    separador = ',';
+                } else if (primerPunto !== -1) {
+                    separador = '.';
+                }
+
+                if (separador) {
+                    const idx = limpio.indexOf(separador);
+                    const antes = limpio.slice(0, idx + 1);
+                    const despues = limpio.slice(idx + 1).replace(/[.,]/g, '');
+                    limpio = antes + despues;
+                }
+
+                if (limpio !== this.value) this.value = limpio;
+
+                const valido = limpio.length >= 1 && REGEX_CARGA_HORARIA.test(limpio);
+                marcarInvalido(this, !valido);
+            });
+            input.addEventListener('blur', function () {
+                const valido = this.value.length >= 1 && REGEX_CARGA_HORARIA.test(this.value);
+                marcarInvalido(this, !valido);
+            });
+        }
+
+        /* ============================================================ */
+        /* ✅ VALIDAR FORMULARIO COMPLETO ANTES DE ENVIAR                */
+        /* ============================================================ */
+        function validarFormulario(form) {
+            let ok = true;
+            form.querySelectorAll('input, select').forEach(el => {
+                if (el.disabled || el.type === 'hidden') return;
+                if (el.offsetParent === null && el.type !== 'hidden') return;
+
+                if (el.required && !el.value.trim()) {
+                    el.classList.add('is-invalid');
+                    ok = false;
+                    return;
+                }
+                if (el.value.trim() && !el.checkValidity()) {
+                    el.classList.add('is-invalid');
+                    ok = false;
+                }
+            });
+            return ok;
+        }
+
+        /* ============================================================ */
+        /* ✅ APLICAR VALIDACIONES — MODAL CONSTANCIA DE ESTUDIO          */
+        /* ============================================================ */
+        forzarSoloLetras(document.getElementById('nombresEstudio'));
+        forzarSoloLetras(document.getElementById('apellidosEstudio'));
+        forzarSoloNumeros(document.getElementById('inputCedulaEscolarEstudio'), 5);
+        forzarSoloNumeros(document.getElementById('inputCedulaIdentidadEstudio'), 5);
+        forzarUnaLetra(document.getElementById('seccionEstudio'));
+
+        /* ============================================================ */
+        /* ✅ APLICAR VALIDACIONES — MODAL CONSTANCIA DE TRABAJO          */
+        /* ============================================================ */
+        forzarSoloLetras(document.getElementById('nombresTrabajo'));
+        forzarSoloLetras(document.getElementById('apellidosTrabajo'));
+        forzarSoloNumeros(document.getElementById('cedulaTrabajo'), 5);
+        forzarSoloLetras(document.getElementById('cargoTrabajo'), 3);
+        forzarCodigoCargo(document.getElementById('codigoCargoTrabajo'), 2);
+        forzarCargaHoraria(document.getElementById('cargaHorariaTrabajo'));
+
+        /* ============================================================ */
+        /* ✅ LÓGICA: alternar entre Cédula Escolar y Cédula Identidad   */
+        /* ============================================================ */
+        (function () {
+            const selectTipo      = document.getElementById('tipoDocumentoEstudio');
+            const bloqueEscolar   = document.getElementById('bloqueEscolarEstudio');
+            const bloqueIdentidad = document.getElementById('bloqueIdentidadEstudio');
+            const inputEscolar    = document.getElementById('inputCedulaEscolarEstudio');
+            const inputNacional   = document.getElementById('inputNacionalidadEstudio');
+            const inputIdentidad  = document.getElementById('inputCedulaIdentidadEstudio');
+
+            function aplicarModo() {
+                const modo = selectTipo.value;
+
+                if (modo === 'identidad') {
+                    bloqueEscolar.classList.add('oculto');
+                    bloqueIdentidad.classList.add('activo');
+
+                    inputEscolar.required = false;
+                    inputEscolar.value = '';
+                    inputEscolar.disabled = true;
+                    inputEscolar.classList.remove('is-invalid', 'is-valid');
+
+                    inputNacional.required = true;
+                    inputIdentidad.required = true;
+                    inputNacional.disabled = false;
+                    inputIdentidad.disabled = false;
+                } else {
+                    bloqueEscolar.classList.remove('oculto');
+                    bloqueIdentidad.classList.remove('activo');
+
+                    inputEscolar.required = true;
+                    inputEscolar.disabled = false;
+
+                    inputNacional.required = false;
+                    inputIdentidad.required = false;
+                    inputNacional.disabled = true;
+                    inputIdentidad.disabled = true;
+
+                    inputNacional.value = 'V';
+                    inputIdentidad.value = '';
+                    inputIdentidad.classList.remove('is-invalid', 'is-valid');
+                }
+            }
+
+            aplicarModo();
+            selectTipo.addEventListener('change', aplicarModo);
+        })();
+
+        /* ============================================================ */
+        /* ✅ VALIDAR ANTES DE ENVIAR                                     */
+        /* ============================================================ */
+        document.getElementById('formConstanciaEstudio').addEventListener('submit', function (e) {
+            if (!validarFormulario(this)) {
+                e.preventDefault();
+                const primero = this.querySelector('.is-invalid');
+                if (primero) primero.focus();
+            }
+        });
+
+        document.getElementById('formConstanciaTrabajo').addEventListener('submit', function (e) {
+            if (!validarFormulario(this)) {
+                e.preventDefault();
+                const primero = this.querySelector('.is-invalid');
+                if (primero) primero.focus();
+            }
+        });
+    </script>
+</body>
+</html>

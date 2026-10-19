@@ -1,0 +1,1565 @@
+<!-- templates/escuela/calendario_escolar.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario Escolar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --azul: #0d6efd;
+            --azul-oscuro: #0a58ca;
+            --azul-claro: #e7f0ff;
+            --azul-suave: #f0f6ff;
+            --rojo: #dc3545;
+            --verde: #198754;
+            --verde-suave: #d1e7dd;
+            --amarillo: #ffc107;
+            --amarillo-suave: #fff3cd;
+            --morado: #6f42c1;
+            --morado-suave: #e2d9f3;
+        }
+
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+
+        .tarjeta-cuaderno {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(13, 110, 253, 0.12);
+            border: 3px solid var(--azul-claro);
+        }
+
+        .titulo-cuaderno {
+            font-family: 'Baloo 2', cursive;
+            font-weight: 800;
+            color: var(--azul);
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .titulo-cuaderno .subtitulo {
+            font-size: 1.3rem;
+            color: var(--azul-oscuro);
+            font-weight: 700;
+        }
+
+        .panel-config {
+            background: linear-gradient(135deg, #f0f6ff, #e7f0ff);
+            border: 2px solid var(--azul);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .panel-config h5 {
+            color: var(--azul-oscuro);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .config-item {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--azul);
+        }
+        .config-item.vacaciones {
+            border-left-color: var(--verde);
+        }
+        .vac-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .vac-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-left: 3px solid var(--verde);
+            font-size: 0.9rem;
+        }
+        .vac-item .vac-desc { font-weight: 700; color: #212529; }
+        .vac-item .vac-fechas { font-size: 0.8rem; color: #6c757d; }
+        .vac-item .btn-eliminar-vac {
+            background: transparent;
+            border: none;
+            color: var(--rojo);
+            font-size: 1.1rem;
+            padding: 2px 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .vac-item .btn-eliminar-vac:hover {
+            background: var(--rojo);
+            color: white;
+            border-radius: 6px;
+        }
+
+        .fila-config {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+        .fila-config .campo {
+            display: flex;
+            flex-direction: column;
+        }
+        .fila-config .campo label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            white-space: nowrap;
+        }
+        .fila-config .campo input {
+            height: 40px;
+        }
+        @media (max-width: 768px) {
+            .fila-config { grid-template-columns: 1fr; }
+        }
+
+        .campo-info {
+            flex: 1;
+            min-width: 200px;
+            border: 2px solid var(--azul);
+            border-radius: 10px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--azul-oscuro);
+            font-size: 0.9rem;
+            background: white;
+        }
+        .campo-info .etiqueta {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .campo-info .valor { color: var(--azul); font-weight: 700; }
+        .campo-info i { color: var(--azul); }
+        .campo-info.dropdown-mes {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .campo-info.dropdown-mes:hover {
+            background: var(--azul-suave);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(13, 110, 253, 0.15);
+        }
+        .campo-info.dropdown-mes .chevron {
+            margin-left: auto;
+            transition: transform 0.25s ease;
+        }
+        .campo-info.dropdown-mes.abierto .chevron {
+            transform: rotate(180deg);
+        }
+        .menu-mes {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--azul);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(13, 110, 253, 0.2);
+            z-index: 100;
+            display: none;
+            animation: dropIn 0.2s ease;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .menu-mes.abierto { display: block; }
+        @keyframes dropIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .menu-mes .item-mes {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            text-decoration: none;
+            color: var(--azul-oscuro);
+            font-weight: 600;
+            border-bottom: 1px solid var(--azul-claro);
+            transition: background 0.15s;
+        }
+        .menu-mes .item-mes:last-child { border-bottom: none; }
+        .menu-mes .item-mes:hover { background: var(--azul-suave); color: var(--azul); }
+        .menu-mes .item-mes.activo { background: var(--azul); color: white; }
+        .menu-mes .item-mes.activo i { color: white; }
+        .menu-mes .item-mes i { color: var(--azul); }
+
+        .tabla-calendario {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            border: 2px solid var(--azul);
+        }
+        .tabla-calendario thead th {
+            background: var(--azul-claro);
+            color: var(--azul-oscuro);
+            font-weight: 800;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            text-align: center;
+            padding: 8px 4px;
+            border: 1px solid var(--azul);
+            line-height: 1.1;
+        }
+        .tabla-calendario thead th.col-num { width: 40px; }
+        .tabla-calendario thead th.col-dia { width: 40px; }
+        .tabla-calendario thead th .letra-dia {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--azul);
+        }
+        .tabla-calendario thead th .fecha-dia {
+            display: block;
+            font-size: 0.68rem;
+            color: var(--azul-oscuro);
+            font-weight: 700;
+        }
+        .tabla-calendario tbody td {
+            border: 1px solid var(--azul);
+            padding: 4px;
+            height: 34px;
+            vertical-align: middle;
+        }
+        .tabla-calendario tbody td.col-num {
+            text-align: center;
+            font-weight: 700;
+            color: var(--azul-oscuro);
+            background: var(--azul-suave);
+        }
+        .tabla-calendario tbody td.col-nombre {
+            padding-left: 12px;
+            font-weight: 600;
+            background: white;
+            min-width: 250px;
+        }
+        .tabla-calendario tbody td.celda-check {
+            text-align: center;
+            cursor: pointer;
+            background: var(--azul-suave);
+            transition: background 0.15s;
+            position: relative;
+            user-select: none;
+        }
+        .tabla-calendario tbody td.celda-check:hover:not(.vacaciones-celda):not(.fuera-anio) {
+            background: var(--azul-claro);
+        }
+
+        .celda-check.estado-feriado {
+            background: var(--amarillo-suave) !important;
+            color: #856404;
+        }
+        .celda-check.estado-eventos {
+            background: var(--morado-suave) !important;
+            color: var(--morado);
+        }
+        .celda-check.vacaciones-celda {
+            background: var(--verde-suave) !important;
+            cursor: not-allowed;
+        }
+
+        .celda-check.fuera-anio {
+            background: #f0f0f0 !important;
+            background-image: repeating-linear-gradient(
+                45deg,
+                #e0e0e0,
+                #e0e0e0 4px,
+                #f0f0f0 4px,
+                #f0f0f0 8px
+            ) !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+        .celda-check.fuera-anio:hover {
+            background: #f0f0f0 !important;
+        }
+
+        .icono-estado {
+            display: none;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+        .celda-check.estado-feriado .icono-feriado { display: block; color: #856404; }
+        .celda-check.estado-eventos .icono-eventos { display: block; color: var(--morado); }
+        .celda-check.vacaciones-celda .icono-vacaciones { display: block; color: var(--verde); }
+
+        .celda-check.tiene-descripcion::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 6px;
+            height: 6px;
+            background: var(--morado);
+            border-radius: 50%;
+        }
+        .celda-check.recurrente::before {
+            content: '↻';
+            position: absolute;
+            top: 1px;
+            left: 3px;
+            font-size: 0.7rem;
+            color: #0a58ca;
+            font-weight: 900;
+        }
+
+        .btn-custom {
+            background-color: white;
+            border: 2px solid var(--azul);
+            color: var(--azul);
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover:not(:disabled) { background-color: var(--azul); color: white; }
+        .btn-custom i { color: var(--azul); }
+        .btn-custom:hover:not(:disabled) i { color: white; }
+
+        .btn-pdf {
+            background-color: white;
+            border: 2px solid var(--rojo);
+            color: var(--rojo);
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-pdf:hover:not(:disabled) { background-color: var(--rojo); color: white; }
+        .btn-pdf i { color: var(--rojo); }
+        .btn-pdf:hover:not(:disabled) i { color: white; }
+
+        .btn-verde {
+            background-color: white;
+            border: 2px solid var(--verde);
+            color: var(--verde);
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-verde:hover:not(:disabled) { background-color: var(--verde); color: white; }
+        .btn-verde i { color: var(--verde); }
+        .btn-verde:hover:not(:disabled) i { color: white; }
+
+        .btn-cierre {
+            background: linear-gradient(135deg, #dc3545, #b02a37);
+            border: none;
+            color: white;
+            border-radius: 10px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+        }
+        .btn-cierre:hover:not(:disabled) {
+            background: linear-gradient(135deg, #b02a37, #8b1e29);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.5);
+            color: white;
+        }
+
+        .tabla-scroll { overflow-x: auto; border-radius: 12px; }
+
+        .selector-info {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .badge-mes {
+            background: var(--azul);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .badge-vacaciones {
+            background: var(--verde);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .leyenda-estados {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+        }
+        .leyenda-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #495057;
+        }
+        .leyenda-cuadro {
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .leyenda-cuadro.feriado { background: var(--amarillo-suave); color: #856404; }
+        .leyenda-cuadro.eventos { background: var(--morado-suave); color: var(--morado); }
+        .leyenda-cuadro.vacaciones { background: var(--verde-suave); color: var(--verde); }
+        .leyenda-cuadro.fuera-anio {
+            background: repeating-linear-gradient(45deg, #e0e0e0, #e0e0e0 3px, #f0f0f0 3px, #f0f0f0 6px);
+            color: #6c757d;
+        }
+
+        #contenedorNotificaciones {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 900px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .notificacion-custom {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            animation: slideDown 0.35s ease-out;
+        }
+        .notificacion-custom.ocultando { animation: slideUp 0.35s ease-in forwards; }
+        .notificacion-custom .notif-icono { font-size: 1.6rem; }
+        .notificacion-custom .notif-texto { flex: 1; font-size: 0.98rem; }
+        .notificacion-custom .notif-cerrar {
+            background: transparent; border: none; color: white;
+            font-size: 1.4rem; cursor: pointer; opacity: 0.8;
+        }
+        .notificacion-custom.error { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        .notificacion-custom.exito { background: linear-gradient(135deg, #198754, #146c43); }
+        .notificacion-custom.advertencia { background: linear-gradient(135deg, #ffc107, #e0a800); color: #212529; }
+        .notificacion-custom.advertencia .notif-cerrar { color: #212529; }
+        .notificacion-custom.info { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-25px); } }
+    </style>
+</head>
+<body>
+
+<div id="contenedorNotificaciones"></div>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand mb-0 h1 fw-bold">
+            <i class="bi bi-mortarboard-fill"></i> E.N Carmen Magaly Vargas
+        </span>
+        <div class="collapse navbar-collapse">
+            <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+                 <a href="{% url 'menu_admin' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                 <i class="bi bi-shield-lock-fill me-1"></i> Panel Admin
+                </a>
+                <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-house-fill me-1"></i> Inicio
+                </a>
+                <span class="text-white ms-2 me-2 small d-none d-md-inline">Usuario: <strong>{{ user.username }}</strong></span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mb-5">
+
+    <div class="tarjeta-cuaderno">
+
+        <div class="titulo-cuaderno">
+            <i class="bi bi-calendar3"></i>
+            CALENDARIO
+            <span class="subtitulo">ESCOLAR INSTITUCIONAL</span>
+        </div>
+
+        <!-- ==================== PANEL DE CONFIGURACIÓN ==================== -->
+        <div class="panel-config">
+            <h5>
+                <i class="bi bi-gear-fill"></i> Configuración del Año Escolar
+                <span class="badge bg-primary ms-auto">
+                    Año Escolar: {{ config.anio_escolar }}
+                </span>
+            </h5>
+
+            <div class="alert alert-light py-2 px-3 mb-3 small border">
+                <i class="bi bi-info-circle-fill text-primary me-1"></i>
+                <strong>Año escolar automático:</strong> El sistema asigna automáticamente el año
+                <strong>{{ config.anio_escolar }}</strong>. Solo debes seleccionar la <strong>fecha de inicio</strong>
+                (Septiembre u Octubre {{ config.anio_inicio }}) y la <strong>fecha de fin</strong>
+                (Julio {{ config.anio_fin }}).
+            </div>
+
+            <div class="fila-config mb-3">
+                <div class="campo">
+                    <label><i class="bi bi-play-circle me-1"></i> Inicio de Año (Sep-Oct {{ config.anio_inicio }})</label>
+                    <input type="date" class="form-control" id="inputFechaInicio"
+                           value="{{ config.fecha_inicio|date:'Y-m-d'|default:'' }}"
+                           min="{{ config.anio_inicio }}-09-01"
+                           max="{{ config.anio_inicio }}-10-31">
+                </div>
+
+                <div class="campo">
+                    <label><i class="bi bi-stop-circle me-1"></i> Fin de Año (Julio {{ config.anio_fin }}) <span class="text-muted fw-normal">(opcional)</span></label>
+                    <input type="date" class="form-control" id="inputFechaFin"
+                           value="{{ config.fecha_fin|date:'Y-m-d'|default:'' }}"
+                           min="{{ config.anio_fin }}-07-01"
+                           max="{{ config.anio_fin }}-07-31">
+                </div>
+
+                <div class="campo">
+                    <label>&nbsp;</label>
+                    <button type="button" class="btn btn-custom w-100" onclick="guardarConfiguracion()">
+                        <i class="bi bi-save me-1"></i> Guardar Fechas
+                    </button>
+                </div>
+            </div>
+
+            <div class="config-item vacaciones">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong class="small">
+                        <i class="bi bi-tree-fill text-success me-1"></i> Períodos de Vacaciones
+                    </strong>
+                    <button type="button" class="btn btn-verde btn-sm" onclick="toggleFormVacaciones()">
+                        <i class="bi bi-plus-circle me-1"></i> Agregar
+                    </button>
+                </div>
+
+                <div id="formVacaciones" style="display: none;" class="mb-3 p-2 bg-white rounded">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small mb-1">Desde</label>
+                            <input type="date" class="form-control form-control-sm" id="vacFechaInicio">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small mb-1">Hasta</label>
+                            <input type="date" class="form-control form-control-sm" id="vacFechaFin">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small mb-1">Descripción</label>
+                            <input type="text" class="form-control form-control-sm" id="vacDescripcion"
+                                   placeholder="Ej: Vacaciones de Navidad" maxlength="200">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold small mb-1 d-block">Recurrente</label>
+                            <div class="form-check form-switch mt-1">
+                                <input class="form-check-input" type="checkbox" id="vacRecurrente" checked>
+                                <label class="form-check-label small" for="vacRecurrente">Anual</label>
+                            </div>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="btn btn-verde btn-sm w-100" onclick="guardarVacaciones()">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2" id="ayudaRangoVacaciones">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Rango permitido: dentro del año escolar.
+                    </small>
+                </div>
+
+                <div class="vac-list">
+                    {% for v in config.vacaciones.all %}
+                    <div class="vac-item" data-id="{{ v.pk }}">
+                        <div>
+                            <div class="vac-desc">
+                                {{ v.descripcion }}
+                                {% if v.recurrente %}<span class="badge bg-info ms-1" style="font-size:0.65rem;">↻ Anual</span>{% endif %}
+                            </div>
+                            <div class="vac-fechas">
+                                <i class="bi bi-calendar-range me-1"></i>
+                                {{ v.fecha_inicio|date:'d/m/Y' }} → {{ v.fecha_fin|date:'d/m/Y' }}
+                            </div>
+                        </div>
+                        <button type="button" class="btn-eliminar-vac"
+                                onclick="eliminarVacaciones({{ v.pk }})" title="Eliminar">
+                            <i class="bi bi-trash3-fill"></i>
+                        </button>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted small py-2">
+                        <i class="bi bi-info-circle me-1"></i> No hay períodos de vacaciones registrados.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- INFO DEL AÑO ESCOLAR -->
+        <div class="alert alert-info d-flex align-items-center mb-3 py-2">
+            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+            <div class="small">
+                <strong>Año Escolar {{ config.anio_escolar }}:</strong>
+                {% if config.fecha_inicio %}
+                    <span class="badge bg-primary ms-1">
+                        <i class="bi bi-play-circle me-1"></i>Inicio: {{ config.fecha_inicio|date:'d/m/Y' }}
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary ms-1">
+                        <i class="bi bi-dash-circle me-1"></i>Inicio: Sin definir
+                    </span>
+                {% endif %}
+                {% if config.fecha_fin %}
+                    <span class="badge bg-danger ms-1">
+                        <i class="bi bi-stop-circle me-1"></i>Fin: {{ config.fecha_fin|date:'d/m/Y' }}
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary ms-1">
+                        <i class="bi bi-dash-circle me-1"></i>Fin: Sin definir
+                    </span>
+                {% endif %}
+                {% if es_temporada_vacaciones %}
+                    <span class="badge bg-success ms-1">
+                        <i class="bi bi-tree-fill me-1"></i>Temporada de Vacaciones
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- SELECTOR DE MES -->
+        <div class="cabecera-campos mb-3" style="display:flex; gap:15px; flex-wrap:wrap;">
+            <div class="campo-info dropdown-mes" id="dropdownMes" onclick="toggleMenuMes(event)">
+                <i class="bi bi-calendar3"></i>
+                <span class="etiqueta">MES:</span>
+                <span class="valor">{{ mes_nombre }} {{ anio }}</span>
+                <i class="bi bi-chevron-down chevron"></i>
+
+                <div class="menu-mes" id="menuMes">
+                    {% for m in meses_disponibles %}
+                    <a href="?mes={{ m.valor }}"
+                       class="item-mes {% if m.valor == mes_sel_str %}activo{% endif %}">
+                        <i class="bi bi-calendar-month"></i>
+                        <div>
+                            <div class="nombre-mes" style="font-weight:700;">{{ m.nombre }} {{ m.anio }}</div>
+                            <div style="font-size:0.72rem;opacity:0.75;">{{ m.etiqueta }}</div>
+                        </div>
+                        {% if m.valor == mes_sel_str %}
+                        <i class="bi bi-check-lg ms-auto"></i>
+                        {% endif %}
+                    </a>
+                    {% empty %}
+                    <div class="p-3 text-center text-muted small">
+                        <i class="bi bi-info-circle me-1"></i> No hay meses disponibles
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="campo-info">
+                <i class="bi bi-clock"></i>
+                <span class="etiqueta">FECHA:</span>
+                <span class="valor">{% now 'd/m/Y' %}</span>
+            </div>
+        </div>
+
+        <!-- Info modo -->
+        <div class="selector-info">
+            {% if es_temporada_vacaciones %}
+            <span class="badge-vacaciones">
+                <i class="bi bi-tree-fill me-1"></i> Temporada de Vacaciones
+            </span>
+            <span class="text-muted small">
+                <i class="bi bi-info-circle me-1"></i>
+                Este mes está fuera del año escolar. Puedes consultar pero no marcar eventos.
+            </span>
+            {% else %}
+            <span class="badge-mes">
+                <i class="bi bi-pencil-square me-1"></i> Modo Edición
+            </span>
+            <span class="text-muted small">
+                <i class="bi bi-info-circle me-1"></i>
+                Clic en una celda: <strong>Feriado → Evento Especial → Sin marcar</strong>
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- Leyenda -->
+        <div class="leyenda-estados">
+            <div class="leyenda-item">
+                <div class="leyenda-cuadro feriado"><i class="bi bi-star-fill" style="font-size:0.7rem;"></i></div>
+                Feriado
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-cuadro eventos"><i class="bi bi-megaphone-fill" style="font-size:0.7rem;"></i></div>
+                Evento Especial
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-cuadro vacaciones"><i class="bi bi-tree-fill" style="font-size:0.7rem;"></i></div>
+                Vacaciones
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-cuadro fuera-anio"><i class="bi bi-slash-circle" style="font-size:0.7rem;"></i></div>
+                Fuera del año escolar
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="tabla-scroll">
+            <table class="tabla-calendario" id="tablaCalendario">
+                <thead>
+                    <tr>
+                        <th class="col-num">#</th>
+                        <th class="col-nombre">Evento / Descripción</th>
+                        {% for d in dias %}
+                            {% if d.weekday < 5 %}
+                            <th class="col-dia th-dia"
+                                data-fecha="{{ d|date:'Y-m-d' }}"
+                                data-dia="{{ d.day }}">
+                                <span class="letra-dia">
+                                    {% if d.weekday == 0 %}L
+                                    {% elif d.weekday == 1 %}M
+                                    {% elif d.weekday == 2 %}M
+                                    {% elif d.weekday == 3 %}J
+                                    {% elif d.weekday == 4 %}V
+                                    {% endif %}
+                                </span>
+                                <span class="fecha-dia">{{ d.day }}</span>
+                            </th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-num">1</td>
+                        <td class="col-nombre">Calendario Escolar {{ anio }}</td>
+                        {% for d in dias %}
+                            {% if d.weekday < 5 %}
+                            <td class="celda-check"
+                                data-fecha="{{ d|date:'Y-m-d' }}"
+                                data-dia="{{ d.day }}"
+                                onclick="toggleEvento(this)">
+                                <span class="icono-estado icono-feriado"><i class="bi bi-star-fill"></i></span>
+                                <span class="icono-estado icono-eventos"><i class="bi bi-megaphone-fill"></i></span>
+                                <span class="icono-estado icono-vacaciones"><i class="bi bi-tree-fill"></i></span>
+                            </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                Se muestran solo los días de <strong>Lunes a Viernes</strong> del mes.
+            </small>
+            <small class="text-muted">
+                Total días laborables: <strong id="totalDias">0</strong>
+            </small>
+        </div>
+
+    </div>
+
+    <!-- Botones -->
+    <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-lg">
+            <i class="bi bi-arrow-left-circle"></i> Regresar
+        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="limpiarTodo()" {% if es_temporada_vacaciones %}disabled{% endif %}>
+                <i class="bi bi-eraser"></i> Limpiar
+            </button>
+            <button type="button" class="btn btn-pdf btn-lg" onclick="generarPDF()">
+                <i class="bi bi-file-earmark-pdf-fill"></i> Generar PDF
+            </button>
+            <button type="button" class="btn btn-custom btn-lg" onclick="guardarCalendario()" {% if es_temporada_vacaciones %}disabled{% endif %}>
+                <i class="bi bi-check-circle-fill"></i> Guardar
+            </button>
+            {% if puede_cerrar_anio %}
+            <button type="button" class="btn btn-cierre btn-lg" onclick="abrirModalCierreAnual()">
+                <i class="bi bi-arrow-repeat"></i> Cerrar Año Escolar
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL CIERRE ANUAL                                            -->
+<!-- ============================================================ -->
+<div class="modal fade" id="modalCierreAnual" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px;">
+            <div class="modal-header bg-danger text-white" style="border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title">
+                    <i class="bi bi-arrow-repeat me-2"></i> Cierre del Año Escolar {{ config.anio_escolar }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+
+                <div class="alert alert-warning d-flex align-items-center mb-3">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+                    <div class="small">
+                        <strong>Atención:</strong> Estás por cerrar el año escolar
+                        <strong>{{ config.anio_escolar }}</strong>.
+                        Una vez confirmado, no se puede deshacer.
+                    </div>
+                </div>
+
+                <!-- Estadísticas -->
+                <div class="row g-2 mb-3">
+                    <div class="col-3">
+                        <div class="p-2 text-center" style="background: rgba(25,135,84,0.12); border-radius: 10px;">
+                            <div class="fw-bold fs-4 text-success" id="stat-inscritos">0</div>
+                            <small class="text-uppercase fw-bold" style="font-size:0.7rem;color:#198754;">
+                                <i class="bi bi-arrow-up-circle-fill"></i> Inscritos
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 text-center" style="background: rgba(255,193,7,0.18); border-radius: 10px;">
+                            <div class="fw-bold fs-4" style="color:#cc9a06;" id="stat-repitientes">0</div>
+                            <small class="text-uppercase fw-bold" style="font-size:0.7rem;color:#cc9a06;">
+                                <i class="bi bi-arrow-repeat"></i> Repitientes
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 text-center" style="background: rgba(220,53,69,0.12); border-radius: 10px;">
+                            <div class="fw-bold fs-4 text-danger" id="stat-retirados">0</div>
+                            <small class="text-uppercase fw-bold" style="font-size:0.7rem;color:#dc3545;">
+                                <i class="bi bi-person-dash-fill"></i> Retirados
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 text-center" style="background: rgba(111,66,193,0.12); border-radius: 10px;">
+                            <div class="fw-bold fs-4" style="color:#6f42c1;" id="stat-egresados">0</div>
+                            <small class="text-uppercase fw-bold" style="font-size:0.7rem;color:#6f42c1;">
+                                <i class="bi bi-mortarboard-fill"></i> Egresados
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mb-3 flex-wrap">
+                    <button class="btn btn-outline-success btn-sm" onclick="aplicarTodos('inscribir')">
+                        <i class="bi bi-arrow-up-circle-fill"></i> Todos: Inscribir
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="aplicarTodos('repitiente')">
+                        <i class="bi bi-arrow-repeat"></i> Todos: Repitiente
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="cargarEstudiantesCierre()">
+                        <i class="bi bi-arrow-clockwise"></i> Recargar
+                    </button>
+                </div>
+
+                <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 10px;">
+                    <div id="contenedor-tabla-cierre">
+                        <div class="text-center text-muted py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 mb-0">Cargando estudiantes...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <label class="form-label fw-bold small">
+                        <i class="bi bi-chat-left-text me-1"></i> Observación general (opcional)
+                    </label>
+                    <textarea id="observacionCierre" class="form-control form-control-sm" rows="2"
+                              placeholder="Ej: Cierre del año escolar..."></textarea>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarCierreAnual">
+                    <i class="bi bi-check2-circle"></i> Confirmar Cierre
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CONFIRMACIÓN FINAL -->
+<div class="modal fade" id="modalConfirmarFinalCierre" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px;">
+            <div class="modal-header bg-danger text-white" style="border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title">
+                    <i class="bi bi-shield-exclamation me-2"></i> Confirmación Final
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div style="font-size: 3.5rem; color: #dc3545; margin-bottom: 15px;">
+                    <i class="bi bi-shield-exclamation"></i>
+                </div>
+                <h5 class="fw-bold">¿Estás completamente seguro?</h5>
+                <p class="text-muted small mb-3">
+                    Se aplicarán las acciones al año escolar <strong>{{ config.anio_escolar }}</strong>.
+                    Esta operación <strong>no se puede deshacer</strong>.
+                </p>
+                <div class="alert alert-info small mb-0 text-start">
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    <strong>Se hará automáticamente:</strong>
+                    <ul class="mb-0 mt-2 ps-3">
+                        <li>Los estudiantes serán promovidos al siguiente nivel</li>
+                        <li>Los repitientes se mantienen en su nivel</li>
+                        <li>Los egresados de 6to se archivarán</li>
+                        <li>Se creará el año escolar {{ config.anio_fin }}-{{ config.anio_fin|add:1 }}</li>
+                        <li>Los <strong>feriados y vacaciones recurrentes</strong> se copiarán al nuevo año</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="btnEjecutarCierreFinal">
+                    <i class="bi bi-check2-circle"></i> Sí, cerrar año escolar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Descripción -->
+<div class="modal fade" id="modalDescripcion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px;">
+            <div class="modal-header bg-primary text-white" style="border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title">
+                    <i class="bi bi-pencil-square me-2"></i> Descripción del Evento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center mb-3">
+                    <span class="badge fs-6" id="tipoEventoBadge">Feriado</span>
+                </div>
+                <p class="text-muted small mb-3 text-center">
+                    <i class="bi bi-calendar-event me-1"></i>
+                    Fecha: <strong id="fechaDescripcion"></strong>
+                </p>
+                <label class="form-label fw-bold">
+                    <i class="bi bi-chat-left-text me-1"></i> Descripción (opcional)
+                </label>
+                <input type="text" class="form-control mb-3" id="inputDescripcion"
+                       placeholder="Ej: Día de la Independencia..." maxlength="200">
+
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="chkRecurrente" checked>
+                    <label class="form-check-label fw-bold" for="chkRecurrente">
+                        <i class="bi bi-arrow-repeat me-1"></i> Se repite cada año
+                    </label>
+                    <small class="d-block text-muted">Si está activo, este evento se copiará automáticamente al siguiente año escolar.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="guardarDescripcion()">
+                    <i class="bi bi-check-circle-fill"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ===== CSRF =====
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const CSRF_TOKEN = "{{ csrf_token }}" || getCookie('csrftoken');
+    const MES_SELECCIONADO = "{{ mes_sel_str }}";
+    const ES_TEMPORADA_VACACIONES = {{ es_temporada_vacaciones|yesno:"true,false" }};
+    const FECHA_INICIO_ANIO = "{{ config.fecha_inicio|date:'Y-m-d'|default:'' }}";
+    const FECHA_FIN_ANIO = "{{ config.fecha_fin|date:'Y-m-d'|default:'' }}";
+    const ANIO_INICIO = {{ config.anio_inicio|default:0 }};
+    const ANIO_FIN = {{ config.anio_fin|default:0 }};
+
+    const EVENTOS_GUARDADOS = {
+        {% for fecha, evento in eventos_map.items %}
+            "{{ fecha }}": "{{ evento }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+    const DESCRIPCIONES_GUARDADAS = {
+        {% for fecha, desc in descripciones_map.items %}
+            "{{ fecha }}": "{{ desc|escapejs }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+    const VACACIONES_MAP = {
+        {% for fecha, desc in vacaciones_map.items %}
+            "{{ fecha }}": "{{ desc|escapejs }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+    const RECURRENTES = {
+        {% for f in config.feriados.all %}
+            {% if f.recurrente %}"{{ f.fecha|date:'Y-m-d' }}": true,{% endif %}
+        {% endfor %}
+    };
+
+    const NOMBRES_EVENTOS = {
+        'feriado': 'Feriado',
+        'eventos': 'Evento Especial'
+    };
+
+    function esFechaFueraDelAnioEscolar(fechaStr) {
+        if (!FECHA_INICIO_ANIO && !FECHA_FIN_ANIO) return false;
+        if (FECHA_INICIO_ANIO && fechaStr < FECHA_INICIO_ANIO) return true;
+        if (FECHA_FIN_ANIO && fechaStr > FECHA_FIN_ANIO) return true;
+        return false;
+    }
+
+    function mostrarNotificacion(mensaje, tipo = 'error', duracion = 4000) {
+        const contenedor = document.getElementById('contenedorNotificaciones');
+        const iconos = {
+            error: 'bi-exclamation-triangle-fill',
+            exito: 'bi-check-circle-fill',
+            advertencia: 'bi-exclamation-circle-fill',
+            info: 'bi-info-circle-fill'
+        };
+        const notif = document.createElement('div');
+        notif.className = `notificacion-custom ${tipo}`;
+        notif.innerHTML = `
+            <i class="bi ${iconos[tipo]} notif-icono"></i>
+            <div class="notif-texto">${mensaje}</div>
+            <button type="button" class="notif-cerrar"><i class="bi bi-x-lg"></i></button>
+        `;
+        contenedor.appendChild(notif);
+        const cerrar = () => {
+            notif.classList.add('ocultando');
+            setTimeout(() => notif.remove(), 350);
+        };
+        notif.querySelector('.notif-cerrar').addEventListener('click', cerrar);
+        if (duracion > 0) setTimeout(cerrar, duracion);
+    }
+
+    function toggleMenuMes(e) {
+        if (e) e.stopPropagation();
+        const menu = document.getElementById('menuMes');
+        const dropdown = document.getElementById('dropdownMes');
+        const abierto = menu.classList.contains('abierto');
+        menu.classList.toggle('abierto', !abierto);
+        dropdown.classList.toggle('abierto', !abierto);
+    }
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('dropdownMes');
+        if (dropdown && !dropdown.contains(e.target)) {
+            document.getElementById('menuMes').classList.remove('abierto');
+            dropdown.classList.remove('abierto');
+        }
+    });
+
+    function marcarCeldasFueraAnio() {
+        document.querySelectorAll('.celda-check').forEach(celda => {
+            const fecha = celda.dataset.fecha;
+            if (esFechaFueraDelAnioEscolar(fecha)) {
+                celda.classList.add('fuera-anio');
+                celda.title = 'Fuera del año escolar configurado';
+                celda.classList.remove('estado-feriado', 'estado-eventos', 'vacaciones-celda', 'tiene-descripcion', 'recurrente');
+            }
+        });
+    }
+
+    function actualizarTotalDias() {
+        const total = document.querySelectorAll('th.th-dia').length;
+        const el = document.getElementById('totalDias');
+        if (el) el.textContent = total;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        marcarCeldasFueraAnio();
+
+        document.querySelectorAll('.celda-check').forEach(celda => {
+            if (celda.classList.contains('fuera-anio')) return;
+
+            const fecha = celda.dataset.fecha;
+
+            if (VACACIONES_MAP[fecha]) {
+                celda.classList.add('vacaciones-celda');
+                celda.title = `Vacaciones: ${VACACIONES_MAP[fecha]}`;
+                return;
+            }
+
+            const evento = EVENTOS_GUARDADOS[fecha];
+            const desc = DESCRIPCIONES_GUARDADAS[fecha];
+
+            if (evento) {
+                celda.classList.add(`estado-${evento}`);
+                const nombre = NOMBRES_EVENTOS[evento] || evento;
+                celda.title = desc ? `${nombre}: ${desc}` : nombre;
+            }
+            if (desc) celda.classList.add('tiene-descripcion');
+            if (RECURRENTES[fecha]) celda.classList.add('recurrente');
+        });
+
+        actualizarTotalDias();
+        actualizarLimitesVacaciones();
+
+        const vacIni = document.getElementById('vacFechaInicio');
+        const vacFin = document.getElementById('vacFechaFin');
+        if (vacIni) vacIni.addEventListener('change', validarVacaciones);
+        if (vacFin) vacFin.addEventListener('change', validarVacaciones);
+    });
+
+    function actualizarLimitesVacaciones() {
+        const vacIni = document.getElementById('vacFechaInicio');
+        const vacFin = document.getElementById('vacFechaFin');
+        const ayuda = document.getElementById('ayudaRangoVacaciones');
+
+        if (!vacIni || !vacFin) return;
+
+        if (FECHA_INICIO_ANIO) vacIni.min = FECHA_INICIO_ANIO;
+        if (FECHA_FIN_ANIO) vacIni.max = FECHA_FIN_ANIO;
+        if (FECHA_INICIO_ANIO) vacFin.min = FECHA_INICIO_ANIO;
+        if (FECHA_FIN_ANIO) vacFin.max = FECHA_FIN_ANIO;
+
+        if (ayuda) {
+            if (FECHA_INICIO_ANIO && FECHA_FIN_ANIO) {
+                const fmt = (s) => { const [y, m, d] = s.split('-'); return `${d}/${m}/${y}`; };
+                ayuda.innerHTML = `<i class="bi bi-info-circle me-1"></i> Rango: <strong>${fmt(FECHA_INICIO_ANIO)}</strong> hasta <strong>${fmt(FECHA_FIN_ANIO)}</strong>.`;
+            }
+        }
+    }
+
+    function validarVacaciones() {
+        const vacIni = document.getElementById('vacFechaInicio');
+        const vacFin = document.getElementById('vacFechaFin');
+        if (!vacIni || !vacFin) return;
+
+        if (FECHA_FIN_ANIO) {
+            if (vacIni.value && vacIni.value > FECHA_FIN_ANIO) { mostrarNotificacion('No puede ser posterior al fin del año.', 'advertencia', 3500); vacIni.value = ''; }
+            if (vacFin.value && vacFin.value > FECHA_FIN_ANIO) { mostrarNotificacion('No puede ser posterior al fin del año.', 'advertencia', 3500); vacFin.value = ''; }
+        }
+        if (FECHA_INICIO_ANIO) {
+            if (vacIni.value && vacIni.value < FECHA_INICIO_ANIO) { mostrarNotificacion('No puede ser anterior al inicio del año.', 'advertencia', 3500); vacIni.value = ''; }
+            if (vacFin.value && vacFin.value < FECHA_INICIO_ANIO) { mostrarNotificacion('No puede ser anterior al inicio del año.', 'advertencia', 3500); vacFin.value = ''; }
+        }
+        if (vacIni.value && vacFin.value && vacFin.value < vacIni.value) {
+            mostrarNotificacion('La fecha fin no puede ser anterior a la fecha inicio.', 'advertencia', 3500);
+            vacFin.value = '';
+        }
+    }
+
+    // ===== MODAL DESCRIPCIÓN =====
+    let fechaSeleccionada = null;
+    let modalDescripcion = null;
+    let tipoEventoSeleccionado = null;
+
+    function abrirModalDescripcion(fecha, tipoEvento) {
+        fechaSeleccionada = fecha;
+        tipoEventoSeleccionado = tipoEvento;
+        document.getElementById('fechaDescripcion').textContent = fecha;
+        const badge = document.getElementById('tipoEventoBadge');
+        badge.textContent = NOMBRES_EVENTOS[tipoEvento] || tipoEvento;
+        badge.className = 'badge fs-6';
+        if (tipoEvento === 'feriado') badge.classList.add('bg-warning', 'text-dark');
+        else if (tipoEvento === 'eventos') badge.classList.add('bg-info', 'text-dark');
+
+        document.getElementById('inputDescripcion').value = DESCRIPCIONES_GUARDADAS[fecha] || '';
+        document.getElementById('chkRecurrente').checked = RECURRENTES[fecha] !== undefined;
+
+        if (!modalDescripcion) {
+            modalDescripcion = new bootstrap.Modal(document.getElementById('modalDescripcion'));
+        }
+        modalDescripcion.show();
+        setTimeout(() => document.getElementById('inputDescripcion').focus(), 300);
+    }
+
+    function guardarDescripcion() {
+        const desc = document.getElementById('inputDescripcion').value.trim();
+        const recurrente = document.getElementById('chkRecurrente').checked;
+
+        if (fechaSeleccionada) {
+            if (desc) DESCRIPCIONES_GUARDADAS[fechaSeleccionada] = desc;
+            else delete DESCRIPCIONES_GUARDADAS[fechaSeleccionada];
+
+            if (recurrente) RECURRENTES[fechaSeleccionada] = true;
+            else delete RECURRENTES[fechaSeleccionada];
+
+            const celda = document.querySelector(`.celda-check[data-fecha="${fechaSeleccionada}"]`);
+            if (celda) {
+                const tipo = EVENTOS_GUARDADOS[fechaSeleccionada];
+                if (tipo) {
+                    const nombre = NOMBRES_EVENTOS[tipo] || tipo;
+                    celda.title = desc ? `${nombre}: ${desc}` : nombre;
+                }
+                celda.classList.toggle('tiene-descripcion', !!desc);
+                celda.classList.toggle('recurrente', recurrente);
+            }
+        }
+        if (modalDescripcion) modalDescripcion.hide();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const inp = document.getElementById('inputDescripcion');
+        if (inp) inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); guardarDescripcion(); }
+        });
+    });
+
+    function toggleEvento(celda) {
+        if (ES_TEMPORADA_VACACIONES) {
+            mostrarNotificacion('Este mes está fuera del año escolar.', 'advertencia', 3000);
+            return;
+        }
+
+        const fecha = celda.dataset.fecha;
+
+        if (esFechaFueraDelAnioEscolar(fecha)) {
+            if (!FECHA_INICIO_ANIO) mostrarNotificacion('Primero configura el año escolar.', 'advertencia', 3000);
+            else if (fecha < FECHA_INICIO_ANIO) mostrarNotificacion(`No puedes marcar antes de ${FECHA_INICIO_ANIO}.`, 'advertencia', 3500);
+            else if (FECHA_FIN_ANIO && fecha > FECHA_FIN_ANIO) mostrarNotificacion(`No puedes marcar después de ${FECHA_FIN_ANIO}.`, 'advertencia', 3500);
+            return;
+        }
+
+        if (VACACIONES_MAP[fecha]) {
+            mostrarNotificacion('Este día está en vacaciones.', 'advertencia', 3000);
+            return;
+        }
+
+        const estados = ['feriado', 'eventos'];
+        let actual = null;
+        for (let e of estados) if (celda.classList.contains(`estado-${e}`)) { actual = e; break; }
+        estados.forEach(e => celda.classList.remove(`estado-${e}`));
+
+        let siguiente = null;
+        if (actual === null) siguiente = 'feriado';
+        else if (actual === 'feriado') siguiente = 'eventos';
+
+        if (siguiente) {
+            celda.classList.add(`estado-${siguiente}`);
+            EVENTOS_GUARDADOS[fecha] = siguiente;
+            const nombre = NOMBRES_EVENTOS[siguiente];
+            const desc = DESCRIPCIONES_GUARDADAS[fecha];
+            celda.title = desc ? `${nombre}: ${desc}` : nombre;
+            abrirModalDescripcion(fecha, siguiente);
+        } else {
+            delete EVENTOS_GUARDADOS[fecha];
+            delete DESCRIPCIONES_GUARDADAS[fecha];
+            delete RECURRENTES[fecha];
+            celda.classList.remove('tiene-descripcion', 'recurrente');
+            celda.title = '';
+        }
+    }
+
+    function limpiarTodo() {
+        if (ES_TEMPORADA_VACACIONES) { mostrarNotificacion('No puedes limpiar en temporada de vacaciones.', 'advertencia', 3000); return; }
+        const marcadas = document.querySelectorAll('.celda-check[class*="estado-"]').length;
+        if (marcadas === 0) { mostrarNotificacion('No hay eventos marcados.', 'advertencia', 3000); return; }
+        document.querySelectorAll('.celda-check').forEach(c => {
+            c.classList.remove('estado-feriado', 'estado-eventos', 'tiene-descripcion', 'recurrente');
+            c.title = '';
+        });
+        for (let k in EVENTOS_GUARDADOS) delete EVENTOS_GUARDADOS[k];
+        for (let k in DESCRIPCIONES_GUARDADAS) delete DESCRIPCIONES_GUARDADAS[k];
+        for (let k in RECURRENTES) delete RECURRENTES[k];
+        mostrarNotificacion(`Se limpiaron ${marcadas} evento(s).`, 'info', 4000);
+    }
+
+    function guardarCalendario() {
+        if (ES_TEMPORADA_VACACIONES) { mostrarNotificacion('No puedes guardar en temporada de vacaciones.', 'advertencia', 3000); return; }
+        const eventos = [];
+        const recurrentes = [];
+        document.querySelectorAll('.celda-check').forEach(celda => {
+            if (celda.classList.contains('fuera-anio')) return;
+            const fecha = celda.dataset.fecha;
+            let estado = null;
+            for (let e of ['feriado', 'eventos']) if (celda.classList.contains(`estado-${e}`)) { estado = e; break; }
+            if (estado) {
+                eventos.push({ fecha, evento: estado, descripcion: DESCRIPCIONES_GUARDADAS[fecha] || '' });
+                if (RECURRENTES[fecha]) recurrentes.push(fecha);
+            }
+        });
+
+        if (eventos.length === 0) { mostrarNotificacion('No hay eventos para guardar.', 'advertencia', 3000); return; }
+
+        const botones = document.querySelectorAll('button');
+        botones.forEach(b => b.disabled = true);
+
+        fetch("{% url 'guardar_calendario_escolar' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            credentials: 'same-origin',
+            body: JSON.stringify({ mes: MES_SELECCIONADO, eventos, recurrentes })
+        })
+        .then(async r => { const t = await r.text(); try { return JSON.parse(t); } catch(e) { throw new Error('Respuesta inválida'); } })
+        .then(data => {
+            if (data.ok) mostrarNotificacion(`✅ ${data.mensaje}`, 'exito', 4000);
+            else mostrarNotificacion(`Error: ${data.error}`, 'error', 4500);
+        })
+        .catch(err => { console.error(err); mostrarNotificacion('Error de conexión.', 'error', 4500); })
+        .finally(() => botones.forEach(b => b.disabled = false));
+    }
+
+    function guardarConfiguracion() {
+        const fecha_inicio = document.getElementById('inputFechaInicio').value;
+        const fecha_fin = document.getElementById('inputFechaFin').value;
+
+        if (!fecha_inicio) { mostrarNotificacion('Debes seleccionar la fecha de inicio.', 'advertencia', 4000); return; }
+
+        fetch("{% url 'guardar_configuracion_anual' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            credentials: 'same-origin',
+            body: JSON.stringify({ fecha_inicio, fecha_fin })
+        })
+        .then(async r => { const t = await r.text(); try { return JSON.parse(t); } catch(e) { throw new Error('Respuesta inválida'); } })
+        .then(data => {
+            if (data.ok) {
+                mostrarNotificacion(`✅ ${data.mensaje}`, 'exito', 4000);
+                setTimeout(() => window.location.reload(), 800);
+            } else mostrarNotificacion(`Error: ${data.error}`, 'error', 4500);
+        })
+        .catch(err => { console.error(err); mostrarNotificacion('Error de conexión.', 'error', 4500); });
+    }
+
+    function toggleFormVacaciones() {
+        const f = document.getElementById('formVacaciones');
+        f.style.display = f.style.display === 'none' ? 'block' : 'none';
+        if (f.style.display === 'block') actualizarLimitesVacaciones();
+    }
+
+    function guardarVacaciones() {
+        const fecha_inicio = document.getElementById('vacFechaInicio').value;
+        const fecha_fin = document.getElementById('vacFechaFin').value;
+        const descripcion = document.getElementById('vacDescripcion').value.trim();
+        const recurrente = document.getElementById('vacRecurrente').checked;
+
+        if (!fecha_inicio || !fecha_fin || !descripcion) { mostrarNotificacion('Completa todos los campos.', 'advertencia', 3000); return; }
+
+        fetch("{% url 'guardar_vacaciones' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            credentials: 'same-origin',
+            body: JSON.stringify({ fecha_inicio, fecha_fin, descripcion, recurrente })
+        })
+        .then(async r => { const t = await r.text(); try { return JSON.parse(t); } catch(e) { throw new Error('Respuesta inválida'); } })
+        .then(data => {
+            if (data.ok) {
+                mostrarNotificacion(`✅ ${data.mensaje}`, 'exito', 4000);
+                setTimeout(() => window.location.reload(), 800);
+            } else mostrarNotificacion(`Error: ${data.error}`, 'error', 4500);
+        })
+        .catch(err => { console.error(err); mostrarNotificacion('Error de conexión.', 'error', 4500); });
+    }
+
+    function eliminarVacaciones(pk) {
+        if (!confirm('¿Eliminar este período de vacaciones?')) return;
+        fetch(`/calendario-escolar/vacaciones/eliminar/${pk}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN },
+            credentials: 'same-origin'
+        })
+        .then(async r => { const t = await r.text(); try { return JSON.parse(t); } catch(e) { throw new Error('Respuesta inválida'); } })
+        .then(data => {
+            if (data.ok) { mostrarNotificacion(`✅ ${data.mensaje}`, 'exito', 4000); setTimeout(() => window.location.reload(), 800); }
+            else mostrarNotificacion(`Error: ${data.error}`, 'error', 4500);
+        })
+        .catch(err => { console.error(err); mostrarNotificacion('Error de conexión.', 'error', 4500); });
+    }
+
+    function generarPDF() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{% url 'exportar_calendario_pdf' %}";
+        form.target = '_blank';
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden'; csrf.name = 'csrfmiddlewaretoken'; csrf.value = CSRF_TOKEN;
+        form.appendChild(csrf);
+        const datos = document.createElement('input');
+        datos.type = 'hidden'; datos.name = 'datos';
+        datos.value = JSON.stringify({ mes: MES_SELECCIONADO, mes_nombre: "{{ mes_nombre }}", anio: {{ anio }} });
+        form.appendChild(datos);
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    }
+
+    // ==================================================
+    // CIERRE ANUAL
+    // ==================================================
+    let listaEstudiantesCierre = [];
+    let accionesSeleccionadas = {};
+    let modalCierreAnualInstance = null;
+    let modalConfirmarFinalInstance = null;
+
+    function abrirModalCierreAnual() {
+        if (!modalCierreAnualInstance) {
+            modalCierreAnualInstance = new bootstrap.Modal(document.getElementById('modalCierreAnual'));
+        }
+        modalCierreAnualInstance.show();
+        cargarEstudiantesCierre();
+    }
+
+    function cargarEstudiantesCierre() {
+        const contenedor = document.getElementById('contenedor-tabla-cierre');
+        contenedor.innerHTML = `<div class="text-center text-muted py-4"><div class="spinner-border text-primary"></div></div>`;
+
+        fetch("{% url 'cierre_anual_json' %}")
+            .then(r => r.json())
+            .then(data => {
+                if (!data.ok) { contenedor.innerHTML = `<div class="alert alert-danger m-3">${data.error}</div>`; return; }
+                listaEstudiantesCierre = data.estudiantes;
+                accionesSeleccionadas = {};
+                listaEstudiantesCierre.forEach(e => accionesSeleccionadas[e.id] = 'inscribir');
+                renderTablaCierre();
+                actualizarContadoresCierre();
+            })
+            .catch(err => { console.error(err); contenedor.innerHTML = '<div class="alert alert-danger m-3">Error de conexión.</div>'; });
+    }
+
+    function renderTablaCierre() {
+        const contenedor = document.getElementById('contenedor-tabla-cierre');
+        if (listaEstudiantesCierre.length === 0) {
+            contenedor.innerHTML = '<div class="text-center text-muted py-4"><i class="bi bi-inbox" style="font-size:2rem;"></i><p class="mt-2 mb-0">No hay estudiantes activos.</p></div>';
+            return;
+        }
+        let filas = '';
+        listaEstudiantesCierre.forEach(e => {
+            const accion = accionesSeleccionadas[e.id] || 'inscribir';
+            const esEgresado = e.siguiente_nivel === '';
+            const labelIns = esEgresado ? '<i class="bi bi-mortarboard-fill"></i> Egresar' : '<i class="bi bi-arrow-up-circle-fill"></i> Inscribir';
+            filas += `
+                <tr>
+                    <td class="ps-3" style="font-size:0.85rem;"><strong>${e.nombres}</strong> ${e.apellidos}</td>
+                    <td style="font-size:0.82rem;">${e.cedula}</td>
+                    <td style="font-size:0.82rem;">
+                        <span class="badge bg-primary">${e.nivel_display}</span>
+                        <i class="bi bi-arrow-right mx-1 text-muted"></i>
+                        ${esEgresado ? '<span class="badge" style="background:#6f42c1;">🎓 Egresado</span>' : `<span class="badge bg-success">${e.siguiente_nivel_display}</span>`}
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex gap-1 justify-content-center flex-wrap">
+                            <button type="button" class="btn btn-sm ${accion === 'inscribir' ? 'btn-success' : 'btn-outline-success'}" onclick="selAccion(${e.id}, 'inscribir')" style="font-size:0.72rem;">${labelIns}</button>
+                            <button type="button" class="btn btn-sm ${accion === 'repitiente' ? 'btn-warning' : 'btn-outline-warning'}" onclick="selAccion(${e.id}, 'repitiente')" style="font-size:0.72rem;"><i class="bi bi-arrow-repeat"></i> Repitiente</button>
+                            <button type="button" class="btn btn-sm ${accion === 'retirar' ? 'btn-danger' : 'btn-outline-danger'}" onclick="selAccion(${e.id}, 'retirar')" style="font-size:0.72rem;"><i class="bi bi-person-dash-fill"></i> Retirar</button>
+                        </div>
+                    </td>
+                </tr>`;
+        });
+        contenedor.innerHTML = `
+            <table class="table table-sm table-hover mb-0" style="font-size:0.85rem;">
+                <thead style="position:sticky; top:0; background:#f8f9fa; z-index:1;">
+                    <tr><th class="ps-3">Estudiante</th><th>Cédula</th><th>Nivel → Siguiente</th><th class="text-center">Acción</th></tr>
+                </thead>
+                <tbody>${filas}</tbody>
+            </table>`;
+    }
+
+    function selAccion(id, accion) { accionesSeleccionadas[id] = accion; renderTablaCierre(); actualizarContadoresCierre(); }
+    function aplicarTodos(accion) { listaEstudiantesCierre.forEach(e => accionesSeleccionadas[e.id] = accion); renderTablaCierre(); actualizarContadoresCierre(); mostrarNotificacion(`Se aplicó "${accion}" a todos.`, 'info', 2000); }
+
+    function actualizarContadoresCierre() {
+        let ins = 0, rep = 0, ret = 0, egr = 0;
+        listaEstudiantesCierre.forEach(e => {
+            const a = accionesSeleccionadas[e.id];
+            if (a === 'inscribir') { if (e.siguiente_nivel === '') egr++; else ins++; }
+            else if (a === 'repitiente') rep++;
+            else if (a === 'retirar') ret++;
+        });
+        document.getElementById('stat-inscritos').textContent = ins;
+        document.getElementById('stat-repitientes').textContent = rep;
+        document.getElementById('stat-retirados').textContent = ret;
+        document.getElementById('stat-egresados').textContent = egr;
+    }
+
+    document.getElementById('btnConfirmarCierreAnual').addEventListener('click', function() {
+        if (listaEstudiantesCierre.length === 0) { mostrarNotificacion('No hay estudiantes para procesar.', 'advertencia', 3000); return; }
+        if (modalCierreAnualInstance) modalCierreAnualInstance.hide();
+        if (!modalConfirmarFinalInstance) modalConfirmarFinalInstance = new bootstrap.Modal(document.getElementById('modalConfirmarFinalCierre'));
+        modalConfirmarFinalInstance.show();
+    });
+
+    document.getElementById('btnEjecutarCierreFinal').addEventListener('click', function() {
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+        const acciones = listaEstudiantesCierre.map(e => ({ id: e.id, accion: accionesSeleccionadas[e.id] || 'inscribir' }));
+        const payload = { acciones: acciones, observacion: document.getElementById('observacionCierre').value.trim() };
+
+        fetch("{% url 'ejecutar_cierre_anual' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (modalConfirmarFinalInstance) modalConfirmarFinalInstance.hide();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check2-circle"></i> Sí, cerrar año escolar';
+            if (data.ok) {
+                mostrarNotificacion('🎉 ' + data.mensaje, 'exito', 8000);
+                setTimeout(() => window.location.href = "{% url 'calendario_escolar' %}", 3000);
+            } else {
+                mostrarNotificacion('Error: ' + data.error, 'error', 6000);
+            }
+        })
+        .catch(err => {
+            if (modalConfirmarFinalInstance) modalConfirmarFinalInstance.hide();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check2-circle"></i> Sí, cerrar año escolar';
+            console.error(err);
+            mostrarNotificacion('Error de conexión al ejecutar el cierre.', 'error');
+        });
+    });
+</script>
+</body>
+</html>

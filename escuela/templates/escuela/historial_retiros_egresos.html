@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Retiros y Egresos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .navbar-custom { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
+        
+        .card { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card-header {
+            background: white; border-bottom: 2px solid #e9ecef;
+            font-weight: 700; color: #0d6efd;
+            border-radius: 15px 15px 0 0 !important;
+        }
+
+        /* Tabs personalizados */
+        .nav-pills .nav-link {
+            border-radius: 10px; font-weight: 600; color: #495057;
+            padding: 12px 20px; border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .nav-pills .nav-link:hover { background-color: #e9ecef; }
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd; color: white; border-color: #0d6efd;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+        }
+        .nav-pills .nav-link.active i { color: white !important; }
+
+        /* Tabla */
+        .tabla-historial thead th {
+            background-color: #f8f9fa; color: #1a1a2e;
+            font-weight: 700; font-size: 0.8rem; text-transform: uppercase;
+            padding: 12px; border-bottom: 2px solid #dee2e6;
+        }
+        .tabla-historial tbody td {
+            padding: 12px; vertical-align: middle; font-size: 0.9rem;
+        }
+        .tabla-historial tbody tr:hover { background-color: #f8faff; }
+
+        /* Botones mini */
+        .btn-accion {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px; border-radius: 8px; font-size: 0.95rem;
+            transition: all 0.25s ease; text-decoration: none; border: none;
+        }
+        .btn-pdf { background: rgba(25, 135, 84, 0.1); color: #198754; }
+        .btn-pdf:hover { background: #198754; color: white; transform: translateY(-2px); }
+        .btn-eliminar { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+        .btn-eliminar:hover { background: #dc3545; color: white; transform: translateY(-2px); }
+
+        /* Notificaciones */
+        #contenedorNotificaciones {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+            width: 92%; max-width: 900px; z-index: 99999; pointer-events: none;
+        }
+        .notificacion-custom {
+            pointer-events: auto; display: flex; align-items: center; gap: 14px;
+            padding: 16px 20px; border-radius: 14px; font-weight: 600; color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 12px;
+            animation: slideDown 0.35s ease-out;
+        }
+        .notificacion-custom.ocultando { animation: slideUp 0.35s ease-in forwards; }
+        .notificacion-custom .notif-icono { font-size: 1.6rem; flex-shrink: 0; }
+        .notificacion-custom .notif-texto { flex: 1; font-size: 0.98rem; line-height: 1.3; }
+        .notificacion-custom .notif-cerrar {
+            background: transparent; border: none; color: white;
+            font-size: 1.4rem; cursor: pointer; opacity: 0.8;
+        }
+        .notificacion-custom .notif-cerrar:hover { opacity: 1; }
+        .notificacion-custom.error { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        .notificacion-custom.exito { background: linear-gradient(135deg, #198754, #146c43); }
+        .notificacion-custom.advertencia { background: linear-gradient(135deg, #ffc107, #e0a800); color: #212529; }
+        .notificacion-custom.advertencia .notif-cerrar { color: #212529; }
+        .notificacion-custom.info { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-25px); } }
+    </style>
+</head>
+<body>
+
+<div id="contenedorNotificaciones"></div>
+
+<!-- ==================== NAVBAR ==================== -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm mb-4">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand mb-0 h1 fw-bold">
+            <i class="bi bi-journal-x"></i> Historial de Retiros y Egresos
+        </span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+                <a href="{% url 'menu_admin' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Volver al Panel
+                </a>
+                <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-house-fill me-1"></i> Inicio
+                </a>
+                <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+    
+    <!-- TABS DE NAVEGACIÓN -->
+    <div class="card mb-4">
+        <div class="card-body p-3">
+            <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pills-retiros-tab" data-bs-toggle="pill" data-bs-target="#pills-retiros" type="button" role="tab">
+                        <i class="bi bi-person-dash-fill me-2"></i> Estudiantes Retirados
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-egresados-tab" data-bs-toggle="pill" data-bs-target="#pills-egresados" type="button" role="tab">
+                        <i class="bi bi-mortarboard-fill me-2"></i> Estudiantes Egresados
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- CONTENIDO DE LAS PESTAÑAS -->
+    <div class="tab-content" id="pills-tabContent">
+        
+        <!-- TAB RETIROS -->
+        <div class="tab-pane fade show active" id="pills-retiros" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-list-ul text-primary me-2"></i> Listado de Retiros</span>
+                    <span class="badge bg-primary" id="badge-count-retiros">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <div id="contenido-retiros" class="p-4">
+                        <div class="text-center text-muted py-5">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2">Cargando retiros...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB EGRESADOS -->
+        <div class="tab-pane fade" id="pills-egresados" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-list-ul text-success me-2"></i> Listado de Egresados</span>
+                    <span class="badge bg-success" id="badge-count-egresados">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <div id="contenido-egresados" class="p-4">
+                        <div class="text-center text-muted py-5">
+                            <div class="spinner-border text-success" role="status"></div>
+                            <p class="mt-2">Cargando egresados...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL: CONFIRMACIÓN DE ELIMINACIÓN                            -->
+<!-- ============================================================ -->
+<div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px;">
+            <div class="modal-header bg-danger text-white" style="border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-4 text-center">
+                <div style="font-size: 3.5rem; color: #dc3545; margin-bottom: 15px;">
+                    <i class="bi bi-trash3-fill"></i>
+                </div>
+                <h5 class="fw-bold mb-2">¿Estás seguro de eliminar este registro?</h5>
+                <p class="text-muted mb-0">
+                    <strong id="nombreAEliminar" class="text-dark">-</strong>
+                </p>
+                <div class="alert alert-warning small mt-3 mb-0 text-start">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong>Advertencia:</strong> Al eliminar este registro del historial, el estudiante volverá a estar <strong>activo</strong> en el sistema. Sin embargo, <strong>ya no tendrá disponible automáticamente la emisión de la constancia o certificado correspondiente a su retiro/egreso</strong> en esta sección.
+                </div>
+            </div>
+
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <button type="button" id="btnConfirmarEliminar" class="btn btn-danger px-4">
+                    <i class="bi bi-trash3-fill"></i> Sí, Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ==================================================
+    // SISTEMA DE NOTIFICACIONES
+    // ==================================================
+    function mostrarNotificacion(mensaje, tipo = 'error', duracion = 3500) {
+        const contenedor = document.getElementById('contenedorNotificaciones');
+        const iconos = {
+            error: 'bi-exclamation-triangle-fill',
+            exito: 'bi-check-circle-fill',
+            advertencia: 'bi-exclamation-circle-fill',
+            info: 'bi-info-circle-fill'
+        };
+        const notif = document.createElement('div');
+        notif.className = `notificacion-custom ${tipo}`;
+        notif.innerHTML = `
+            <i class="bi ${iconos[tipo] || iconos.error} notif-icono"></i>
+            <div class="notif-texto">${mensaje}</div>
+            <button type="button" class="notif-cerrar" aria-label="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        `;
+        contenedor.appendChild(notif);
+        const cerrar = () => {
+            if (notif.classList.contains('ocultando')) return;
+            notif.classList.add('ocultando');
+            setTimeout(() => notif.remove(), 350);
+        };
+        notif.querySelector('.notif-cerrar').addEventListener('click', cerrar);
+        if (duracion > 0) setTimeout(cerrar, duracion);
+        return notif;
+    }
+
+    // ==================================================
+    // CARGA DE DATOS (RETIROS Y EGRESADOS)
+    // ==================================================
+    let tipoEliminarActual = '';
+    let idEliminarActual = 0;
+    let modalConfirmarEliminar = null;
+
+    function cargarRetiros() {
+        const contenedor = document.getElementById('contenido-retiros');
+        fetch('/admin-panel/historial-retiros/json/')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.ok) {
+                    contenedor.innerHTML = `<div class="alert alert-danger">Error al cargar los retiros.</div>`;
+                    return;
+                }
+                document.getElementById('badge-count-retiros').textContent = data.retiros.length;
+                renderTablaRetiros(data.retiros);
+            })
+            .catch(err => {
+                console.error(err);
+                contenedor.innerHTML = `<div class="alert alert-danger">Error de conexión.</div>`;
+            });
+    }
+
+    function cargarEgresados() {
+        const contenedor = document.getElementById('contenido-egresados');
+        fetch('/admin-panel/historial-egresados/json/')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.ok) {
+                    contenedor.innerHTML = `<div class="alert alert-danger">Error al cargar los egresados.</div>`;
+                    return;
+                }
+                document.getElementById('badge-count-egresados').textContent = data.egresados.length;
+                renderTablaEgresados(data.egresados);
+            })
+            .catch(err => {
+                console.error(err);
+                contenedor.innerHTML = `<div class="alert alert-danger">Error de conexión.</div>`;
+            });
+    }
+
+    function renderTablaRetiros(lista) {
+        const contenedor = document.getElementById('contenido-retiros');
+        if (!lista || lista.length === 0) {
+            contenedor.innerHTML = `<div class="text-center text-muted py-5"><i class="bi bi-inbox fs-1"></i><p class="mt-2">No hay estudiantes retirados registrados.</p></div>`;
+            return;
+        }
+
+        let filas = '';
+        lista.forEach(item => {
+            filas += `
+                <tr>
+                    <td><strong>${item.nombre_completo}</strong></td>
+                    <td>${item.cedula}</td>
+                    <td><span class="badge bg-secondary">${item.nivel}</span></td>
+                    <td>${item.anio_escolar}</td>
+                    <td><small class="text-muted">${item.fecha_registro}</small></td>
+                    <td><small>${item.motivo}</small></td>
+                    <td class="text-center">
+                        <div class="d-flex gap-1 justify-content-center">
+                            <a href="${item.url_pdf}" target="_blank" class="btn-accion btn-pdf" title="Ver/Generar Boleta de Retiro">
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                            </a>
+                            <button type="button" class="btn-accion btn-eliminar" title="Eliminar del historial" onclick="confirmarEliminar('${item.nombre_completo}', 'retiro', ${item.id})">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        contenedor.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-hover tabla-historial mb-0">
+                    <thead>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Cédula</th>
+                            <th>Nivel</th>
+                            <th>Año Escolar</th>
+                            <th>Fecha Retiro</th>
+                            <th>Motivo</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>${filas}</tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    function renderTablaEgresados(lista) {
+        const contenedor = document.getElementById('contenido-egresados');
+        if (!lista || lista.length === 0) {
+            contenedor.innerHTML = `<div class="text-center text-muted py-5"><i class="bi bi-inbox fs-1"></i><p class="mt-2">No hay estudiantes egresados registrados.</p></div>`;
+            return;
+        }
+
+        let filas = '';
+        lista.forEach(item => {
+            filas += `
+                <tr>
+                    <td><strong>${item.nombre_completo}</strong></td>
+                    <td>${item.cedula}</td>
+                    <td><span class="badge bg-success">${item.nivel}</span></td>
+                    <td>${item.anio_escolar}</td>
+                    <td><small class="text-muted">${item.fecha_registro}</small></td>
+                    <td class="text-center">
+                        <div class="d-flex gap-1 justify-content-center">
+                            <a href="${item.url_pdf}" target="_blank" class="btn-accion btn-pdf" title="Ver/Generar Certificado">
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                            </a>
+                            <button type="button" class="btn-accion btn-eliminar" title="Eliminar del historial" onclick="confirmarEliminar('${item.nombre_completo}', 'egresado', ${item.id})">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        contenedor.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-hover tabla-historial mb-0">
+                    <thead>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Cédula</th>
+                            <th>Nivel</th>
+                            <th>Año Escolar</th>
+                            <th>Fecha Egreso</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>${filas}</tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // ==================================================
+    // ELIMINAR HISTORIAL
+    // ==================================================
+    function confirmarEliminar(nombre, tipo, id) {
+        tipoEliminarActual = tipo;
+        idEliminarActual = id;
+        document.getElementById('nombreAEliminar').textContent = `"${nombre}"`;
+
+        if (!modalConfirmarEliminar) {
+            modalConfirmarEliminar = new bootstrap.Modal(document.getElementById('modalConfirmarEliminar'));
+        }
+        modalConfirmarEliminar.show();
+    }
+
+    document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
+        if (!tipoEliminarActual || !idEliminarActual) return;
+
+        const url = `/admin-panel/historial/eliminar/${tipoEliminarActual}/${idEliminarActual}/`;
+        const csrftoken = getCookie('csrftoken');
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) {
+                modalConfirmarEliminar.hide();
+                mostrarNotificacion(data.mensaje, 'exito', 3500);
+                // Recargar la pestaña que corresponda
+                if (tipoEliminarActual === 'retiro') cargarRetiros();
+                else cargarEgresados();
+            } else {
+                mostrarNotificacion(data.error || 'Error al eliminar', 'error');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            mostrarNotificacion('Error de conexión al eliminar', 'error');
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // ==================================================
+    // INICIALIZACIÓN
+    // ==================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarRetiros();
+        cargarEgresados();
+
+        // Mensajes de Django
+        document.querySelectorAll('.alert').forEach(alertEl => {
+            const texto = alertEl.textContent.trim();
+            let tipo = 'info';
+            if (alertEl.classList.contains('alert-danger')) tipo = 'error';
+            else if (alertEl.classList.contains('alert-success')) tipo = 'exito';
+            else if (alertEl.classList.contains('alert-warning')) tipo = 'advertencia';
+            if (texto) mostrarNotificacion(texto, tipo, 3000);
+            alertEl.remove();
+        });
+    });
+</script>
+</body>
+</html>

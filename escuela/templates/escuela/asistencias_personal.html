@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistencias del Personal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --azul: #0d6efd;
+            --azul-oscuro: #0a58ca;
+            --azul-claro: #e7f0ff;
+            --azul-suave: #f0f6ff;
+            --rojo: #dc3545;
+            --rojo-suave: #ffe5e8;
+            --rojo-claro: #ffd0d6;
+            --gris-bloqueado: #e9ecef;
+            --amarillo-suave: #fff3cd;
+            --verde-suave: #d1e7dd;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .tarjeta-cuaderno {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 30px 25px;
+            box-shadow: 0 10px 30px rgba(13, 110, 253, 0.12);
+            border: 3px solid var(--azul-claro);
+        }
+
+        .titulo-cuaderno {
+            font-family: 'Baloo 2', cursive;
+            font-weight: 800;
+            color: var(--azul);
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .titulo-cuaderno .subtitulo {
+            font-size: 1.3rem;
+            color: var(--azul-oscuro);
+            font-weight: 700;
+        }
+
+        .cabecera-campos {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .campo-info {
+            flex: 1;
+            min-width: 200px;
+            border: 2px solid var(--azul);
+            border-radius: 10px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--azul-oscuro);
+            font-size: 0.9rem;
+            background: white;
+        }
+        .campo-info .etiqueta {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .campo-info .valor {
+            color: var(--azul);
+            font-weight: 700;
+        }
+        .campo-info i { color: var(--azul); }
+
+        .campo-info.campo-feriados {
+            border-color: #ffc107;
+            color: #856404;
+        }
+        .campo-info.campo-feriados i { color: #ffc107; }
+        .campo-info.campo-feriados .valor { color: #856404; }
+
+        .campo-info.dropdown-mes {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .campo-info.dropdown-mes:hover {
+            background: var(--azul-suave);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(13, 110, 253, 0.15);
+        }
+        .campo-info.dropdown-mes .chevron {
+            margin-left: auto;
+            transition: transform 0.25s ease;
+            font-size: 0.9rem;
+        }
+        .campo-info.dropdown-mes.abierto .chevron {
+            transform: rotate(180deg);
+        }
+
+        .menu-mes {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--azul);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(13, 110, 253, 0.2);
+            z-index: 100;
+            overflow: hidden;
+            display: none;
+            animation: dropIn 0.2s ease;
+        }
+        .menu-mes.abierto { display: block; }
+
+        @keyframes dropIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .menu-mes .item-mes {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: var(--azul-oscuro);
+            font-weight: 600;
+            transition: background 0.15s;
+            border-bottom: 1px solid var(--azul-claro);
+        }
+        .menu-mes .item-mes:last-child { border-bottom: none; }
+        .menu-mes .item-mes:hover {
+            background: var(--azul-suave);
+            color: var(--azul);
+        }
+        .menu-mes .item-mes.activo {
+            background: var(--azul);
+            color: white;
+        }
+        .menu-mes .item-mes.activo i { color: white; }
+        .menu-mes .item-mes i {
+            color: var(--azul);
+            font-size: 1rem;
+        }
+        .menu-mes .item-mes .info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .menu-mes .item-mes .nombre-mes {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .menu-mes .item-mes .etiqueta-mes {
+            font-size: 0.72rem;
+            opacity: 0.75;
+            font-weight: 500;
+        }
+        .menu-mes .item-mes .badge-check {
+            margin-left: auto;
+            color: white;
+        }
+
+        /* Tabla */
+        .tabla-asistencia {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            border: 2px solid var(--azul);
+        }
+        .tabla-asistencia thead th {
+            background: var(--azul-claro);
+            color: var(--azul-oscuro);
+            font-weight: 800;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            text-align: center;
+            padding: 8px 4px;
+            border: 1px solid var(--azul);
+            vertical-align: middle;
+            line-height: 1.1;
+            position: relative;
+        }
+        .tabla-asistencia thead th.col-nombre {
+            text-align: left;
+            padding-left: 12px;
+            min-width: 220px;
+        }
+        .tabla-asistencia thead th.col-num { width: 40px; }
+        .tabla-asistencia thead th.col-dia { width: 38px; }
+        .tabla-asistencia thead th .letra-dia {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--azul);
+        }
+        .tabla-asistencia thead th .fecha-dia {
+            display: block;
+            font-size: 0.68rem;
+            color: var(--azul-oscuro);
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        /* Encabezados con eventos del calendario */
+        .tabla-asistencia thead th.th-dia.es-evento {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .tabla-asistencia thead th.th-dia.es-evento .letra-dia { color: #856404; }
+        .tabla-asistencia thead th.th-dia.es-evento .fecha-dia { color: #856404; }
+
+        .tabla-asistencia thead th.th-dia.es-vacaciones {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+        .tabla-asistencia thead th.th-dia.es-vacaciones .letra-dia { color: #0f5132; }
+        .tabla-asistencia thead th.th-dia.es-vacaciones .fecha-dia { color: #0f5132; }
+
+        .tabla-asistencia thead th.th-dia .icono-evento {
+            display: none;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.65rem;
+        }
+        .tabla-asistencia thead th.th-dia.es-evento .icono-evento { display: block; color: #856404; }
+        .tabla-asistencia thead th.th-dia.es-vacaciones .icono-evento { display: block; color: #0f5132; }
+
+        .tabla-asistencia tbody td {
+            border: 1px solid var(--azul);
+            padding: 4px;
+            vertical-align: middle;
+            height: 34px;
+        }
+        .tabla-asistencia tbody td.col-num {
+            text-align: center;
+            font-weight: 700;
+            color: var(--azul-oscuro);
+            background: var(--azul-suave);
+            width: 40px;
+        }
+        .tabla-asistencia tbody td.col-nombre {
+            padding-left: 12px;
+            font-weight: 600;
+            color: #212529;
+            background: white;
+        }
+        .tabla-asistencia tbody tr:nth-child(even) td.col-nombre {
+            background: #fafcff;
+        }
+
+        .tabla-asistencia tbody td.celda-check {
+            text-align: center;
+            cursor: pointer;
+            background: var(--azul-suave);
+            transition: background 0.15s;
+            position: relative;
+            user-select: none;
+        }
+        .tabla-asistencia tbody td.celda-check:hover:not(.bloqueada):not(.evento-celda) {
+            background: var(--azul-claro);
+        }
+
+        .tabla-asistencia tbody td.celda-check.estado-presente {
+            background: #d1e7dd;
+        }
+        .tabla-asistencia tbody td.celda-check.estado-ausente {
+            background: var(--rojo-suave);
+        }
+
+        .tabla-asistencia tbody td.celda-check.bloqueada {
+            cursor: not-allowed;
+            background: var(--gris-bloqueado);
+            opacity: 0.5;
+        }
+        .tabla-asistencia tbody td.celda-check.bloqueada:hover {
+            background: var(--gris-bloqueado);
+        }
+
+        .tabla-asistencia tbody td.celda-check.evento-celda {
+            cursor: not-allowed;
+        }
+        .tabla-asistencia tbody td.celda-check.evento-celda.feriado-tipo {
+            background: #fff3cd;
+        }
+        .tabla-asistencia tbody td.celda-check.evento-celda.vacaciones-tipo {
+            background: #d1e7dd;
+        }
+
+        .icono-estado {
+            display: none;
+            width: 22px;
+            height: 22px;
+            margin: 0 auto;
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+        .celda-check.estado-presente .icono-presente { display: block; color: #198754; }
+        .celda-check.estado-ausente .icono-ausente { display: block; color: var(--rojo); }
+
+        .celda-check.estado-presente .icono-presente,
+        .celda-check.estado-ausente .icono-ausente {
+            animation: checkPop 0.3s ease;
+        }
+        @keyframes checkPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .btn-custom {
+            background-color: white;
+            border: 2px solid var(--azul);
+            color: var(--azul);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-custom:hover:not(:disabled) { background-color: var(--azul); color: white; }
+        .btn-custom i { color: var(--azul); transition: all 0.3s ease; }
+        .btn-custom:hover:not(:disabled) i { color: white; }
+        .btn-custom:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-pdf {
+            background-color: white;
+            border: 2px solid var(--rojo);
+            color: var(--rojo);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-pdf:hover:not(:disabled) { background-color: var(--rojo); color: white; }
+        .btn-pdf i { color: var(--rojo); transition: all 0.3s ease; }
+        .btn-pdf:hover:not(:disabled) i { color: white; }
+
+        .btn-outline-secondary { border-radius: 10px; font-weight: 600; }
+
+        .tabla-scroll { overflow-x: auto; border-radius: 12px; }
+
+        .selector-info {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .badge-mes {
+            background: var(--azul);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        .badge-mes.lectura { background: #6c757d; }
+
+        .leyenda-estados {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+        }
+        .leyenda-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #495057;
+        }
+        .leyenda-cuadro {
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .leyenda-cuadro.presente { background: #d1e7dd; color: #198754; }
+        .leyenda-cuadro.ausente { background: var(--rojo-suave); color: var(--rojo); }
+        .leyenda-cuadro.feriado { background: #fff3cd; color: #856404; }
+        .leyenda-cuadro.vacaciones { background: #d1e7dd; color: #0f5132; }
+        .leyenda-cuadro.bloqueado { background: var(--gris-bloqueado); color: #6c757d; }
+
+        #contenedorNotificaciones {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 900px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .notificacion-custom {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            animation: slideDown 0.35s ease-out;
+        }
+        .notificacion-custom.ocultando { animation: slideUp 0.35s ease-in forwards; }
+        .notificacion-custom .notif-icono { font-size: 1.6rem; flex-shrink: 0; }
+        .notificacion-custom .notif-texto { flex: 1; font-size: 0.98rem; line-height: 1.3; }
+        .notificacion-custom .notif-cerrar {
+            background: transparent; border: none; color: white;
+            font-size: 1.4rem; cursor: pointer; opacity: 0.8;
+            transition: opacity 0.2s; padding: 0 4px; line-height: 1;
+        }
+        .notificacion-custom .notif-cerrar:hover { opacity: 1; }
+
+        .notificacion-custom.error    { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        .notificacion-custom.exito    { background: linear-gradient(135deg, #198754, #146c43); }
+        .notificacion-custom.advertencia { background: linear-gradient(135deg, #ffc107, #e0a800); color: #212529; }
+        .notificacion-custom.advertencia .notif-cerrar { color: #212529; }
+        .notificacion-custom.info     { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-25px); } }
+    </style>
+</head>
+<body>
+
+<div id="contenedorNotificaciones"></div>
+
+<!-- ==================== NAVBAR ==================== -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand mb-0 h1 fw-bold">
+            <i class="bi bi-mortarboard-fill"></i> E.N Carmen Magaly Vargas
+        </span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-house-fill me-1"></i> Inicio
+                </a>
+                <a href="{% url 'menu_admin' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                <i class="bi bi-shield-lock-fill me-1"></i> Panel Admin
+                </a>
+                <a href="{% url 'personal' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-people-fill me-1"></i> Personal
+                </a>
+                <a href="{% url 'calendario_escolar' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-calendar3 me-1"></i> Calendario Escolar
+                </a>
+                <span class="text-white ms-2 me-2 small d-none d-md-inline">Usuario: <strong>{{ user.username }}</strong></span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mb-5">
+
+    <div class="tarjeta-cuaderno">
+
+        <!-- TÍTULO -->
+        <div class="titulo-cuaderno">
+            <i class="bi bi-calendar-check"></i>
+            REGISTRO
+            <span class="subtitulo">DE ASISTENCIA DEL PERSONAL</span>
+        </div>
+
+        <!-- CABECERA -->
+        <div class="cabecera-campos">
+
+            <!-- SELECTOR DE MES (dropdown) -->
+            <div class="campo-info dropdown-mes" id="dropdownMes" onclick="toggleMenuMes(event)">
+                <i class="bi bi-calendar3"></i>
+                <span class="etiqueta">MES:</span>
+                <span class="valor">{{ mes_nombre }} {{ anio }}</span>
+                <i class="bi bi-chevron-down chevron"></i>
+
+                <div class="menu-mes" id="menuMes">
+                    {% for m in meses_disponibles %}
+                    <a href="?mes={{ m.valor }}"
+                       class="item-mes {% if m.valor == mes_sel_str %}activo{% endif %}">
+                        <i class="bi bi-calendar-month"></i>
+                        <div class="info">
+                            <span class="nombre-mes">{{ m.nombre }} {{ m.anio }}</span>
+                            <span class="etiqueta-mes">{{ m.etiqueta }}</span>
+                        </div>
+                        {% if m.valor == mes_sel_str %}
+                        <i class="bi bi-check-lg badge-check"></i>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="campo-info">
+                <i class="bi bi-people-fill"></i>
+                <span class="etiqueta">PERSONAL:</span>
+                <span class="valor">{{ personal|length }} registrados</span>
+            </div>
+
+            <!-- Contador de días no laborables -->
+            <div class="campo-info campo-feriados">
+                <i class="bi bi-calendar-x-fill"></i>
+                <span class="etiqueta">DÍAS NO LABORABLES:</span>
+                <span class="valor" id="contadorFeriados">0</span>
+                <span class="valor">día(s)</span>
+            </div>
+
+            <div class="campo-info">
+                <i class="bi bi-clock"></i>
+                <span class="etiqueta">FECHA:</span>
+                <span class="valor">{% now 'd/m/Y' %}</span>
+            </div>
+        </div>
+
+        <!-- INFO DEL MODO -->
+        <div class="selector-info">
+            {% if es_mes_actual %}
+            <span class="badge-mes">
+                <i class="bi bi-calendar-month me-1"></i>
+                Mes en curso
+            </span>
+            <span class="text-muted small">
+                <i class="bi bi-info-circle me-1"></i>
+                Haz clic en una celda para marcar: <strong>✅ Presente → ❌ Ausente → ⬜ Sin marcar</strong>
+            </span>
+            {% else %}
+            <span class="badge-mes lectura">
+                <i class="bi bi-lock-fill me-1"></i>
+                Mes cerrado
+            </span>
+            <span class="text-muted small">
+                <i class="bi bi-info-circle me-1"></i>
+                Vista de consulta. No se permiten cambios.
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- LEYENDA DE ESTADOS -->
+        <div class="leyenda-estados">
+            <div class="leyenda-item">
+                <div class="leyenda-cuadro presente"><i class="bi bi-check-lg"></i></div>
+                Presente
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-cuadro ausente"><i class="bi bi-x-lg"></i></div>
+                Ausente
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-cuadro feriado"><i class="bi bi-star-fill" style="font-size:0.7rem;"></i></div>
+                Feriado / Evento
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-cuadro vacaciones"><i class="bi bi-tree-fill" style="font-size:0.7rem;"></i></div>
+                Vacaciones
+            </div>
+            <div class="leyenda-item">
+                <div class="leyenda-cuadro bloqueado"><i class="bi bi-lock-fill" style="font-size:0.7rem;"></i></div>
+                Bloqueado
+            </div>
+        </div>
+
+        <!-- TABLA -->
+        <div class="tabla-scroll">
+            <table class="tabla-asistencia" id="tablaAsistencia">
+                <thead>
+                    <tr>
+                        <th class="col-num">#</th>
+                        <th class="col-nombre">Nombre del Personal</th>
+                        {% for d in dias %}
+                        <th class="col-dia th-dia"
+                            data-fecha="{{ d|date:'Y-m-d' }}"
+                            data-dia="{{ d.day }}">
+                            <span class="icono-evento"><i class="bi bi-star-fill"></i></span>
+                            <span class="letra-dia">
+                                {% if d.weekday == 0 %}L
+                                {% elif d.weekday == 1 %}M
+                                {% elif d.weekday == 2 %}M
+                                {% elif d.weekday == 3 %}J
+                                {% elif d.weekday == 4 %}V
+                                {% endif %}
+                            </span>
+                            <span class="fecha-dia">{{ d.day }}</span>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in personal %}
+                    <tr>
+                        <td class="col-num">{{ forloop.counter }}</td>
+                        <td class="col-nombre">{{ p.obj.apellidos }}, {{ p.obj.nombres }}</td>
+                        {% for d in dias %}
+                        <td class="celda-check {% if not es_mes_actual %}bloqueada{% endif %}"
+                            data-personal="{{ p.obj.pk }}"
+                            data-tipo="{{ p.tipo }}"
+                            data-fecha="{{ d|date:'Y-m-d' }}"
+                            data-dia="{{ d.day }}"
+                            onclick="toggleAsistencia(this)">
+                            <span class="icono-estado icono-presente"><i class="bi bi-check-lg"></i></span>
+                            <span class="icono-estado icono-ausente"><i class="bi bi-x-lg"></i></span>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{{ dias|length|add:2 }}" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox me-2"></i>No hay personal registrado
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+            <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                Solo se muestran los días de <strong>Lunes a Viernes</strong> del mes.
+            </small>
+            <small class="text-muted">
+                Total filas: <strong>{{ personal|length }}</strong> &nbsp;|&nbsp;
+                Total días: <strong>{{ dias|length }}</strong>
+            </small>
+        </div>
+
+    </div>
+
+    <!-- BOTONES -->
+    <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
+        <a href="{% url 'personal' %}" class="btn btn-outline-secondary btn-lg">
+            <i class="bi bi-arrow-left-circle"></i> Regresar
+        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-lg"
+                    onclick="limpiarTodo()"
+                    {% if not es_mes_actual %}disabled{% endif %}>
+                <i class="bi bi-eraser"></i> Limpiar
+            </button>
+            <button type="button"
+                    class="btn btn-pdf btn-lg"
+                    onclick="generarPDF()">
+                <i class="bi bi-file-earmark-pdf-fill"></i> Generar PDF
+            </button>
+            <button type="button"
+                    class="btn btn-custom btn-lg"
+                    onclick="guardarAsistencias()"
+                    {% if not es_mes_actual %}disabled{% endif %}>
+                <i class="bi bi-check-circle-fill"></i> Guardar Asistencias
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ==================================================
+    // CONFIGURACIÓN DESDE DJANGO
+    // ==================================================
+    const ES_MES_ACTUAL = {{ es_mes_actual|yesno:"true,false" }};
+    const MES_SELECCIONADO = "{{ mes_sel_str }}";
+    const CSRF_TOKEN = "{{ csrf_token }}";
+    const DIA_ACTUAL = new Date().getDate();
+    const MES_ACTUAL_NUM = new Date().getMonth() + 1;
+    const ANIO_ACTUAL = new Date().getFullYear();
+    const MES_SELECCIONADO_NUM = {{ mes }};
+    const ANIO_SELECCIONADO = {{ anio }};
+
+    // ✅ FECHA DE INICIO DEL AÑO ESCOLAR (desde el backend)
+    // Se usa para bloquear días anteriores al inicio del año escolar.
+    const FECHA_INICIO_ANIO = {% if fecha_inicio_anio %}"{{ fecha_inicio_anio|date:'Y-m-d' }}"{% else %}null{% endif %};
+
+    const ASISTENCIAS_GUARDADAS = {
+        {% for clave, valor in asistencias_map.items %}
+            "{{ clave }}": "{{ valor }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    // ✅ MAPA DE FERIADOS / EVENTOS (tipo feriado o eventos)
+    const EVENTOS_CALENDARIO = {
+        {% for fecha, ev in eventos_map.items %}
+            "{{ fecha }}": {
+                tipo: "{{ ev.tipo|escapejs }}",
+                descripcion: "{{ ev.descripcion|escapejs }}"
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    // ✅ MAPA DE VACACIONES (fecha → descripción)
+    const VACACIONES_MAP = {
+        {% for fecha, desc in vacaciones_map.items %}
+            "{{ fecha }}": "{{ desc|escapejs }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    // ==================================================
+    // SISTEMA DE NOTIFICACIONES
+    // ==================================================
+    function mostrarNotificacion(mensaje, tipo = 'error', duracion = 4000) {
+        const contenedor = document.getElementById('contenedorNotificaciones');
+        const iconos = {
+            error: 'bi-exclamation-triangle-fill',
+            exito: 'bi-check-circle-fill',
+            advertencia: 'bi-exclamation-circle-fill',
+            info: 'bi-info-circle-fill'
+        };
+        const notif = document.createElement('div');
+        notif.className = `notificacion-custom ${tipo}`;
+        notif.innerHTML = `
+            <i class="bi ${iconos[tipo] || iconos.error} notif-icono"></i>
+            <div class="notif-texto">${mensaje}</div>
+            <button type="button" class="notif-cerrar" aria-label="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        `;
+        contenedor.appendChild(notif);
+        const cerrar = () => {
+            if (notif.classList.contains('ocultando')) return;
+            notif.classList.add('ocultando');
+            setTimeout(() => notif.remove(), 350);
+        };
+        notif.querySelector('.notif-cerrar').addEventListener('click', cerrar);
+        if (duracion > 0) setTimeout(cerrar, duracion);
+        return notif;
+    }
+
+    // ==================================================
+    // DROPDOWN DE MES
+    // ==================================================
+    function toggleMenuMes(e) {
+        if (e) e.stopPropagation();
+        const dropdown = document.getElementById('dropdownMes');
+        const menu = document.getElementById('menuMes');
+        const estaAbierto = menu.classList.contains('abierto');
+        document.querySelectorAll('.menu-mes').forEach(m => m.classList.remove('abierto'));
+        document.querySelectorAll('.dropdown-mes').forEach(d => d.classList.remove('abierto'));
+        if (!estaAbierto) {
+            menu.classList.add('abierto');
+            dropdown.classList.add('abierto');
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('dropdownMes');
+        if (dropdown && !dropdown.contains(e.target)) {
+            document.getElementById('menuMes').classList.remove('abierto');
+            dropdown.classList.remove('abierto');
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('menuMes').classList.remove('abierto');
+            document.getElementById('dropdownMes').classList.remove('abierto');
+        }
+    });
+
+    // ==================================================
+    // UTILIDADES DE FECHAS
+    // ==================================================
+
+    /**
+     * Determina si un día está bloqueado.
+     * Reglas:
+     *  - Si es futuro (día posterior a hoy) → bloqueado.
+     *  - Si es anterior al inicio del año escolar → bloqueado.
+     *  - Si es mes/año futuro → bloqueado.
+     *  - En caso contrario → editable.
+     */
+    function esFechaBloqueada(fechaStr, dia) {
+        // 1. Mes/año futuro
+        if (ANIO_SELECCIONADO > ANIO_ACTUAL) return true;
+        if (ANIO_SELECCIONADO === ANIO_ACTUAL && MES_SELECCIONADO_NUM > MES_ACTUAL_NUM) return true;
+
+        // 2. Día futuro dentro del mes actual
+        if (ANIO_SELECCIONADO === ANIO_ACTUAL && MES_SELECCIONADO_NUM === MES_ACTUAL_NUM) {
+            if (dia > DIA_ACTUAL) return true;
+        }
+
+        // 3. Anterior al inicio del año escolar
+        if (FECHA_INICIO_ANIO && fechaStr < FECHA_INICIO_ANIO) return true;
+
+        return false;
+    }
+
+    // ✅ Verifica si una fecha tiene evento (feriado, evento o vacaciones)
+    function getEventoInfo(fecha) {
+        // 1. Vacaciones
+        if (VACACIONES_MAP[fecha]) {
+            return {
+                tipo: 'vacaciones',
+                nombre: 'Vacaciones',
+                descripcion: VACACIONES_MAP[fecha]
+            };
+        }
+        // 2. Feriado / Evento del calendario
+        if (EVENTOS_CALENDARIO[fecha]) {
+            const ev = EVENTOS_CALENDARIO[fecha];
+            const esEvento = ev.tipo === 'eventos';
+            return {
+                tipo: esEvento ? 'eventos' : 'feriado',
+                nombre: esEvento ? 'Evento Especial' : 'Feriado',
+                descripcion: ev.descripcion || ''
+            };
+        }
+        return null;
+    }
+
+    // ==================================================
+    // CARGAR ESTADOS AL INICIAR
+    // ==================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // ✅ Aplicar estilos a los encabezados de días con eventos del calendario
+        document.querySelectorAll('th.th-dia').forEach(th => {
+            const fecha = th.dataset.fecha;
+            const info = getEventoInfo(fecha);
+
+            if (!info) return;
+
+            if (info.tipo === 'vacaciones') {
+                th.classList.add('es-vacaciones');
+                th.title = `${info.nombre}: ${info.descripcion}`;
+            } else {
+                th.classList.add('es-evento');
+                th.title = info.descripcion
+                    ? `${info.nombre}: ${info.descripcion}`
+                    : info.nombre;
+            }
+        });
+
+        // ✅ Aplicar estilos a las celdas de asistencia
+        document.querySelectorAll('.celda-check').forEach(celda => {
+            const tipo = celda.dataset.tipo;
+            const pid = celda.dataset.personal;
+            const fecha = celda.dataset.fecha;
+            const dia = parseInt(celda.dataset.dia);
+            const clave = `${tipo}-${pid}-${fecha}`;
+
+            // 1. Asistencias guardadas
+            const estado = ASISTENCIAS_GUARDADAS[clave];
+            if (estado === 'presente') {
+                celda.classList.add('estado-presente');
+            } else if (estado === 'ausente') {
+                celda.classList.add('estado-ausente');
+            }
+
+            // 2. Bloqueo por fecha (futuro o anterior al inicio del año escolar)
+            if (esFechaBloqueada(fecha, dia)) {
+                celda.classList.add('bloqueada');
+            }
+
+            // 3. Bloqueo por eventos del calendario
+            const info = getEventoInfo(fecha);
+            if (info) {
+                celda.classList.add('evento-celda');
+                celda.classList.add(info.tipo === 'vacaciones' ? 'vacaciones-tipo' : 'feriado-tipo');
+                celda.title = info.descripcion
+                    ? `${info.nombre}: ${info.descripcion}`
+                    : info.nombre;
+                celda.classList.remove('estado-presente', 'estado-ausente');
+            }
+        });
+
+        actualizarContadorEventos();
+    });
+
+    // ==================================================
+    // ACTUALIZAR CONTADOR DE DÍAS NO LABORABLES
+    // ==================================================
+    function actualizarContadorEventos() {
+        let contador = 0;
+        document.querySelectorAll('th.th-dia').forEach(th => {
+            const fecha = th.dataset.fecha;
+            if (getEventoInfo(fecha)) {
+                contador++;
+            }
+        });
+        document.getElementById('contadorFeriados').textContent = contador;
+    }
+
+    // ==================================================
+    // TOGGLE ASISTENCIA: Presente → Ausente → Sin marcar
+    // ==================================================
+    function toggleAsistencia(celda) {
+        if (!ES_MES_ACTUAL || celda.classList.contains('bloqueada')) {
+            mostrarNotificacion('Esta fecha está bloqueada. No puedes modificarla.', 'advertencia', 3000);
+            return;
+        }
+
+        if (celda.classList.contains('evento-celda')) {
+            const titulo = celda.title || 'Evento del calendario';
+            mostrarNotificacion(`${titulo}. No se puede marcar asistencia.`, 'advertencia', 3000);
+            return;
+        }
+
+        if (celda.classList.contains('estado-presente')) {
+            celda.classList.remove('estado-presente');
+            celda.classList.add('estado-ausente');
+        } else if (celda.classList.contains('estado-ausente')) {
+            celda.classList.remove('estado-ausente');
+        } else {
+            celda.classList.add('estado-presente');
+        }
+    }
+
+    // ==================================================
+    // LIMPIAR TODAS LAS MARCAS
+    // ==================================================
+    function limpiarTodo() {
+        if (!ES_MES_ACTUAL) {
+            mostrarNotificacion('Este mes está cerrado. No puedes hacer cambios.', 'advertencia', 3000);
+            return;
+        }
+
+        const marcadas = document.querySelectorAll('.celda-check.estado-presente, .celda-check.estado-ausente').length;
+
+        if (marcadas === 0) {
+            mostrarNotificacion('No hay asistencias marcadas para limpiar.', 'advertencia', 3000);
+            return;
+        }
+
+        document.querySelectorAll('.celda-check.estado-presente, .celda-check.estado-ausente').forEach(c => {
+            c.classList.remove('estado-presente', 'estado-ausente');
+        });
+
+        mostrarNotificacion(`Se limpiaron ${marcadas} marca(s). No olvides guardar los cambios.`, 'info', 4000);
+    }
+
+    // ==================================================
+    // GUARDAR ASISTENCIAS
+    // ==================================================
+    function guardarAsistencias() {
+        if (!ES_MES_ACTUAL) {
+            mostrarNotificacion('Este mes está cerrado. No puedes guardar cambios.', 'advertencia', 3000);
+            return;
+        }
+
+        const marcas = [];
+        const eliminar = [];
+
+        document.querySelectorAll('.celda-check').forEach(celda => {
+            // Ignorar celdas bloqueadas por eventos del calendario
+            if (celda.classList.contains('evento-celda')) return;
+
+            const tipo = celda.dataset.tipo;
+            const pid = celda.dataset.personal;
+            const fecha = celda.dataset.fecha;
+            const clave = `${tipo}-${pid}-${fecha}`;
+
+            const estadoGuardado = ASISTENCIAS_GUARDADAS[clave];
+            let estadoActual = null;
+
+            if (celda.classList.contains('estado-presente')) {
+                estadoActual = 'presente';
+            } else if (celda.classList.contains('estado-ausente')) {
+                estadoActual = 'ausente';
+            }
+
+            if (estadoActual && estadoActual !== estadoGuardado) {
+                marcas.push({ tipo, personal_id: pid, fecha, estado: estadoActual });
+            } else if (!estadoActual && estadoGuardado) {
+                eliminar.push({ tipo, personal_id: pid, fecha });
+            }
+        });
+
+        if (marcas.length === 0 && eliminar.length === 0) {
+            mostrarNotificacion('No hay cambios para guardar.', 'advertencia', 3000);
+            return;
+        }
+
+        const botones = document.querySelectorAll('.btn-custom, .btn-outline-secondary, .btn-pdf');
+        botones.forEach(b => b.disabled = true);
+
+        fetch("{% url 'guardar_asistencias_personal' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': CSRF_TOKEN,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                mes: MES_SELECCIONADO,
+                marcas: marcas,
+                eliminar: eliminar,
+            }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) {
+                mostrarNotificacion(`✅ ${data.mensaje}`, 'exito', 4000);
+                marcas.forEach(m => {
+                    const clave = `${m.tipo}-${m.personal_id}-${m.fecha}`;
+                    ASISTENCIAS_GUARDADAS[clave] = m.estado;
+                });
+                eliminar.forEach(e => {
+                    const clave = `${e.tipo}-${e.personal_id}-${e.fecha}`;
+                    delete ASISTENCIAS_GUARDADAS[clave];
+                });
+            } else {
+                mostrarNotificacion(`Error: ${data.error}`, 'error', 4500);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            mostrarNotificacion('Error de conexión al guardar asistencias.', 'error', 4500);
+        })
+        .finally(() => {
+            if (ES_MES_ACTUAL) {
+                botones.forEach(b => b.disabled = false);
+            }
+        });
+    }
+
+    // ==================================================
+    // GENERAR PDF
+    // ==================================================
+    function generarPDF() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{% url 'exportar_asistencias_pdf' %}";
+        form.target = '_blank';
+
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = 'csrfmiddlewaretoken';
+        csrf.value = CSRF_TOKEN;
+        form.appendChild(csrf);
+
+        const datos = document.createElement('input');
+        datos.type = 'hidden';
+        datos.name = 'datos';
+        datos.value = JSON.stringify({
+            mes: MES_SELECCIONADO,
+            mes_nombre: "{{ mes_nombre }}",
+            anio: ANIO_SELECCIONADO,
+        });
+        form.appendChild(datos);
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    }
+
+    // ==================================================
+    // CONVERTIR MENSAJES DE DJANGO A NOTIFICACIONES
+    // ==================================================
+    document.querySelectorAll('.alert').forEach(alertEl => {
+        const texto = alertEl.textContent.trim();
+        let tipo = 'info';
+        if (alertEl.classList.contains('alert-danger') || alertEl.classList.contains('alert-error')) tipo = 'error';
+        else if (alertEl.classList.contains('alert-success')) tipo = 'exito';
+        else if (alertEl.classList.contains('alert-warning')) tipo = 'advertencia';
+        if (texto) mostrarNotificacion(texto, tipo, 4500);
+        alertEl.remove();
+    });
+</script>
+</body>
+</html>

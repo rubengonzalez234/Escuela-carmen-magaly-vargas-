@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educación Inicial</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        .btn-group .active { background-color: #0d6efd !important; color: white !important; }
+        .table-hover tbody tr:hover { background-color: #f2f7ff; }
+        .stats-card { border-left: 4px solid #0d6efd; }
+
+        .calle-acordeon {
+            border: 1px solid #eef2f7;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            background: #ffffff;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .calle-acordeon:hover {
+            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.08);
+            border-color: #0d6efd;
+        }
+        .calle-acordeon .calle-header {
+            cursor: pointer;
+            padding: 14px 20px;
+            background: #fafbfc;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .calle-acordeon .calle-header:hover { background: #f0f4ff; }
+        .calle-acordeon .calle-header .icon-box {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .calle-acordeon .calle-header .calle-titulo {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1a1a2e;
+            flex: 1;
+            margin-left: 12px;
+        }
+        .calle-acordeon .calle-header .calle-flecha {
+            font-size: 1.2rem;
+            color: #6c757d;
+            transition: transform 0.3s ease;
+            margin-left: 10px;
+        }
+        .calle-acordeon .calle-header .calle-flecha.rotada { transform: rotate(180deg); }
+        .calle-acordeon .calle-body { padding: 0; background: #ffffff; }
+
+        .calle-tabla { font-size: 0.9rem; }
+        .calle-tabla thead th {
+            background-color: #f8f9fa;
+            color: #1a1a2e;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 12px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .calle-tabla tbody td {
+            padding: 8px 12px;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+        .calle-tabla tbody tr:hover { background-color: #f8faff; }
+
+        .btn-ver-estudiante,
+        .btn-pdf-estudiante {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            border: none;
+        }
+        .btn-ver-estudiante {
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+        }
+        .btn-ver-estudiante:hover {
+            background: #0d6efd;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3);
+        }
+        .btn-pdf-estudiante {
+            background: rgba(25, 135, 84, 0.1);
+            color: #198754;
+        }
+        .btn-pdf-estudiante:hover {
+            background: #198754;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(25, 135, 84, 0.3);
+        }
+        .btn-ver-estudiante i,
+        .btn-pdf-estudiante i { transition: transform 0.2s; }
+        .btn-ver-estudiante:hover i,
+        .btn-pdf-estudiante:hover i { transform: scale(1.15); }
+
+        .stats-card .card-body { padding: 12px 15px; }
+        .stats-card .numero {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0d6efd;
+            margin-bottom: 0;
+        }
+        .stats-card .etiqueta {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #0d6efd;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-custom {
+            background-color: white;
+            border: 2px solid #0d6efd;
+            color: #0d6efd;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-custom:hover { background-color: #0d6efd; color: white; }
+        .btn-custom i { color: #0d6efd; transition: all 0.3s ease; }
+        .btn-custom:hover i { color: white; }
+
+        .btn-custom-pdf {
+            background-color: white;
+            border: 2px solid #dc3545;
+            color: #dc3545;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-custom-pdf:hover { background-color: #dc3545; color: white; }
+        .btn-custom-pdf i { color: #dc3545; transition: all 0.3s ease; }
+        .btn-custom-pdf:hover i { color: white; }
+
+        .card-constancia {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .card-constancia:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #0d6efd;
+        }
+        .card-constancia.selected {
+            border-color: #0d6efd;
+            background-color: #f0f7ff;
+        }
+        .card-constancia.disabled-card {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background-color: #f8f9fa;
+            position: relative;
+        }
+        .card-constancia.disabled-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.4);
+            border-radius: 6px;
+            pointer-events: none;
+        }
+        .card-constancia.disabled-card:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: transparent;
+        }
+        .card-constancia.disabled-card:hover::after {
+            background: rgba(255,255,255,0.4);
+        }
+        .card-constancia.disabled-card .card-body {
+            pointer-events: none;
+        }
+
+        #contenedorNotificaciones {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 900px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .notificacion-custom {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            animation: slideDown 0.35s ease-out;
+        }
+        .notificacion-custom.ocultando { animation: slideUp 0.35s ease-in forwards; }
+        .notificacion-custom .notif-icono { font-size: 1.6rem; flex-shrink: 0; }
+        .notificacion-custom .notif-texto { flex: 1; font-size: 0.98rem; line-height: 1.3; }
+        .notificacion-custom .notif-cerrar {
+            background: transparent; border: none; color: white;
+            font-size: 1.4rem; cursor: pointer; opacity: 0.8;
+            transition: opacity 0.2s; padding: 0 4px; line-height: 1;
+        }
+        .notificacion-custom .notif-cerrar:hover { opacity: 1; }
+
+        .notificacion-custom.error    { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        .notificacion-custom.exito    { background: linear-gradient(135deg, #198754, #146c43); }
+        .notificacion-custom.advertencia { background: linear-gradient(135deg, #ffc107, #e0a800); color: #212529; }
+        .notificacion-custom.advertencia .notif-cerrar { color: #212529; }
+        .notificacion-custom.info     { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; } to { opacity: 0; transform: translateY(-25px); } }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div id="contenedorNotificaciones"></div>
+
+    <!-- ==================== NAVBAR ==================== -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h1 fw-bold">
+                <i class="bi bi-mortarboard-fill"></i> E.N Carmen Magaly Vargas
+            </span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+                    <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                        <i class="bi bi-house-fill me-1"></i> Inicio
+                    </a>
+                    <a href="{% url 'primaria' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                        <i class="bi bi-journal-richtext me-1"></i> Educación Básica
+                    </a>
+                    <a href="{% url 'personal' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                        <i class="bi bi-person-badge-fill me-1"></i> Personal
+                    </a>
+                    <span class="text-white ms-2 me-2 small d-none d-md-inline">Usuario: <strong>{{ user.username }}</strong></span>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- ========== ENCABEZADO ========== -->
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-puzzle text-primary me-2"></i>Educación Inicial
+                </h2>
+            </div>
+        </div>
+
+        <!-- ========== BUSCADOR + BOTONES ========== -->
+        <div class="row mb-4 align-items-center">
+            <div class="col-lg-7">
+                <div class="card shadow-sm p-3">
+                    <form method="GET" class="input-group" id="formBusqueda">
+                        <input type="text" name="buscar" id="inputBusqueda"
+                               class="form-control form-control-lg"
+                               placeholder="Buscar por nombre, apellido o cédula..."
+                               value="{{ busqueda|default:'' }}">
+                        <button class="btn btn-primary px-4" type="submit"><i class="bi bi-search"></i></button>
+                        {% if busqueda %}
+                        <a href="{% url 'inicial' %}" class="btn btn-outline-secondary px-3" title="Limpiar búsqueda">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-5 text-end">
+                {% if user.is_superuser %}
+                <a href="{% url 'registrar_estudiante' %}" class="btn btn-custom btn-lg shadow-sm">
+                    <i class="bi bi-plus-circle-fill"></i> Registrar
+                </a>
+                {% endif %}
+
+                {% if user.is_superuser %}
+                <div class="dropdown d-inline-block shadow-sm ms-2">
+                    <button class="btn btn-custom-pdf btn-lg dropdown-toggle" type="button" id="dropdownMenuPDF" data-bs-toggle="dropdown">
+                        <i class="bi bi-file-earmark-pdf"></i> PDF
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownMenuPDF">
+                        <li><h6 class="dropdown-header">Reportes por Nivel</h6></li>
+                        <li>
+                            <a class="dropdown-item py-2" href="{% url 'exportar_inicial_pdf' %}?nivel=1er_Nivel" target="_blank">
+                                <i class="bi bi-1-circle-fill text-primary me-2"></i>Primer Nivel
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" href="{% url 'exportar_inicial_pdf' %}?nivel=2do_Nivel" target="_blank">
+                                <i class="bi bi-2-circle-fill text-primary me-2"></i>Segundo Nivel
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" href="{% url 'exportar_inicial_pdf' %}?nivel=3er_Nivel" target="_blank">
+                                <i class="bi bi-3-circle-fill text-primary me-2"></i>Tercer Nivel
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ========== CONTADORES ========== -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card stats-card shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <small class="text-muted text-uppercase">Registrados</small>
+                        <h2 class="fw-bold mb-0 text-primary">{{ total_registrados }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <small class="text-muted text-uppercase">Niños</small>
+                        <h2 class="fw-bold mb-0 text-primary">{{ total_ninos }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <small class="text-muted text-uppercase">Niñas</small>
+                        <h2 class="fw-bold mb-0 text-primary">{{ total_ninas }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== PRIMER NIVEL ========== -->
+        <div class="calle-acordeon mb-3">
+            <div class="calle-header" data-bs-toggle="collapse" data-bs-target="#primerNivel" aria-expanded="false">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box"><i class="bi bi-1-circle-fill"></i></div>
+                    <span class="calle-titulo">
+                        Primer Nivel
+                        <span class="badge bg-primary ms-2">{{ primer_nivel|length }}</span>
+                    </span>
+                </div>
+                <i class="bi bi-chevron-down calle-flecha"></i>
+            </div>
+            <div class="collapse" id="primerNivel">
+                <div class="calle-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover calle-tabla mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Cédula</th>
+                                    <th class="text-center">Género</th>
+                                    <th>Edad</th>
+                                    <th>Representante</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for est in primer_nivel %}
+                                <tr>
+                                    <td>{{ est.primer_nombre }}</td>
+                                    <td>{{ est.primer_apellido }}</td>
+                                    <td>{{ est.cedula }}</td>
+                                    <td class="text-center">
+                                        {% if est.genero == 'M' %}
+                                            <span class="badge bg-primary">Masculino</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Femenino</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ est.edad }} años</td>
+                                    <td>{{ est.rep_nombre_corto }}</td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a href="{% url 'ver_estudiante' est.pk %}"
+                                               class="btn-ver-estudiante"
+                                               title="Ver detalles">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn-pdf-estudiante"
+                                                    title="Generar constancia PDF"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalConstancia"
+                                                    data-estudiante-id="{{ est.pk }}"
+                                                    data-estudiante-nombre="{{ est.nombres|title }} {{ est.apellidos|title }}"
+                                                    data-estudiante-nivel="{{ est.nivel }}"
+                                                    data-estudiante-nivel-display="{{ est.get_nivel_display }}">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr class="fila-vacia">
+                                    <td colspan="7" class="text-center text-muted py-3">
+                                        <i class="bi bi-inbox me-2"></i>
+                                        {% if busqueda %}
+                                            Sin resultados en este nivel
+                                        {% else %}
+                                            Sin estudiantes registrados
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== SEGUNDO NIVEL ========== -->
+        <div class="calle-acordeon mb-3">
+            <div class="calle-header" data-bs-toggle="collapse" data-bs-target="#segundoNivel" aria-expanded="false">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box"><i class="bi bi-2-circle-fill"></i></div>
+                    <span class="calle-titulo">
+                        Segundo Nivel
+                        <span class="badge bg-primary ms-2">{{ segundo_nivel|length }}</span>
+                    </span>
+                </div>
+                <i class="bi bi-chevron-down calle-flecha"></i>
+            </div>
+            <div class="collapse" id="segundoNivel">
+                <div class="calle-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover calle-tabla mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Cédula</th>
+                                    <th class="text-center">Género</th>
+                                    <th>Edad</th>
+                                    <th>Representante</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for est in segundo_nivel %}
+                                <tr>
+                                    <td>{{ est.primer_nombre }}</td>
+                                    <td>{{ est.primer_apellido }}</td>
+                                    <td>{{ est.cedula }}</td>
+                                    <td class="text-center">
+                                        {% if est.genero == 'M' %}
+                                            <span class="badge bg-primary">Masculino</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Femenino</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ est.edad }} años</td>
+                                    <td>{{ est.rep_nombre_corto }}</td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a href="{% url 'ver_estudiante' est.pk %}"
+                                               class="btn-ver-estudiante"
+                                               title="Ver detalles">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn-pdf-estudiante"
+                                                    title="Generar constancia PDF"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalConstancia"
+                                                    data-estudiante-id="{{ est.pk }}"
+                                                    data-estudiante-nombre="{{ est.nombres|title }} {{ est.apellidos|title }}"
+                                                    data-estudiante-nivel="{{ est.nivel }}"
+                                                    data-estudiante-nivel-display="{{ est.get_nivel_display }}">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr class="fila-vacia">
+                                    <td colspan="7" class="text-center text-muted py-3">
+                                        <i class="bi bi-inbox me-2"></i>
+                                        {% if busqueda %}
+                                            Sin resultados en este nivel
+                                        {% else %}
+                                            Sin estudiantes registrados
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== TERCER NIVEL ========== -->
+        <div class="calle-acordeon mb-3">
+            <div class="calle-header" data-bs-toggle="collapse" data-bs-target="#tercerNivel" aria-expanded="false">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box"><i class="bi bi-3-circle-fill"></i></div>
+                    <span class="calle-titulo">
+                        Tercer Nivel
+                        <span class="badge bg-primary ms-2">{{ tercer_nivel|length }}</span>
+                    </span>
+                </div>
+                <i class="bi bi-chevron-down calle-flecha"></i>
+            </div>
+            <div class="collapse" id="tercerNivel">
+                <div class="calle-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover calle-tabla mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Cédula</th>
+                                    <th class="text-center">Género</th>
+                                    <th>Edad</th>
+                                    <th>Representante</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for est in tercer_nivel %}
+                                <tr>
+                                    <td>{{ est.primer_nombre }}</td>
+                                    <td>{{ est.primer_apellido }}</td>
+                                    <td>{{ est.cedula }}</td>
+                                    <td class="text-center">
+                                        {% if est.genero == 'M' %}
+                                            <span class="badge bg-primary">Masculino</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Femenino</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ est.edad }} años</td>
+                                    <td>{{ est.rep_nombre_corto }}</td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a href="{% url 'ver_estudiante' est.pk %}"
+                                               class="btn-ver-estudiante"
+                                               title="Ver detalles">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn-pdf-estudiante"
+                                                    title="Generar constancia PDF"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalConstancia"
+                                                    data-estudiante-id="{{ est.pk }}"
+                                                    data-estudiante-nombre="{{ est.nombres|title }} {{ est.apellidos|title }}"
+                                                    data-estudiante-nivel="{{ est.nivel }}"
+                                                    data-estudiante-nivel-display="{{ est.get_nivel_display }}">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr class="fila-vacia">
+                                    <td colspan="7" class="text-center text-muted py-3">
+                                        <i class="bi bi-inbox me-2"></i>
+                                        {% if busqueda %}
+                                            Sin resultados en este nivel
+                                        {% else %}
+                                            Sin estudiantes registrados
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== LISTADO GENERAL ========== -->
+        <div class="calle-acordeon mb-3" style="border: 2px dashed #198754; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);">
+            <div class="calle-header" style="background: transparent;">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box" style="background: rgba(25, 135, 84, 0.15); color: #198754;">
+                        <i class="bi bi-list-columns-reverse"></i>
+                    </div>
+                    <span class="calle-titulo">
+                        Listado General
+                        <span class="badge bg-success ms-2">{{ total_registrados }}</span>
+                        <small class="text-muted ms-2 fw-normal" style="font-size: 0.85rem;">— Todos los niveles</small>
+                    </span>
+                </div>
+                {% if user.is_superuser %}
+                <a href="{% url 'exportar_inicial_general_pdf' %}" target="_blank"
+                   class="btn btn-success btn-sm fw-bold px-3">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i>Listado General
+                </a>
+                {% endif %}
+            </div>
+            <div class="calle-body p-3">
+                <div class="alert alert-success mb-0 d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill fs-3 me-3"></i>
+                    <div>
+                        <strong>Listado General:</strong> Genera un PDF con <strong>todos los estudiantes</strong> de Educación Inicial
+                        (Primer, Segundo y Tercer Nivel) en un solo documento, con matrícula discriminada por género.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL: Selección de tipo de constancia                       -->
+    <!-- ============================================================ -->
+    {% if user.is_superuser %}
+    <div class="modal fade" id="modalConstancia" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-earmark-pdf-fill me-2"></i> Seleccionar tipo de constancia
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Estudiante:</label>
+                        <p class="border-bottom pb-2" id="nombreEstudianteSeleccion">-</p>
+                        <label class="form-label fw-bold">Nivel:</label>
+                        <p class="border-bottom pb-2" id="nivelEstudianteSeleccion">-</p>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <!-- ✅ Constancia de Estudio con URL real -->
+                            <div class="card card-constancia" data-tipo="estudio" data-url="{% url 'constancia_estudio_pdf' 0 %}">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-file-earmark-text-fill fs-1 text-primary mb-2"></i>
+                                    <h5 class="card-title mb-1">Constancia de Estudio</h5>
+                                    <small class="text-muted">Certifica que el estudiante está inscrito y cursando estudios actualmente</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card card-constancia" data-tipo="prosecucion" data-url="{% url 'constancia_prosecucion_pdf' 0 %}" data-requiere-nivel="true">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-arrow-up-right-circle-fill fs-1 text-success mb-2"></i>
+                                    <h5 class="card-title mb-1">Constancia de Prosecución de Estudios</h5>
+                                    <small class="text-muted">Certifica que el estudiante aprobó y continúa al siguiente nivel</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="avisoConstancia" class="alert alert-info small mt-3 d-none">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        <span id="avisoTexto"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ==================================================
+        // ✅ DETECTAR PDF DE CUPO Y DESCARGARLO (iframe)
+        // ==================================================
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pdfCupoId = urlParams.get('pdf_cupo');
+
+            if (pdfCupoId) {
+                // Creamos un iframe invisible para forzar la descarga en segundo plano
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = `/constancia-cupo/${pdfCupoId}/`;
+                document.body.appendChild(iframe);
+
+                // Limpiamos la URL para que no se vuelva a descargar si el usuario recarga
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+        });
+
+        // ==================================================
+        // SISTEMA DE NOTIFICACIONES
+        // ==================================================
+        function mostrarNotificacion(mensaje, tipo = 'error', duracion = 3000) {
+            const contenedor = document.getElementById('contenedorNotificaciones');
+            const iconos = {
+                error: 'bi-exclamation-triangle-fill',
+                exito: 'bi-check-circle-fill',
+                advertencia: 'bi-exclamation-circle-fill',
+                info: 'bi-info-circle-fill'
+            };
+            const notif = document.createElement('div');
+            notif.className = `notificacion-custom ${tipo}`;
+            notif.innerHTML = `
+                <i class="bi ${iconos[tipo] || iconos.error} notif-icono"></i>
+                <div class="notif-texto">${mensaje}</div>
+                <button type="button" class="notif-cerrar" aria-label="Cerrar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            `;
+            contenedor.appendChild(notif);
+            const cerrar = () => {
+                if (notif.classList.contains('ocultando')) return;
+                notif.classList.add('ocultando');
+                setTimeout(() => notif.remove(), 350);
+            };
+            notif.querySelector('.notif-cerrar').addEventListener('click', cerrar);
+            if (duracion > 0) setTimeout(cerrar, duracion);
+            return notif;
+        }
+
+        // ==================================================
+        // ROTACIÓN DE FLECHAS EN ACORDEONES
+        // ==================================================
+        document.querySelectorAll('.calle-header').forEach(header => {
+            const targetId = header.getAttribute('data-bs-target');
+            const collapseEl = document.querySelector(targetId);
+            const flecha = header.querySelector('.calle-flecha');
+
+            if (collapseEl && flecha) {
+                if (collapseEl.classList.contains('show')) {
+                    flecha.classList.add('rotada');
+                }
+                collapseEl.addEventListener('show.bs.collapse', () => flecha.classList.add('rotada'));
+                collapseEl.addEventListener('hide.bs.collapse', () => flecha.classList.remove('rotada'));
+            }
+        });
+
+        // ==================================================
+        // ABRIR AUTOMÁTICAMENTE LOS ACORDEONES CON RESULTADOS
+        // ==================================================
+        {% if busqueda %}
+        ['primerNivel', 'segundoNivel', 'tercerNivel'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            const filasVacias = el.querySelectorAll('tr.fila-vacia').length;
+            const totalFilas = el.querySelectorAll('tbody tr').length;
+            const filasReales = totalFilas - filasVacias;
+
+            if (filasReales > 0) {
+                new bootstrap.Collapse(el, { show: true });
+            }
+        });
+        {% endif %}
+
+        // ==================================================
+        // NOTIFICACIÓN SIN RESULTADOS
+        // ==================================================
+        {% if busqueda and total_registrados == 0 %}
+        mostrarNotificacion(
+            'No se encontraron resultados para "{{ busqueda }}". Intenta con otro nombre, apellido o cédula.',
+            'advertencia',
+            3000
+        );
+        {% endif %}
+
+        // ==================================================
+        // MODAL DE CONSTANCIA
+        // ==================================================
+        {% if user.is_superuser %}
+        let estudianteIdActual = null;
+        let estudianteNombreActual = "";
+        let estudianteNivelActual = "";
+        let estudianteNivelDisplayActual = "";
+        let tipoConstanciaSeleccionada = "";
+
+        const modalConstancia = document.getElementById('modalConstancia');
+        if (modalConstancia) {
+            modalConstancia.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+
+                estudianteIdActual = button.getAttribute('data-estudiante-id');
+                estudianteNombreActual = button.getAttribute('data-estudiante-nombre');
+                estudianteNivelActual = button.getAttribute('data-estudiante-nivel');
+                estudianteNivelDisplayActual = button.getAttribute('data-estudiante-nivel-display');
+                tipoConstanciaSeleccionada = "";
+
+                // Actualizar info del modal
+                document.getElementById('nombreEstudianteSeleccion').innerHTML =
+                    `<strong>${estudianteNombreActual}</strong>`;
+                document.getElementById('nivelEstudianteSeleccion').innerHTML =
+                    `<strong>${estudianteNivelDisplayActual}</strong>`;
+
+                // Reset de tarjetas
+                document.querySelectorAll('#modalConstancia .card-constancia').forEach(card => {
+                    card.classList.remove('selected', 'disabled-card');
+                    card.removeAttribute('data-razon');
+                });
+
+                // Ocultar aviso
+                document.getElementById('avisoConstancia').classList.add('d-none');
+
+                // ✅ Lógica: deshabilitar Prosecución para Primer Nivel
+                if (estudianteNivelActual === '1er_Nivel') {
+                    const cardProsecucion = document.querySelector('#modalConstancia .card-constancia[data-tipo="prosecucion"]');
+                    if (cardProsecucion) {
+                        cardProsecucion.classList.add('disabled-card');
+                        cardProsecucion.setAttribute('data-razon',
+                            'Esta constancia no se genera para el Primer Nivel porque no hay un nivel anterior aprobado.'
+                        );
+                    }
+                }
+            });
+        }
+
+        // Click en cada tarjeta de constancia
+        document.querySelectorAll('#modalConstancia .card-constancia').forEach(card => {
+            card.addEventListener('click', function(e) {
+                const tipo = this.getAttribute('data-tipo');
+                const nombre = this.querySelector('h5').innerText;
+                const urlBase = this.getAttribute('data-url');
+
+                // Si está deshabilitada → aviso y salir
+                if (this.classList.contains('disabled-card')) {
+                    e.stopPropagation();
+                    const razon = this.getAttribute('data-razon') || 'No disponible.';
+                    const aviso = document.getElementById('avisoConstancia');
+                    document.getElementById('avisoTexto').textContent = razon;
+                    aviso.className = 'alert alert-warning small mt-3';
+                    aviso.classList.remove('d-none');
+                    setTimeout(() => aviso.classList.add('d-none'), 4500);
+                    return;
+                }
+
+                // Desmarcar otras
+                document.querySelectorAll('#modalConstancia .card-constancia').forEach(c => {
+                    c.classList.remove('selected');
+                });
+
+                // Marcar actual
+                this.classList.add('selected');
+                tipoConstanciaSeleccionada = tipo;
+
+                // ✅ Si la tarjeta tiene URL real (no "#"), abrirla directamente
+                if (urlBase && urlBase !== '#') {
+                    const url = urlBase.replace('0', estudianteIdActual);
+                    window.open(url, '_blank');
+                    return;
+                }
+
+                // Si no tiene URL real → mostrar aviso de "próximamente"
+                const aviso = document.getElementById('avisoConstancia');
+                document.getElementById('avisoTexto').textContent =
+                    `"${nombre}" estará disponible próximamente.`;
+                aviso.className = 'alert alert-info small mt-3';
+                aviso.classList.remove('d-none');
+            });
+        });
+        {% endif %}
+
+        // ==================================================
+        // CONVERTIR MENSAJES DE DJANGO A NOTIFICACIONES
+        // ==================================================
+        document.querySelectorAll('.alert').forEach(alertEl => {
+            if (alertEl.closest('.calle-body')) return; // Ignorar el aviso del Listado General
+            const texto = alertEl.textContent.trim();
+            let tipo = 'info';
+            if (alertEl.classList.contains('alert-danger') || alertEl.classList.contains('alert-error')) tipo = 'error';
+            else if (alertEl.classList.contains('alert-success')) tipo = 'exito';
+            else if (alertEl.classList.contains('alert-warning')) tipo = 'advertencia';
+            if (texto) mostrarNotificacion(texto, tipo, 3000);
+            alertEl.remove();
+        });
+    </script>
+</body>
+</html>

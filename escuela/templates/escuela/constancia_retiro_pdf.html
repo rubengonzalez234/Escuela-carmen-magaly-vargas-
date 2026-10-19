@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Boleta de Retiro</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 1.5cm 2cm 2.5cm 2cm;
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 2cm;
+                right: 2cm;
+                bottom: 0.5cm;
+                height: 1.5cm;
+            }
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            color: #000000;
+            line-height: 1.5;
+            text-align: justify;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ENCABEZADO */
+        .header-img { text-align: center; margin-bottom: 15px; }
+        .header-img img { width: 100%; max-width: 100%; height: auto; }
+
+        /* TÍTULO */
+        .titulo {
+            text-align: center;
+            font-size: 15pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            margin-bottom: 25px;
+        }
+        .titulo span {
+            display: inline-block;
+            border-bottom: 1.5px solid #000000;
+            padding-bottom: 2px;
+        }
+
+        /* PÁRRAFOS */
+        .parrafo {
+            text-align: justify;
+            font-size: 12pt;
+            margin-bottom: 14px;
+        }
+
+        .negrita { font-weight: bold; }
+        .subrayado { text-decoration: underline; }
+        .negrita-subrayado { font-weight: bold; text-decoration: underline; }
+
+        /* FIRMA */
+        .espacios-firma { height: 60px; }
+        .firma-section { margin-top: 30px; width: 100%; table-layout: fixed; }
+        .firma-section td { text-align: center; vertical-align: top; padding: 0; }
+        
+        .firma-tabla-linea { width: 100%; border-collapse: collapse; margin: 0 auto; }
+        .firma-tabla-linea td { border-top: 1px solid #000000; width: 280px; height: 1px; padding: 0; }
+
+        .firma-nombre, .firma-ci, .firma-cargo, .firma-telefono {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;
+            line-height: 1.4;
+        }
+        .firma-cargo { text-transform: uppercase; }
+
+        /* FOOTER */
+        #footer_content {
+            font-size: 9pt;
+            color: #222222;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            padding-top: 5px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ENCABEZADO INSTITUCIONAL -->
+    <div class="header-img">
+        <img src="/static/img/encabezado.png" alt="Encabezado Institucional">
+    </div>
+
+    <!-- TÍTULO -->
+    <br><div class="titulo"><span>Boleta de Retiro</span></div>
+
+    <!-- PÁRRAFO 1: DIRECTOR Y ESTUDIANTE -->
+    <p class="parrafo">
+        Quien suscribe, Director(a) <span class="negrita-subrayado">{{ director_nombres }}</span>, 
+        titular de la Cédula de Identidad Nº <span class="negrita-subrayado">{{ director_cedula }}</span>, 
+        de la Institución Educativa <span class="negrita-subrayado">E.N CARMEN MAGALY VARGAS</span>, 
+        ubicada en El Helechal, Municipio Junín de la Parroquia Bramón, adscrita al Centro de Desarrollo 
+        de la Calidad Educativa Estadal Táchira, con código de dependencia <span class="negrita">18006970033</span>, 
+        a los fines legales pertinentes y con base a lo establecido en la Ley Orgánica de Educación, 
+        certifica que {{ articulo }} estudiante:
+    </p>
+
+    <!-- DATOS DEL ESTUDIANTE -->
+    <p class="parrafo" style="text-align: center; margin: 20px 0;">
+        <span class="negrita-subrayado" style="font-size: 14pt; text-transform: uppercase;">
+            {{ estudiante.nombres }} {{ estudiante.apellidos }}
+        </span><br>
+        Titular de la {{ tipo_documento_display }} Nº <span class="negrita">{{ cedula_estudiante }}</span>
+    </p>
+
+    <!-- PÁRRAFO 2: MOTIVO DEL RETIRO -->
+    <p class="parrafo">
+        Cursa el <span class="negrita-subrayado">{{ nivel_display }}</span> durante el año escolar 
+        <span class="negrita-subrayado">{{ anio_escolar }}</span>. Se retira de esta institución 
+        el día <span class="negrita-subrayado">{{ dia_expedicion }}</span> del mes de 
+        <span class="negrita-subrayado">{{ mes_expedicion }}</span> del año 
+        <span class="negrita-subrayado">{{ anio_expedicion }}</span>, por la siguiente causa: 
+        <span class="negrita-subrayado">{{ motivo }}</span>.
+    </p>
+
+    {% if observacion %}
+    <p class="parrafo">
+        <span class="negrita">Observación adicional:</span> {{ observacion }}
+    </p>
+    {% endif %}
+
+    <!-- PÁRRAFO 3: REPRESENTANTE -->
+    <p class="parrafo">
+        Según lo ha manifestado su Madre, Padre y/o Representante 
+        <span class="negrita-subrayado">{{ rep_nombre_completo }}</span>, 
+        titular de la Cédula de Identidad <span class="negrita-subrayado">{{ rep_cedula_completa }}</span>.
+    </p>
+
+    <!-- ESPACIOS Y FIRMA -->
+    <div class="espacios-firma"></div>
+    
+    <br><table class="firma-section">
+        <tr>
+            <td>
+                <table class="firma-tabla-linea" align="center">
+                    <tr><td>&nbsp;</td></tr>
+                </table>
+                <div class="firma-nombre">Prof. {{ director_nombres }}</div>
+                <div class="firma-ci">C.I N° {{ director_cedula }}</div>
+                <div class="firma-cargo">Director (a)</div>
+                <div class="firma-telefono">Teléf. {{ director_telefono }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- FOOTER -->
+    <div id="footer_content">
+        Dirección: Calle principal del Helechal, Parroquia Bramón, Municipio Junín, Estado<br>
+        Táchira Correo: coord.helechal282@gmail.com / Teléfono: 0276-8088144
+    </div>
+
+</body>
+</html>

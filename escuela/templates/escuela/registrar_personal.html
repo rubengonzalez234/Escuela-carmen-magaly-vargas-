@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if es_edicion %}Editar{% else %}Registrar{% endif %} Personal — E.N Carmen Magaly Vargas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .card { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card-header {
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 700;
+            color: #0d6efd;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #495057;
+            letter-spacing: 0.2px;
+        }
+        .form-control, .form-select { border-radius: 10px; }
+        .btn-custom {
+            background-color: white;
+            border: 2px solid #0d6efd;
+            color: #0d6efd;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-custom:hover { background-color: #0d6efd; color: white; }
+        .btn-custom i { color: #0d6efd; transition: all 0.3s ease; }
+        .btn-custom:hover i { color: white; }
+
+        .btn-custom-warning {
+            background-color: white;
+            border: 2px solid #cc9a06;
+            color: #cc9a06;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-custom-warning:hover { background-color: #ffc107; color: white; border-color: #ffc107; }
+        .btn-custom-warning i { color: #cc9a06; transition: all 0.3s ease; }
+        .btn-custom-warning:hover i { color: white; }
+
+        .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 4px 0 0 0;
+            color: #dc3545;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .tipo-pills { display: flex; gap: 12px; flex-wrap: wrap; }
+        .tipo-pills input[type="radio"] { display: none; }
+        .tipo-pills label {
+            flex: 1;
+            min-width: 180px;
+            border: 2px solid #e9ecef;
+            border-radius: 14px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            color: #495057;
+        }
+        .tipo-pills label i { font-size: 1.5rem; color: #adb5bd; transition: color 0.25s; }
+        .tipo-pills label:hover {
+            border-color: #0d6efd;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(13, 110, 253, 0.1);
+        }
+        .tipo-pills input[type="radio"]:checked + label {
+            border-color: #0d6efd;
+            background: #f0f6ff;
+            color: #0d6efd;
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
+        }
+        .tipo-pills input[type="radio"]:checked + label i { color: #0d6efd; }
+
+        .tipo-pills input[type="radio"]:disabled + label {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .tipo-pills input[type="radio"]:disabled + label:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: #e9ecef;
+        }
+
+        #contenedorNotificaciones {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 900px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .notificacion-custom {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            animation: slideDown 0.35s ease-out;
+        }
+        .notificacion-custom.ocultando { animation: slideUp 0.35s ease-in forwards; }
+        .notificacion-custom .notif-icono { font-size: 1.6rem; flex-shrink: 0; }
+        .notificacion-custom .notif-texto { flex: 1; font-size: 0.98rem; line-height: 1.3; }
+        .notificacion-custom .notif-cerrar {
+            background: transparent; border: none; color: white;
+            font-size: 1.4rem; cursor: pointer; opacity: 0.8;
+            transition: opacity 0.2s; padding: 0 4px; line-height: 1;
+        }
+        .notificacion-custom .notif-cerrar:hover { opacity: 1; }
+
+        .notificacion-custom.error    { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        .notificacion-custom.exito    { background: linear-gradient(135deg, #198754, #146c43); }
+        .notificacion-custom.advertencia { background: linear-gradient(135deg, #ffc107, #e0a800); color: #212529; }
+        .notificacion-custom.advertencia .notif-cerrar { color: #212529; }
+        .notificacion-custom.info     { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-25px); } }
+
+        .banner-edicion {
+            background: linear-gradient(135deg, #fff3cd, #ffe69c);
+            border-left: 4px solid #ffc107;
+            border-radius: 12px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            color: #664d03;
+            font-weight: 600;
+        }
+        .banner-edicion i {
+            font-size: 1.7rem;
+            color: #cc9a06;
+        }
+
+        .seccion-docente-existente {
+            background: linear-gradient(135deg, #e7f1ff 0%, #f0f7ff 100%);
+            border: 2px dashed #0d6efd;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .seccion-docente-existente .titulo-seccion {
+            font-weight: 800;
+            color: #0d6efd;
+            font-size: 1rem;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .seccion-docente-existente .subtitulo-seccion {
+            font-size: 0.85rem;
+            color: #495057;
+            margin-bottom: 14px;
+        }
+        .seccion-docente-existente .form-select {
+            border: 2px solid #0d6efd;
+            font-weight: 600;
+        }
+
+        .input-bloqueado {
+            background-color: #f8f9fa !important;
+            border: 2px solid #198754 !important;
+            color: #495057 !important;
+            font-weight: 600;
+            cursor: not-allowed;
+        }
+        .badge-cargado {
+            background: linear-gradient(135deg, #198754, #146c43);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: 8px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div id="contenedorNotificaciones"></div>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand mb-0 h1 fw-bold">
+            <i class="bi bi-mortarboard-fill"></i> E.N Carmen Magaly Vargas
+        </span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-house-fill me-1"></i> Inicio
+                </a>
+                {% if es_edicion %}
+                <a href="{% url 'menu_admin' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Volver al Panel Admin
+                </a>
+                {% else %}
+                <a href="{% url 'personal' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Volver a Personal
+                </a>
+                {% endif %}
+                <span class="text-white ms-2 me-2 small d-none d-md-inline">Usuario: <strong>{{ user.username }}</strong></span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if form_docente.errors or form_admin.errors or form_apoyo.errors or form_cocina.errors %}
+    <div class="alert alert-danger shadow-sm">
+        <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>El formulario tiene errores:</h6>
+        <ul class="mb-0 small">
+            {% for field, errors in form_docente.errors.items %}<li><strong>Docente - {{ field }}:</strong> {{ errors|join:", " }}</li>{% endfor %}
+            {% for field, errors in form_admin.errors.items %}<li><strong>Admin - {{ field }}:</strong> {{ errors|join:", " }}</li>{% endfor %}
+            {% for field, errors in form_apoyo.errors.items %}<li><strong>Apoyo - {{ field }}:</strong> {{ errors|join:", " }}</li>{% endfor %}
+            {% for field, errors in form_cocina.errors.items %}<li><strong>Cocina - {{ field }}:</strong> {{ errors|join:", " }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if es_edicion %}
+    <div class="banner-edicion">
+        <i class="bi bi-pencil-square"></i>
+        <div>
+            <strong>Modo edición</strong> — Estás actualizando los datos de <strong>{{ etiqueta }}</strong>.
+            Verifica los cambios antes de guardar.
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">
+                {% if es_edicion %}
+                    <i class="bi bi-pencil-square text-warning me-2"></i>Editar {{ etiqueta }}
+                {% else %}
+                    <i class="bi bi-person-plus-fill text-primary me-2"></i>Registrar Personal
+                {% endif %}
+            </h2>
+            <p class="text-secondary mb-0">
+                {% if es_edicion %}
+                    Modifica los datos y guarda los cambios
+                {% else %}
+                    Selecciona el tipo de personal y completa los datos
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <form method="POST" novalidate id="formPersonal">
+        {% csrf_token %}
+
+        {% if es_edicion %}
+        <input type="hidden" name="pk_editar" value="{{ pk_editar }}">
+        {% endif %}
+
+        <!-- ✅ INPUT HIDDEN GLOBAL: siempre envía la nacionalidad correcta -->
+        <input type="hidden" id="input_nacionalidad_global" name="nacionalidad" value="V">
+
+        <!-- ================= TIPO DE PERSONAL ================= -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-diagram-3-fill text-primary me-2"></i> Tipo de Personal
+                {% if es_edicion %}
+                <span class="badge bg-warning text-dark ms-2" style="font-size:0.7rem;">
+                    <i class="bi bi-lock-fill"></i> Bloqueado en edición
+                </span>
+                {% endif %}
+            </div>
+            <div class="card-body p-4">
+                <div class="tipo-pills">
+                    <input type="radio" name="tipo" id="tipo_docente" value="Docente"
+                           {% if tipo == 'Docente' %}checked{% endif %}
+                           {% if es_edicion %}disabled{% endif %}>
+                    <label for="tipo_docente">
+                        <i class="bi bi-person-workspace"></i>
+                        <div>
+                            <div>Docente</div>
+                            <small class="text-muted" style="font-size:0.75rem;">Personal de aula</small>
+                        </div>
+                    </label>
+
+                    <input type="radio" name="tipo" id="tipo_administrativo" value="Administrativo"
+                           {% if tipo == 'Administrativo' %}checked{% endif %}
+                           {% if es_edicion %}disabled{% endif %}>
+                    <label for="tipo_administrativo">
+                        <i class="bi bi-briefcase-fill"></i>
+                        <div>
+                            <div>Administrativo</div>
+                            <small class="text-muted" style="font-size:0.75rem;">Dirección, secretaría...</small>
+                        </div>
+                    </label>
+
+                    <input type="radio" name="tipo" id="tipo_apoyo" value="Apoyo"
+                           {% if tipo == 'Apoyo' %}checked{% endif %}
+                           {% if es_edicion %}disabled{% endif %}>
+                    <label for="tipo_apoyo">
+                        <i class="bi bi-people-fill"></i>
+                        <div>
+                            <div>Personal de Apoyo</div>
+                            <small class="text-muted" style="font-size:0.75rem;">Vigilancia, obreros...</small>
+                        </div>
+                    </label>
+
+                    <input type="radio" name="tipo" id="tipo_cocina" value="Cocina"
+                           {% if tipo == 'Cocina' %}checked{% endif %}
+                           {% if es_edicion %}disabled{% endif %}>
+                    <label for="tipo_cocina">
+                        <i class="bi bi-egg-fried"></i>
+                        <div>
+                            <div>Personal de Cocina</div>
+                            <small class="text-muted" style="font-size:0.75rem;">Cocineros(as)</small>
+                        </div>
+                    </label>
+                </div>
+
+                {% if es_edicion %}
+                <input type="hidden" name="tipo" value="{{ tipo }}">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- BLOQUE 1: DOCENTE                                            -->
+        <!-- ============================================================ -->
+        <div class="bloque-formulario" id="bloque-docente" style="display:none;">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-person-badge text-primary me-2"></i> Datos Personales
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_docente.nombres.label }}</label>
+                            {{ form_docente.nombres }}
+                            {{ form_docente.nombres.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_docente.apellidos.label }}</label>
+                            {{ form_docente.apellidos }}
+                            {{ form_docente.apellidos.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Cédula</label>
+                            <div class="input-group">
+                                <select class="form-select" id="id_docente_nacionalidad_visual" style="max-width: 80px;">
+                                    <option value="V" {% if form_docente.instance.nacionalidad == 'V' or not form_docente.instance.nacionalidad %}selected{% endif %}>V</option>
+                                    <option value="E" {% if form_docente.instance.nacionalidad == 'E' %}selected{% endif %}>E</option>
+                                </select>
+                                {{ form_docente.cedula }}
+                            </div>
+                            {{ form_docente.cedula.errors }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_docente.fecha_ingreso.label }}</label>
+                            {{ form_docente.fecha_ingreso }}
+                            {{ form_docente.fecha_ingreso.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_docente.fecha_nacimiento.label }}</label>
+                            {{ form_docente.fecha_nacimiento }}
+                            {{ form_docente.fecha_nacimiento.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_docente.genero.label }}</label>
+                            {{ form_docente.genero }}
+                            {{ form_docente.genero.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_docente.telefono.label }} (opcional)</label>
+                            {{ form_docente.telefono }}
+                            {{ form_docente.telefono.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_docente.email.label }} (opcional)</label>
+                            {{ form_docente.email }}
+                            {{ form_docente.email.errors }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">{{ form_docente.direccion.label }} (opcional)</label>
+                            {{ form_docente.direccion }}
+                            {{ form_docente.direccion.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-briefcase text-primary me-2"></i> Datos Laborales
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_docente.nivel_grado.label }}</label>
+                            {{ form_docente.nivel_grado }}
+                            {{ form_docente.nivel_grado.errors }}
+                            <small class="text-muted" style="font-size:0.75rem;">
+                                Solo puede haber <strong>un docente por nivel/grado</strong>.
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_docente.especialidad.label }} (opcional)</label>
+                            {{ form_docente.especialidad }}
+                            {{ form_docente.especialidad.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- BLOQUE 2: ADMINISTRATIVO                                     -->
+        <!-- ============================================================ -->
+        <div class="bloque-formulario" id="bloque-administrativo" style="display:none;">
+
+            <div class="seccion-docente-existente" id="seccionDocenteExistente" style="display:none;">
+                <div class="titulo-seccion">
+                    <i class="bi bi-person-check-fill"></i>
+                    ¿Es un docente ya registrado?
+                </div>
+                <div class="subtitulo-seccion">
+                    Selecciona un docente previamente registrado para asignarle el cargo de
+                    <strong>Director</strong>, <strong>Subdirector</strong> o <strong>Coordinador</strong>.
+                    Sus datos se cargarán automáticamente.
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-9">
+                        <label class="form-label">Seleccionar Docente Registrado</label>
+                        <select class="form-select" id="selectDocenteExistente">
+                            <option value="">— Seleccione un docente —</option>
+                            {% for doc in docentes_disponibles %}
+                            <option value="{{ doc.pk }}"
+                                    data-nombres="{{ doc.nombres }}"
+                                    data-apellidos="{{ doc.apellidos }}"
+                                    data-cedula="{{ doc.cedula }}"
+                                    data-nacionalidad="{{ doc.nacionalidad|default:'V' }}"
+                                    data-fecha-nacimiento="{{ doc.fecha_nacimiento|date:'Y-m-d' }}"
+                                    data-fecha-ingreso="{{ doc.fecha_ingreso|date:'Y-m-d' }}"
+                                    data-genero="{{ doc.genero }}"
+                                    data-telefono="{{ doc.telefono }}"
+                                    data-email="{{ doc.email }}"
+                                    data-direccion="{{ doc.direccion }}">
+                                {{ doc.apellidos }}, {{ doc.nombres }} — C.I. {{ doc.nacionalidad }}-{{ doc.cedula }}
+                            </option>
+                            {% empty %}
+                            <option value="" disabled>No hay docentes registrados disponibles</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-custom w-100" id="btnLimpiarDocente">
+                            <i class="bi bi-eraser"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-person-badge text-primary me-2"></i> Datos Personales
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                {{ form_admin.nombres.label }}
+                                <span class="badge-cargado" id="badgeNombres" style="display:none;">
+                                    <i class="bi bi-check-circle-fill"></i> Cargado
+                                </span>
+                            </label>
+                            {{ form_admin.nombres }}
+                            {{ form_admin.nombres.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                {{ form_admin.apellidos.label }}
+                                <span class="badge-cargado" id="badgeApellidos" style="display:none;">
+                                    <i class="bi bi-check-circle-fill"></i> Cargado
+                                </span>
+                            </label>
+                            {{ form_admin.apellidos }}
+                            {{ form_admin.apellidos.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Cédula
+                                <span class="badge-cargado" id="badgeCedula" style="display:none;">
+                                    <i class="bi bi-check-circle-fill"></i> Cargado
+                                </span>
+                            </label>
+                            <div class="input-group">
+                                <select class="form-select" id="id_admin_nacionalidad_visual" style="max-width: 80px;">
+                                    <option value="V" {% if form_admin.instance.nacionalidad == 'V' or not form_admin.instance.nacionalidad %}selected{% endif %}>V</option>
+                                    <option value="E" {% if form_admin.instance.nacionalidad == 'E' %}selected{% endif %}>E</option>
+                                </select>
+                                {{ form_admin.cedula }}
+                            </div>
+                            {{ form_admin.cedula.errors }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                {{ form_admin.fecha_ingreso.label }}
+                                <span class="badge-cargado" id="badgeFechaIngreso" style="display:none;">
+                                    <i class="bi bi-check-circle-fill"></i> Cargado
+                                </span>
+                            </label>
+                            {{ form_admin.fecha_ingreso }}
+                            {{ form_admin.fecha_ingreso.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                {{ form_admin.fecha_nacimiento.label }}
+                                <span class="badge-cargado" id="badgeFechaNacimiento" style="display:none;">
+                                    <i class="bi bi-check-circle-fill"></i> Cargado
+                                </span>
+                            </label>
+                            {{ form_admin.fecha_nacimiento }}
+                            {{ form_admin.fecha_nacimiento.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                {{ form_admin.genero.label }}
+                                <span class="badge-cargado" id="badgeGenero" style="display:none;">
+                                    <i class="bi bi-check-circle-fill"></i> Cargado
+                                </span>
+                            </label>
+                            {{ form_admin.genero }}
+                            {{ form_admin.genero.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_admin.telefono.label }} (opcional)</label>
+                            {{ form_admin.telefono }}
+                            {{ form_admin.telefono.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_admin.email.label }} (opcional)</label>
+                            {{ form_admin.email }}
+                            {{ form_admin.email.errors }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">{{ form_admin.direccion.label }} (opcional)</label>
+                            {{ form_admin.direccion }}
+                            {{ form_admin.direccion.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-briefcase text-primary me-2"></i> Datos Laborales
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_admin.cargo.label }}</label>
+                            {{ form_admin.cargo }}
+                            {{ form_admin.cargo.errors }}
+                            <small class="text-muted" style="font-size:0.75rem;">
+                                Solo puede haber <strong>uno por cargo</strong> (excepto "Otro").
+                            </small>
+                        </div>
+                        <div class="col-md-6" id="campoCargoDetalleAdmin" style="display:none;">
+                            <label class="form-label">{{ form_admin.cargo_detalle.label }}</label>
+                            {{ form_admin.cargo_detalle }}
+                            {{ form_admin.cargo_detalle.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- BLOQUE 3: PERSONAL DE APOYO                                  -->
+        <!-- ============================================================ -->
+        <div class="bloque-formulario" id="bloque-apoyo" style="display:none;">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-person-badge text-primary me-2"></i> Datos Personales
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_apoyo.nombres.label }}</label>
+                            {{ form_apoyo.nombres }}
+                            {{ form_apoyo.nombres.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_apoyo.apellidos.label }}</label>
+                            {{ form_apoyo.apellidos }}
+                            {{ form_apoyo.apellidos.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Cédula</label>
+                            <div class="input-group">
+                                <select class="form-select" id="id_apoyo_nacionalidad_visual" style="max-width: 80px;">
+                                    <option value="V" {% if form_apoyo.instance.nacionalidad == 'V' or not form_apoyo.instance.nacionalidad %}selected{% endif %}>V</option>
+                                    <option value="E" {% if form_apoyo.instance.nacionalidad == 'E' %}selected{% endif %}>E</option>
+                                </select>
+                                {{ form_apoyo.cedula }}
+                            </div>
+                            {{ form_apoyo.cedula.errors }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_apoyo.fecha_ingreso.label }}</label>
+                            {{ form_apoyo.fecha_ingreso }}
+                            {{ form_apoyo.fecha_ingreso.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_apoyo.fecha_nacimiento.label }}</label>
+                            {{ form_apoyo.fecha_nacimiento }}
+                            {{ form_apoyo.fecha_nacimiento.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_apoyo.genero.label }}</label>
+                            {{ form_apoyo.genero }}
+                            {{ form_apoyo.genero.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_apoyo.telefono.label }} (opcional)</label>
+                            {{ form_apoyo.telefono }}
+                            {{ form_apoyo.telefono.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_apoyo.email.label }} (opcional)</label>
+                            {{ form_apoyo.email }}
+                            {{ form_apoyo.email.errors }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">{{ form_apoyo.direccion.label }} (opcional)</label>
+                            {{ form_apoyo.direccion }}
+                            {{ form_apoyo.direccion.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-briefcase text-primary me-2"></i> Datos Laborales
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_apoyo.cargo.label }}</label>
+                            {{ form_apoyo.cargo }}
+                            {{ form_apoyo.cargo.errors }}
+                            <small class="text-muted" style="font-size:0.75rem;">
+                                Sin límite: puede haber varios con el mismo cargo.
+                            </small>
+                        </div>
+                        <div class="col-md-6" id="campoCargoDetalleApoyo" style="display:none;">
+                            <label class="form-label">{{ form_apoyo.cargo_detalle.label }}</label>
+                            {{ form_apoyo.cargo_detalle }}
+                            {{ form_apoyo.cargo_detalle.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- BLOQUE 4: PERSONAL DE COCINA                                 -->
+        <!-- ============================================================ -->
+        <div class="bloque-formulario" id="bloque-cocina" style="display:none;">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-person-badge text-primary me-2"></i> Datos Personales
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_cocina.nombres.label }}</label>
+                            {{ form_cocina.nombres }}
+                            {{ form_cocina.nombres.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_cocina.apellidos.label }}</label>
+                            {{ form_cocina.apellidos }}
+                            {{ form_cocina.apellidos.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Cédula</label>
+                            <div class="input-group">
+                                <select class="form-select" id="id_cocina_nacionalidad_visual" style="max-width: 80px;">
+                                    <option value="V" {% if form_cocina.instance.nacionalidad == 'V' or not form_cocina.instance.nacionalidad %}selected{% endif %}>V</option>
+                                    <option value="E" {% if form_cocina.instance.nacionalidad == 'E' %}selected{% endif %}>E</option>
+                                </select>
+                                {{ form_cocina.cedula }}
+                            </div>
+                            {{ form_cocina.cedula.errors }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_cocina.fecha_ingreso.label }}</label>
+                            {{ form_cocina.fecha_ingreso }}
+                            {{ form_cocina.fecha_ingreso.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_cocina.fecha_nacimiento.label }}</label>
+                            {{ form_cocina.fecha_nacimiento }}
+                            {{ form_cocina.fecha_nacimiento.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_cocina.genero.label }}</label>
+                            {{ form_cocina.genero }}
+                            {{ form_cocina.genero.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_cocina.telefono.label }} (opcional)</label>
+                            {{ form_cocina.telefono }}
+                            {{ form_cocina.telefono.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_cocina.email.label }} (opcional)</label>
+                            {{ form_cocina.email }}
+                            {{ form_cocina.email.errors }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">{{ form_cocina.direccion.label }} (opcional)</label>
+                            {{ form_cocina.direccion }}
+                            {{ form_cocina.direccion.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-briefcase text-primary me-2"></i> Datos Laborales
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form_cocina.cargo.label }}</label>
+                            {{ form_cocina.cargo }}
+                            {{ form_cocina.cargo.errors }}
+                            <small class="text-muted" style="font-size:0.75rem;">
+                                Sin límite: puede haber varios cocineros(as).
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="d-flex justify-content-end gap-2 mb-5">
+            {% if es_edicion %}
+            <a href="{% url 'menu_admin' %}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-custom-warning btn-lg">
+                <i class="bi bi-save-fill"></i> Actualizar Cambios
+            </button>
+            {% else %}
+            <a href="{% url 'personal' %}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-custom btn-lg">
+                <i class="bi bi-check-circle-fill"></i> Guardar
+            </button>
+            {% endif %}
+        </div>
+    </form>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function mostrarNotificacion(mensaje, tipo = 'error', duracion = 4000) {
+        const contenedor = document.getElementById('contenedorNotificaciones');
+        const iconos = {
+            error: 'bi-exclamation-triangle-fill',
+            exito: 'bi-check-circle-fill',
+            advertencia: 'bi-exclamation-circle-fill',
+            info: 'bi-info-circle-fill'
+        };
+        const notif = document.createElement('div');
+        notif.className = `notificacion-custom ${tipo}`;
+        notif.innerHTML = `
+            <i class="bi ${iconos[tipo] || iconos.error} notif-icono"></i>
+            <div class="notif-texto">${mensaje}</div>
+            <button type="button" class="notif-cerrar" aria-label="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        `;
+        contenedor.appendChild(notif);
+        const cerrar = () => {
+            if (notif.classList.contains('ocultando')) return;
+            notif.classList.add('ocultando');
+            setTimeout(() => notif.remove(), 350);
+        };
+        notif.querySelector('.notif-cerrar').addEventListener('click', cerrar);
+        if (duracion > 0) setTimeout(cerrar, duracion);
+        return notif;
+    }
+
+    const ES_EDICION = {{ es_edicion|yesno:"true,false" }};
+
+    const soloLetras = (valor) => valor.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñÜü\s'.-]/g, '');
+    const soloNumeros = (valor) => valor.replace(/\D/g, '');
+    const aFormatoTitulo = (valor) => valor.toLowerCase()
+        .replace(/(^|\s|'|-)([a-záéíóúñü])/g, (m, sep, letra) => sep + letra.toUpperCase());
+
+    const CEDULAS_REGISTRADAS = [
+        {% for c in cedulas_registradas %}"{{ c }}"{% if not forloop.last %},{% endif %}{% endfor %}
+    ];
+    const NIVELES_OCUPADOS = [
+        {% for n in niveles_ocupados %}"{{ n }}"{% if not forloop.last %},{% endif %}{% endfor %}
+    ];
+    const CARGOS_OCUPADOS = [
+        {% for c in cargos_ocupados %}"{{ c }}"{% if not forloop.last %},{% endif %}{% endfor %}
+    ];
+
+    // ==================================================
+    // ✅ SINCRONIZAR NACIONALIDAD CON INPUT GLOBAL
+    // ==================================================
+    function sincronizarNacionalidadConGlobal(idVisual) {
+        const selectVisual = document.getElementById(idVisual);
+        const inputGlobal = document.getElementById('input_nacionalidad_global');
+        if (!selectVisual || !inputGlobal) return;
+
+        selectVisual.addEventListener('change', () => {
+            const tipoSeleccionado = document.querySelector('input[name="tipo"]:checked');
+            if (!tipoSeleccionado) return;
+
+            const tipoActual = tipoSeleccionado.value;
+            const mapaTipoId = {
+                'Docente': 'id_docente_nacionalidad_visual',
+                'Administrativo': 'id_admin_nacionalidad_visual',
+                'Apoyo': 'id_apoyo_nacionalidad_visual',
+                'Cocina': 'id_cocina_nacionalidad_visual',
+            };
+
+            if (mapaTipoId[tipoActual] === idVisual) {
+                inputGlobal.value = selectVisual.value;
+            }
+        });
+    }
+
+    sincronizarNacionalidadConGlobal('id_docente_nacionalidad_visual');
+    sincronizarNacionalidadConGlobal('id_admin_nacionalidad_visual');
+    sincronizarNacionalidadConGlobal('id_apoyo_nacionalidad_visual');
+    sincronizarNacionalidadConGlobal('id_cocina_nacionalidad_visual');
+
+    // ==================================================
+    // ACTUALIZAR EL HIDDEN GLOBAL SEGÚN EL TIPO Y SELECT VISUAL
+    // ==================================================
+    function actualizarNacionalidadGlobal() {
+        const tipoSeleccionado = document.querySelector('input[name="tipo"]:checked');
+        const inputGlobal = document.getElementById('input_nacionalidad_global');
+        if (!tipoSeleccionado || !inputGlobal) return;
+
+        const tipoActual = tipoSeleccionado.value;
+        const mapaTipoId = {
+            'Docente': 'id_docente_nacionalidad_visual',
+            'Administrativo': 'id_admin_nacionalidad_visual',
+            'Apoyo': 'id_apoyo_nacionalidad_visual',
+            'Cocina': 'id_cocina_nacionalidad_visual',
+        };
+
+        const idVisual = mapaTipoId[tipoActual];
+        if (!idVisual) return;
+
+        const selectVisual = document.getElementById(idVisual);
+        if (selectVisual) {
+            inputGlobal.value = selectVisual.value;
+        }
+    }
+
+    // ==================================================
+    // MOSTRAR/OCULTAR BLOQUES SEGÚN TIPO
+    // ==================================================
+    function aplicarTipoPersonal() {
+        const seleccionado = document.querySelector('input[name="tipo"]:checked');
+        if (!seleccionado) return;
+        const tipo = seleccionado.value;
+
+        const bloqueDocente = document.getElementById('bloque-docente');
+        const bloqueAdmin = document.getElementById('bloque-administrativo');
+        const bloqueApoyo = document.getElementById('bloque-apoyo');
+        const bloqueCocina = document.getElementById('bloque-cocina');
+
+        [bloqueDocente, bloqueAdmin, bloqueApoyo, bloqueCocina].forEach(b => {
+            if (!b) return;
+            b.style.display = 'none';
+            b.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+        });
+
+        let bloqueActivo;
+        if (tipo === 'Docente') bloqueActivo = bloqueDocente;
+        else if (tipo === 'Administrativo') bloqueActivo = bloqueAdmin;
+        else if (tipo === 'Apoyo') bloqueActivo = bloqueApoyo;
+        else if (tipo === 'Cocina') bloqueActivo = bloqueCocina;
+
+        if (bloqueActivo) {
+            bloqueActivo.style.display = '';
+            bloqueActivo.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+            verificarCargoDetalle(bloqueActivo);
+        }
+
+        actualizarSeccionDocenteExistente();
+        actualizarNacionalidadGlobal();
+    }
+
+    function actualizarSeccionDocenteExistente() {
+        const tipoSeleccionado = document.querySelector('input[name="tipo"]:checked');
+        const seccion = document.getElementById('seccionDocenteExistente');
+        if (!seccion) return;
+
+        if (!tipoSeleccionado || tipoSeleccionado.value !== 'Administrativo') {
+            seccion.style.display = 'none';
+            return;
+        }
+
+        const selectCargo = document.querySelector('#bloque-administrativo select[name="cargo"]');
+        if (!selectCargo) {
+            seccion.style.display = 'none';
+            return;
+        }
+
+        const cargosPermitidos = ['Director', 'Subdirector', 'Coordinador'];
+        if (cargosPermitidos.includes(selectCargo.value)) {
+            seccion.style.display = '';
+        } else {
+            seccion.style.display = 'none';
+            limpiarDatosDocente();
+        }
+    }
+
+    function limpiarDatosDocente() {
+        const selectDocente = document.getElementById('selectDocenteExistente');
+        if (selectDocente) selectDocente.value = '';
+
+        const bloqueAdmin = document.getElementById('bloque-administrativo');
+        if (!bloqueAdmin) return;
+
+        bloqueAdmin.querySelectorAll('.input-bloqueado').forEach(el => {
+            el.classList.remove('input-bloqueado');
+            el.removeAttribute('readonly');
+        });
+
+        document.querySelectorAll('.badge-cargado').forEach(b => b.style.display = 'none');
+    }
+
+    function cargarDatosDocente() {
+        const selectDocente = document.getElementById('selectDocenteExistente');
+        if (!selectDocente) return;
+
+        const opcionSeleccionada = selectDocente.options[selectDocente.selectedIndex];
+        const bloqueAdmin = document.getElementById('bloque-administrativo');
+
+        if (!bloqueAdmin) return;
+
+        if (!selectDocente.value) {
+            limpiarDatosDocente();
+            return;
+        }
+
+        const datos = {
+            nombres: opcionSeleccionada.dataset.nombres || '',
+            apellidos: opcionSeleccionada.dataset.apellidos || '',
+            cedula: opcionSeleccionada.dataset.cedula || '',
+            nacionalidad: opcionSeleccionada.dataset.nacionalidad || 'V',
+            fecha_nacimiento: opcionSeleccionada.dataset.fechaNacimiento || '',
+            fecha_ingreso: opcionSeleccionada.dataset.fechaIngreso || '',
+            genero: opcionSeleccionada.dataset.genero || '',
+            telefono: opcionSeleccionada.dataset.telefono || '',
+            email: opcionSeleccionada.dataset.email || '',
+            direccion: opcionSeleccionada.dataset.direccion || '',
+        };
+
+        const mapeo = [
+            { name: 'nombres', badge: 'badgeNombres' },
+            { name: 'apellidos', badge: 'badgeApellidos' },
+            { name: 'cedula', badge: 'badgeCedula' },
+            { name: 'fecha_nacimiento', badge: 'badgeFechaNacimiento' },
+            { name: 'fecha_ingreso', badge: 'badgeFechaIngreso' },
+            { name: 'genero', badge: 'badgeGenero' },
+        ];
+
+        mapeo.forEach(({ name, badge }) => {
+            const input = bloqueAdmin.querySelector(`[name="${name}"]`);
+            if (input && datos[name] !== undefined) {
+                input.value = datos[name];
+                input.classList.add('input-bloqueado');
+                input.setAttribute('readonly', 'readonly');
+                const badgeEl = document.getElementById(badge);
+                if (badgeEl) badgeEl.style.display = 'inline-block';
+            }
+        });
+
+        const selectNacVisual = document.getElementById('id_admin_nacionalidad_visual');
+        if (selectNacVisual) {
+            selectNacVisual.value = datos.nacionalidad;
+            selectNacVisual.disabled = true;
+            selectNacVisual.classList.add('input-bloqueado');
+        }
+
+        const inputGlobal = document.getElementById('input_nacionalidad_global');
+        if (inputGlobal) inputGlobal.value = datos.nacionalidad;
+
+        ['telefono', 'email', 'direccion'].forEach(name => {
+            const input = bloqueAdmin.querySelector(`[name="${name}"]`);
+            if (input && datos[name]) input.value = datos[name];
+        });
+
+        mostrarNotificacion('Datos del docente cargados correctamente. Puede asignar el cargo.', 'exito', 4000);
+    }
+
+    function verificarCargoDetalle(bloque) {
+        if (!bloque) {
+            const tipoSeleccionado = document.querySelector('input[name="tipo"]:checked');
+            if (!tipoSeleccionado) return;
+            const tipo = tipoSeleccionado.value;
+            if (tipo === 'Administrativo') bloque = document.getElementById('bloque-administrativo');
+            else if (tipo === 'Apoyo') bloque = document.getElementById('bloque-apoyo');
+            else return;
+        }
+
+        const selectCargo = bloque.querySelector('select[name="cargo"]');
+        if (!selectCargo) return;
+
+        let detalleContainer;
+        if (bloque.id === 'bloque-administrativo') detalleContainer = document.getElementById('campoCargoDetalleAdmin');
+        else if (bloque.id === 'bloque-apoyo') detalleContainer = document.getElementById('campoCargoDetalleApoyo');
+
+        if (!detalleContainer) return;
+
+        if (selectCargo.value === 'Otro') {
+            detalleContainer.style.display = '';
+        } else {
+            detalleContainer.style.display = 'none';
+            const inputDetalle = detalleContainer.querySelector('input[name="cargo_detalle"]');
+            if (inputDetalle && !ES_EDICION) inputDetalle.value = '';
+        }
+    }
+
+    document.querySelectorAll('input[name="tipo"]').forEach(radio => {
+        radio.addEventListener('change', aplicarTipoPersonal);
+    });
+
+    const selectCargoAdmin = document.querySelector('#bloque-administrativo select[name="cargo"]');
+    if (selectCargoAdmin) {
+        selectCargoAdmin.addEventListener('change', () => {
+            verificarCargoDetalle(document.getElementById('bloque-administrativo'));
+            actualizarSeccionDocenteExistente();
+        });
+    }
+
+    const selectCargoApoyo = document.querySelector('#bloque-apoyo select[name="cargo"]');
+    if (selectCargoApoyo) {
+        selectCargoApoyo.addEventListener('change', () => verificarCargoDetalle(document.getElementById('bloque-apoyo')));
+    }
+
+    const selectDocenteExistente = document.getElementById('selectDocenteExistente');
+    if (selectDocenteExistente) selectDocenteExistente.addEventListener('change', cargarDatosDocente);
+
+    const btnLimpiarDocente = document.getElementById('btnLimpiarDocente');
+    if (btnLimpiarDocente) {
+        btnLimpiarDocente.addEventListener('click', function () {
+            limpiarDatosDocente();
+
+            const selectNacVisual = document.getElementById('id_admin_nacionalidad_visual');
+            if (selectNacVisual) {
+                selectNacVisual.disabled = false;
+                selectNacVisual.classList.remove('input-bloqueado');
+            }
+
+            actualizarNacionalidadGlobal();
+
+            mostrarNotificacion('Datos del docente limpiados. Puede llenar el formulario manualmente.', 'info', 3000);
+        });
+    }
+
+    aplicarTipoPersonal();
+
+    document.querySelectorAll('input[name="nombres"], input[name="apellidos"]').forEach(input => {
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('maxlength', '100');
+
+        input.addEventListener('input', function () {
+            if (this.classList.contains('input-bloqueado')) return;
+            const pos = this.selectionStart;
+            let v = soloLetras(this.value).replace(/\s{2,}/g, ' ');
+            this.value = v;
+            try { this.setSelectionRange(pos, pos); } catch (e) {}
+        });
+        input.addEventListener('blur', function () {
+            if (this.classList.contains('input-bloqueado')) return;
+            this.value = aFormatoTitulo(this.value).trim();
+        });
+    });
+
+    document.querySelectorAll('input[name="cedula"]').forEach(input => {
+        input.setAttribute('inputmode', 'numeric');
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('maxlength', '10');
+        input.addEventListener('input', function () {
+            if (this.classList.contains('input-bloqueado')) return;
+            this.value = soloNumeros(this.value);
+        });
+        input.addEventListener('keypress', function (e) {
+            if (this.classList.contains('input-bloqueado')) return;
+            if (!/[0-9]/.test(e.key)) e.preventDefault();
+        });
+        input.addEventListener('paste', function (e) {
+            if (this.classList.contains('input-bloqueado')) return;
+            e.preventDefault();
+            const texto = (e.clipboardData || window.clipboardData).getData('text');
+            this.value = soloNumeros(texto);
+        });
+    });
+
+    document.querySelectorAll('input[name="telefono"]').forEach(input => {
+        input.setAttribute('inputmode', 'numeric');
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('maxlength', '11');
+        input.addEventListener('input', function () { this.value = soloNumeros(this.value); });
+        input.addEventListener('keypress', function (e) {
+            if (!/[0-9]/.test(e.key)) e.preventDefault();
+        });
+        input.addEventListener('paste', function (e) {
+            e.preventDefault();
+            const texto = (e.clipboardData || window.clipboardData).getData('text');
+            this.value = soloNumeros(texto);
+        });
+    });
+
+    document.querySelectorAll('input[name="email"]').forEach(input => {
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('maxlength', '254');
+        input.addEventListener('input', function () {
+            this.value = this.value.replace(/\s/g, '');
+        });
+    });
+
+    (function configurarFechas() {
+        const hoy = new Date();
+        const y = hoy.getFullYear();
+        const m = hoy.getMonth();
+        const d = hoy.getDate();
+
+        const formatear = (date) => {
+            const yy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            return `${yy}-${mm}-${dd}`;
+        };
+
+        const maxHoy = formatear(new Date(y, m, d));
+
+        document.querySelectorAll('input[name="fecha_nacimiento"]').forEach(input => {
+            input.setAttribute('min', formatear(new Date(y - 100, m, d)));
+            input.setAttribute('max', maxHoy);
+        });
+
+        document.querySelectorAll('input[name="fecha_ingreso"]').forEach(input => {
+            input.setAttribute('min', formatear(new Date(y - 50, m, d)));
+            input.setAttribute('max', maxHoy);
+            if (!input.value && !ES_EDICION) input.value = maxHoy;
+        });
+    })();
+
+    document.getElementById('formPersonal').addEventListener('submit', function (e) {
+        // ✅ SINCRONIZAR ANTES DE ENVIAR
+        actualizarNacionalidadGlobal();
+
+        const errores = [];
+        const tipoSeleccionado = document.querySelector('input[name="tipo"]:checked');
+        const tipo = tipoSeleccionado ? tipoSeleccionado.value : '';
+
+        if (!tipo) errores.push('Debe seleccionar un tipo de personal.');
+
+        let bloqueActivo;
+        if (tipo === 'Docente') bloqueActivo = document.getElementById('bloque-docente');
+        else if (tipo === 'Administrativo') bloqueActivo = document.getElementById('bloque-administrativo');
+        else if (tipo === 'Apoyo') bloqueActivo = document.getElementById('bloque-apoyo');
+        else if (tipo === 'Cocina') bloqueActivo = document.getElementById('bloque-cocina');
+
+        if (!bloqueActivo) {
+            errores.push('Debe seleccionar un tipo de personal.');
+        } else {
+            const obtener = (name) => bloqueActivo.querySelector(`[name="${name}"]`);
+
+            const nombres = obtener('nombres');
+            const apellidos = obtener('apellidos');
+            const cedula = obtener('cedula');
+            const fechaNac = obtener('fecha_nacimiento');
+            const fechaIng = obtener('fecha_ingreso');
+            const genero = obtener('genero');
+            const telefono = obtener('telefono');
+            const email = obtener('email');
+            const nivelGrado = obtener('nivel_grado');
+            const cargo = obtener('cargo');
+            const cargoDetalle = obtener('cargo_detalle');
+
+            const regexLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s'.-]+$/;
+            const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!nombres.value.trim()) errores.push('El campo "Nombres" es obligatorio.');
+            else if (!regexLetras.test(nombres.value.trim())) errores.push('El nombre solo puede contener letras.');
+
+            if (!apellidos.value.trim()) errores.push('El campo "Apellidos" es obligatorio.');
+            else if (!regexLetras.test(apellidos.value.trim())) errores.push('El apellido solo puede contener letras.');
+
+            // ✅ VALIDACIÓN DE CÉDULA: solo bloquear si es del MISMO tipo y no viene de un docente seleccionado
+            if (!cedula.value.trim()) {
+                errores.push('La Cédula es obligatoria.');
+            } else if (!/^\d{6,10}$/.test(cedula.value)) {
+                errores.push('La Cédula debe tener entre 6 y 10 dígitos.');
+            } else {
+                // Determinar si el campo de cédula está bloqueado (viene de un docente existente)
+                const cedulaBloqueada = cedula.classList.contains('input-bloqueado');
+
+                // Solo validar contra CEDULAS_REGISTRADAS si NO viene de un docente cargado
+                if (!ES_EDICION && !cedulaBloqueada && CEDULAS_REGISTRADAS.includes(cedula.value.trim())) {
+                    errores.push(`La Cédula ${cedula.value.trim()} ya está registrada en el sistema.`);
+                }
+            }
+
+            if (!fechaIng.value) {
+                errores.push('La fecha de ingreso a la institución es obligatoria.');
+            } else {
+                const fecha = new Date(fechaIng.value + 'T00:00:00');
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                if (fecha > hoy) errores.push('La fecha de ingreso no puede ser en el futuro.');
+            }
+
+            if (!fechaNac.value) {
+                errores.push('La fecha de nacimiento es obligatoria.');
+            } else {
+                const fecha = new Date(fechaNac.value + 'T00:00:00');
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+
+                let edad = hoy.getFullYear() - fecha.getFullYear();
+                const mDiff = hoy.getMonth() - fecha.getMonth();
+                if (mDiff < 0 || (mDiff === 0 && hoy.getDate() < fecha.getDate())) edad--;
+
+                if (fecha > hoy) errores.push('La fecha de nacimiento no puede ser en el futuro.');
+                else if (edad < 18) errores.push('El personal debe ser mayor de 18 años.');
+                else if (edad > 80) errores.push('La edad no parece válida (máx. 80 años).');
+            }
+
+            if (!genero.value) errores.push('Debe seleccionar un género.');
+
+            if (telefono.value && !/^\d{10,11}$/.test(telefono.value))
+                errores.push('El teléfono debe tener entre 10 y 11 dígitos.');
+
+            if (email.value && !regexEmail.test(email.value))
+                errores.push('El correo no tiene un formato válido.');
+
+            if (tipo === 'Docente') {
+                if (!nivelGrado || !nivelGrado.value) {
+                    errores.push('Debe seleccionar un Nivel / Grado.');
+                } else if (!ES_EDICION && NIVELES_OCUPADOS.includes(nivelGrado.value)) {
+                    errores.push(`Ya existe un docente registrado para ${nivelGrado.value}. Solo puede haber uno por nivel/grado.`);
+                }
+            } else if (tipo === 'Administrativo') {
+                if (cargo && !cargo.value) {
+                    errores.push('Debe seleccionar un Cargo.');
+                } else if (cargo && cargo.value !== 'Otro' && !ES_EDICION && CARGOS_OCUPADOS.includes(cargo.value)) {
+                    errores.push(`Ya existe un ${cargo.value} registrado. Solo puede haber uno por cargo.`);
+                }
+                if (cargo && cargo.value === 'Otro' && (!cargoDetalle || !cargoDetalle.value.trim())) {
+                    errores.push('Debe especificar el cargo cuando selecciona "Otro".');
+                }
+            } else if (tipo === 'Apoyo') {
+                if (cargo && !cargo.value) {
+                    errores.push('Debe seleccionar un Cargo.');
+                }
+                if (cargo && cargo.value === 'Otro' && (!cargoDetalle || !cargoDetalle.value.trim())) {
+                    errores.push('Debe especificar el cargo cuando selecciona "Otro".');
+                }
+            } else if (tipo === 'Cocina') {
+                if (cargo && !cargo.value) {
+                    errores.push('Debe seleccionar un Cargo.');
+                }
+            }
+        }
+
+        if (errores.length > 0) {
+            e.preventDefault();
+            errores.forEach((msg, i) => {
+                setTimeout(() => mostrarNotificacion(msg, 'error', 4500), i * 150);
+            });
+            return false;
+        }
+    });
+
+    document.querySelectorAll('.alert').forEach(alertEl => {
+        const texto = alertEl.textContent.trim();
+        let tipo = 'info';
+        if (alertEl.classList.contains('alert-danger') || alertEl.classList.contains('alert-error')) tipo = 'error';
+        else if (alertEl.classList.contains('alert-success')) tipo = 'exito';
+        else if (alertEl.classList.contains('alert-warning')) tipo = 'advertencia';
+        if (texto) mostrarNotificacion(texto, tipo, 4500);
+        alertEl.remove();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia de Estudio</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 1.5cm 2cm 2.5cm 2cm;
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 2cm;
+                right: 2cm;
+                bottom: 0.5cm;
+                height: 1.5cm;
+            }
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            color: #000000;
+            line-height: 1.4;
+            text-align: justify;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ============================================ */
+        /* ENCABEZADO INSTITUCIONAL                      */
+        /* ============================================ */
+        .header-img {
+            text-align: center;
+            margin-bottom: 15px;
+            display: block;
+            clear: both;
+        }
+        .header-img img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* ============================================ */
+        /* TÍTULO                                        */
+        /* ============================================ */
+        .titulo {
+            text-align: center;
+            font-size: 15pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .titulo span {
+            display: inline-block;
+            border-bottom: 1.5px solid #000000;
+            padding-bottom: 2px;
+        }
+
+        /* ============================================ */
+        /* PÁRRAFOS                                      */
+        /* ============================================ */
+        .parrafo {
+            text-align: justify;
+            font-size: 12pt;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            text-indent: 0;
+        }
+
+        .negrita {
+            font-weight: bold;
+        }
+
+        .subrayado {
+            text-decoration: underline;
+        }
+
+        .negrita-subrayado {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        /* ============================================ */
+        /* BLOQUE DESTACADO DEL ESTUDIANTE              */
+        /* ============================================ */
+        .bloque-estudiante-wrapper {
+            text-align: center;
+            margin: 18px 0;
+        }
+
+        .bloque-estudiante-texto {
+            display: inline-block;
+            font-size: 13pt;
+            font-weight: bold;
+            text-decoration: underline;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.4;
+        }
+
+        /* Fecha de expedición */
+        .fecha-expedicion {
+            margin-top: 15px;
+            margin-bottom: 20px;
+            font-size: 12pt;
+        }
+
+        /* ============================================ */
+        /* ESPACIOS EN BLANCO ANTES DE LA FIRMA         */
+        /* ============================================ */
+        .espacios-firma {
+            height: 60px;
+        }
+
+        /* ============================================ */
+        /* FIRMA                                         */
+        /* ============================================ */
+        .firma-section {
+            margin-top: 0;
+            width: 100%;
+            table-layout: fixed;
+        }
+        .firma-section td {
+            text-align: center;
+            vertical-align: top;
+            padding: 0;
+        }
+
+        .firma-tabla-linea {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        .firma-tabla-linea td {
+            border-top: 1px solid #000000;
+            width: 280px;
+            height: 1px;
+            font-size: 0;
+            line-height: 0;
+            padding: 0;
+        }
+
+        .firma-nombre {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .firma-ci {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .firma-cargo {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .firma-telefono {
+            font-size: 12pt;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* ============================================ */
+        /* FOOTER (PDF FRAME)                            */
+        /* ============================================ */
+        #footer_content {
+            font-size: 9pt;
+            color: #222222;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            padding-top: 5px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== ENCABEZADO INSTITUCIONAL ==================== -->
+    <div class="header-img">
+        <img src="/static/img/encabezado.png" alt="Encabezado Institucional">
+    </div>
+
+    <!-- ==================== TÍTULO ==================== -->
+    <br><br><div class="titulo"><span>Constancia de Estudio</span></div>
+
+    <!-- ✅ 3 líneas de espacio debajo del título -->
+    <div class="espacios-firma"></div>
+    <div class="espacios-firma"></div>
+    <div class="espacios-firma"></div>
+
+    <!-- ==================== PÁRRAFO 1: DIRECTOR ==================== -->
+    <p class="parrafo">
+        Quien suscribe, Director (a)
+        <span class="negrita-subrayado">{{ director_nombres }}</span>
+        titular de la cédula de identidad Nº
+        <span class="negrita-subrayado">{{ director_cedula }}</span>,
+        de la
+        <span class="negrita-subrayado">ESCUELA NACIONAL CARMEN MAGALY VARGAS</span>,
+        ubicada en la aldea el Helechal, por medio de la presente hace constar que {{ articulo }} estudiante:
+    </p>
+
+    <!-- ==================== NOMBRE DEL ESTUDIANTE DESTACADO ==================== -->
+    <div class="bloque-estudiante-wrapper">
+        <span class="bloque-estudiante-texto">
+            {{ estudiante.nombres }} {{ estudiante.apellidos }}
+        </span>
+    </div>
+
+
+    <!-- ==================== PÁRRAFO 2: DATOS ACADÉMICOS ==================== -->
+    <p class="parrafo">
+        Titular de la {{ tipo_documento_display|lower }}
+        N° {{ cedula_estudiante }}
+        cursa el
+        <span class="negrita-subrayado">{{ nivel_display }}</span>
+        de educación básica sección
+        <span class="negrita-subrayado">"{{ seccion }}"</span>
+        durante el año escolar {{ anio_escolar }}
+        en la
+        <span class="negrita-subrayado">ESCUELA NACIONAL CARMEN MAGALY VARGAS</span>,
+        con código <span class="negrita">DEA OD02492014</span>, adscrita a esta dependencia.
+    </p>
+
+    <!-- ==================== PÁRRAFO 3: FECHA DE EXPEDICIÓN ==================== -->
+    <p class="parrafo fecha-expedicion">
+        Constancia que se expide a petición de la parte interesada a los fines legales, a los
+        <span class="negrita-subrayado">{{ dia_expedicion }}</span>
+        días del mes de
+        <span class="negrita-subrayado">{{ mes_expedicion }}</span>
+        año
+        <span class="negrita-subrayado">{{ anio_expedicion }}</span>.<br><br><br>
+    </p>
+    <br><br><br>
+    <!-- ==================== FIRMA ==================== -->
+    <table class="firma-section">
+        <tr>
+            <td>
+                <!-- Línea de firma: tabla con border-top (siempre se renderiza) -->
+                <table class="firma-tabla-linea" align="center">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+
+                <div class="firma-nombre">Prof. {{ director_nombres }}</div>
+                <div class="firma-ci">C.I N° {{ director_cedula }}</div>
+                <div class="firma-cargo">Director (a)</div>
+                <div class="firma-telefono">Teléf. {{ director_telefono }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- ==================== FOOTER (contenido para el frame) ==================== -->
+    <div id="footer_content">
+        Dirección: Calle principal del Helechal, Parroquia Bramón, Municipio Junín, Estado<br>
+        Táchira Correo: coord.helechal282@gmail.com / Teléfono: 0276-8088144
+    </div>
+
+</body>
+</html>

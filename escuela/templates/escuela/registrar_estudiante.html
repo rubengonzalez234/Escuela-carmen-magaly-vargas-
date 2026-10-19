@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if es_edicion %}Editar{% else %}Registrar{% endif %} Estudiante</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .card { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card-header {
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 700;
+            color: #0d6efd;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        .card-header.rep-header {
+            border-bottom: 2px solid #e9ecef;
+            color: #198754;
+        }
+        .card-header.nacimiento-header {
+            border-bottom: 2px solid #e9ecef;
+            color: #6f42c1;
+        }
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #495057;
+            letter-spacing: 0.2px;
+        }
+        .form-control, .form-select { border-radius: 10px; }
+        .btn-custom {
+            background-color: white;
+            border: 2px solid #0d6efd;
+            color: #0d6efd;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-custom:hover { background-color: #0d6efd; color: white; }
+        .btn-custom i { color: #0d6efd; transition: all 0.3s ease; }
+        .btn-custom:hover i { color: white; }
+        .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 4px 0 0 0;
+            color: #dc3545;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        #contenedorNotificaciones {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 900px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .notificacion-custom {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            animation: slideDown 0.35s ease-out;
+        }
+        .notificacion-custom.ocultando { animation: slideUp 0.35s ease-in forwards; }
+        .notificacion-custom .notif-icono { font-size: 1.6rem; flex-shrink: 0; }
+        .notificacion-custom .notif-texto { flex: 1; font-size: 0.98rem; line-height: 1.3; }
+        .notificacion-custom .notif-cerrar {
+            background: transparent; border: none; color: white;
+            font-size: 1.4rem; cursor: pointer; opacity: 0.8;
+            transition: opacity 0.2s; padding: 0 4px; line-height: 1;
+        }
+        .notificacion-custom .notif-cerrar:hover { opacity: 1; }
+
+        .notificacion-custom.error    { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        .notificacion-custom.exito    { background: linear-gradient(135deg, #198754, #146c43); }
+        .notificacion-custom.advertencia { background: linear-gradient(135deg, #ffc107, #e0a800); color: #212529; }
+        .notificacion-custom.advertencia .notif-cerrar { color: #212529; }
+        .notificacion-custom.info     { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-25px); } }
+
+        #diagnosticoJS {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #212529;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            z-index: 10000;
+            max-width: 400px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="contenedorNotificaciones"></div>
+<div id="diagnosticoJS"></div>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand mb-0 h1 fw-bold">
+            <i class="bi bi-mortarboard-fill"></i> E.N Carmen Magaly Vargas
+        </span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="d-flex align-items-center ms-auto flex-wrap gap-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm fw-bold text-primary px-3">
+                    <i class="bi bi-house-fill me-1"></i> Inicio
+                </a>
+                <span class="text-white ms-2 me-2 small d-none d-md-inline">Usuario: <strong>{{ user.username }}</strong></span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Cerrar Sesion</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">
+                {% if es_edicion %}
+                    <i class="bi bi-pencil-square text-warning me-2"></i>Editar Estudiante
+                {% else %}
+                    <i class="bi bi-person-plus-fill text-primary me-2"></i>Registrar Estudiante
+                {% endif %}
+            </h2>
+            <p class="text-secondary mb-0">
+                {% if es_edicion %}
+                    Modifique los datos del estudiante
+                {% else %}
+                    Complete los datos del nuevo estudiante
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <form method="POST" novalidate id="formEstudiante">
+        {% csrf_token %}
+
+        {% if es_edicion %}
+            <input type="hidden" name="pk_editar" value="{{ pk_editar }}">
+        {% endif %}
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-person-badge text-primary me-2"></i> Datos del Estudiante
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.nombres.label }}</label>
+                        {{ form.nombres }}
+                        {{ form.nombres.errors }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.apellidos.label }}</label>
+                        {{ form.apellidos }}
+                        {{ form.apellidos.errors }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.fecha_nacimiento.label }}</label>
+                        {{ form.fecha_nacimiento }}
+                        {{ form.fecha_nacimiento.errors }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.genero.label }}</label>
+                        {{ form.genero }}
+                        {{ form.genero.errors }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.nivel.label }}</label>
+                        {{ form.nivel }}
+                        {{ form.nivel.errors }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo de Documento</label>
+                        <select class="form-select" id="id_tipo_documento" name="tipo_documento">
+                            <option value="escolar" {% if form.instance.tipo_documento == 'escolar' %}selected{% endif %}>Cedula Escolar</option>
+                            <option value="identidad" {% if form.instance.tipo_documento == 'identidad' %}selected{% endif %}>Cedula de Identidad</option>
+                        </select>
+                        <small class="text-muted">Aplica para 3er Grado en adelante.</small>
+                    </div>
+
+                    <div class="col-md-6" id="grupo_cedula_escolar">
+                        <label class="form-label">{{ form.cedula.label }}</label>
+                        {{ form.cedula }}
+                        {{ form.cedula.errors }}
+                    </div>
+
+                    <div class="col-md-6" id="grupo_cedula_identidad" style="display: none;">
+                        <label class="form-label">Cedula de Identidad</label>
+                        <div class="input-group">
+                            <select class="form-select" id="id_nacionalidad" name="nacionalidad" style="max-width: 80px;">
+                                <option value="V" {% if form.instance.nacionalidad == 'V' %}selected{% endif %}>V</option>
+                                <option value="E" {% if form.instance.nacionalidad == 'E' %}selected{% endif %}>E</option>
+                            </select>
+                            <input type="text" class="form-control" id="id_cedula_identidad" name="cedula_identidad" placeholder="Ej: 12345678" value="{{ form.instance.cedula_identidad|default:'' }}">
+                        </div>
+                        <small class="text-muted">Ingrese el numero sin puntos ni guiones.</small>
+                        {{ form.nacionalidad.errors }}
+                    </div>
+
+                    <div class="col-md-6" id="grupo_nacionalidad_escolar" style="display: none;">
+                        <label class="form-label">Nacionalidad</label>
+                        <select class="form-select" name="nacionalidad_escolar" disabled>
+                            <option value="V">Venezolano/a (V)</option>
+                        </select>
+                        <small class="text-muted">La Cedula Escolar es siempre Venezolana.</small>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">{{ form.direccion.label }}</label>
+                        {{ form.direccion }}
+                        {{ form.direccion.errors }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header nacimiento-header">
+                <i class="bi bi-geo-alt-fill me-2" style="color: #6f42c1;"></i> Lugar de Nacimiento
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Pais</label>
+                        <select class="form-select" id="id_pais_nacimiento" name="pais_nacimiento">
+                            <option value="">Seleccione...</option>
+                            <option value="Venezuela" {% if form.instance.pais_nacimiento == 'Venezuela' %}selected{% endif %}>Venezuela</option>
+                            <option value="Colombia" {% if form.instance.pais_nacimiento == 'Colombia' %}selected{% endif %}>Colombia</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Estado / Departamento</label>
+                        <input type="text" class="form-control" id="id_estado_nacimiento" name="estado_nacimiento" placeholder="Ej: Tachira, Norte de Santander" value="{{ form.instance.estado_nacimiento|default:'' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Ciudad / Municipio</label>
+                        <input type="text" class="form-control" id="id_ciudad_nacimiento" name="ciudad_nacimiento" placeholder="Ej: San Cristobal, Cucuta" value="{{ form.instance.ciudad_nacimiento|default:'' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header rep-header">
+                <i class="bi bi-person-vcard text-success me-2"></i> Datos del Representante
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nombres</label>
+                        {{ form.rep_nombres }}
+                        {{ form.rep_nombres.errors }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Apellidos</label>
+                        {{ form.rep_apellidos }}
+                        {{ form.rep_apellidos.errors }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Cedula</label>
+                        <div class="input-group">
+                            <select class="form-select" id="id_rep_nacionalidad" name="rep_nacionalidad" style="max-width: 80px;">
+                                <option value="V" {% if form.instance.rep_nacionalidad == 'V' %}selected{% endif %}>V</option>
+                                <option value="E" {% if form.instance.rep_nacionalidad == 'E' %}selected{% endif %}>E</option>
+                            </select>
+                            {{ form.rep_cedula }}
+                        </div>
+                        {{ form.rep_cedula.errors }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Parentesco</label>
+                        {{ form.rep_parentesco }}
+                        {{ form.rep_parentesco.errors }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Telefono</label>
+                        {{ form.rep_telefono }}
+                        {{ form.rep_telefono.errors }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Correo
+                            <span class="text-muted" style="font-size:0.75rem;">(opcional)</span>
+                        </label>
+                        {{ form.rep_email }}
+                        {{ form.rep_email.errors }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="d-flex justify-content-end gap-2 mb-5">
+            <a href="{{ url_origen }}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
+            <button type="submit" id="btnGuardar" class="btn btn-custom btn-lg">
+                <i class="bi bi-check-circle-fill"></i>
+                {% if es_edicion %}Actualizar Estudiante{% else %}Guardar Estudiante{% endif %}
+            </button>
+        </div>
+    </form>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ==================================================
+    // DIAGNOSTICO VISIBLE
+    // ==================================================
+    var _diag = document.getElementById('diagnosticoJS');
+    function logDiag(msg, esError) {
+        console.log(msg);
+        if (_diag) {
+            _diag.style.display = 'block';
+            _diag.style.color = esError ? '#ff6b6b' : '#0f0';
+            _diag.textContent = msg;
+        }
+    }
+
+    logDiag('SCRIPT CARGADO OK', false);
+
+    // ==================================================
+    // SISTEMA DE NOTIFICACIONES
+    // ==================================================
+    function mostrarNotificacion(mensaje, tipo, duracion) {
+        tipo = tipo || 'error';
+        duracion = (duracion === undefined) ? 4000 : duracion;
+        var contenedor = document.getElementById('contenedorNotificaciones');
+        if (!contenedor) { alert(mensaje); return null; }
+        var iconos = {
+            error: 'bi-exclamation-triangle-fill',
+            exito: 'bi-check-circle-fill',
+            advertencia: 'bi-exclamation-circle-fill',
+            info: 'bi-info-circle-fill'
+        };
+        var notif = document.createElement('div');
+        notif.className = 'notificacion-custom ' + tipo;
+        notif.innerHTML =
+            '<i class="bi ' + (iconos[tipo] || iconos.error) + ' notif-icono"></i>' +
+            '<div class="notif-texto">' + mensaje + '</div>' +
+            '<button type="button" class="notif-cerrar" aria-label="Cerrar">' +
+            '<i class="bi bi-x-lg"></i></button>';
+        contenedor.appendChild(notif);
+        var cerrar = function() {
+            if (notif.classList.contains('ocultando')) return;
+            notif.classList.add('ocultando');
+            setTimeout(function() { notif.remove(); }, 350);
+        };
+        notif.querySelector('.notif-cerrar').addEventListener('click', cerrar);
+        if (duracion > 0) setTimeout(cerrar, duracion);
+        return notif;
+    }
+
+    // ==================================================
+    // UTILIDADES
+    // ==================================================
+    var RE_LETRAS = /[^A-Za-z\u00C0-\u017F\s'.-]/g;
+    var RE_TITULO = /(^|\s|'|-)([a-z\u00E0-\u00FF])/g;
+
+    function soloLetras(valor) { return valor.replace(RE_LETRAS, ''); }
+    function soloNumeros(valor) { return valor.replace(/\D/g, ''); }
+    function aFormatoTitulo(valor) {
+        return valor.toLowerCase().replace(RE_TITULO, function(m, sep, letra) {
+            return sep + letra.toUpperCase();
+        });
+    }
+
+    // ==================================================
+    // VARIABLES DEL SERVIDOR
+    // ==================================================
+    var ES_EDICION = {% if es_edicion %}true{% else %}false{% endif %};
+    var CEDULAS_REGISTRADAS = [
+        {% for c in cedulas_registradas %}"{{ c }}"{% if not forloop.last %},{% endif %}{% endfor %}
+    ];
+
+    // ==================================================
+    // FECHA DE NACIMIENTO
+    // ==================================================
+    (function configurarFechaNacimiento() {
+        var input = document.getElementById('id_fecha_nacimiento');
+        if (!input) return;
+        var hoy = new Date();
+        var y = hoy.getFullYear();
+        var m = hoy.getMonth();
+        var d = hoy.getDate();
+        var formatear = function(date) {
+            var yy = date.getFullYear();
+            var mm = String(date.getMonth() + 1).padStart(2, '0');
+            var dd = String(date.getDate()).padStart(2, '0');
+            return yy + '-' + mm + '-' + dd;
+        };
+        var max = new Date(y - 2, m, d);
+        var min = new Date(y - 13, m, d + 1);
+        input.setAttribute('min', formatear(min));
+        input.setAttribute('max', formatear(max));
+    })();
+
+    // ==================================================
+    // INPUTS DE SOLO LETRAS
+    // ==================================================
+    ['id_nombres', 'id_apellidos', 'id_rep_nombres', 'id_rep_apellidos',
+     'id_estado_nacimiento', 'id_ciudad_nacimiento'].forEach(function(id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('maxlength', '100');
+        input.addEventListener('input', function () {
+            var pos = this.selectionStart;
+            var v = soloLetras(this.value).replace(/\s{2,}/g, ' ');
+            this.value = v;
+            try { this.setSelectionRange(pos, pos); } catch (e) {}
+        });
+        input.addEventListener('blur', function () {
+            this.value = aFormatoTitulo(this.value).trim();
+        });
+    });
+
+    // ==================================================
+    // INPUTS DE SOLO NUMEROS
+    // ==================================================
+    var inputsNumericos = [
+        { id: 'id_cedula', max: 10 },
+        { id: 'id_cedula_identidad', max: 10 },
+        { id: 'id_rep_cedula', max: 10 },
+        { id: 'id_rep_telefono', max: 11 }
+    ];
+    inputsNumericos.forEach(function(cfg) {
+        var input = document.getElementById(cfg.id);
+        if (!input) return;
+        input.setAttribute('inputmode', 'numeric');
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('maxlength', cfg.max);
+        input.addEventListener('input', function () { this.value = soloNumeros(this.value); });
+        input.addEventListener('keypress', function (e) {
+            if (!/[0-9]/.test(e.key)) e.preventDefault();
+        });
+        input.addEventListener('paste', function (e) {
+            e.preventDefault();
+            var texto = (e.clipboardData || window.clipboardData).getData('text');
+            this.value = soloNumeros(texto);
+        });
+    });
+
+    // ==================================================
+    // EMAIL SIN ESPACIOS
+    // ==================================================
+    ['id_rep_email'].forEach(function(id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('maxlength', '254');
+        input.addEventListener('input', function () {
+            this.value = this.value.replace(/\s/g, '');
+        });
+    });
+
+    // ==================================================
+    // LOGICA TIPO DE DOCUMENTO
+    // ==================================================
+    var nivelSelect = document.getElementById('id_nivel');
+    var tipoDocumentoSelect = document.getElementById('id_tipo_documento');
+    var grupoCedulaEscolar = document.getElementById('grupo_cedula_escolar');
+    var grupoCedulaIdentidad = document.getElementById('grupo_cedula_identidad');
+    var grupoNacionalidadEscolar = document.getElementById('grupo_nacionalidad_escolar');
+    var selectNacionalidadEstudiante = document.getElementById('id_nacionalidad');
+
+    function actualizarTipoDocumento() {
+        if (!nivelSelect || !tipoDocumentoSelect) return;
+        var nivel = nivelSelect.value;
+        var gradosAvanzados = ['3er_Grado', '4to_Grado', '5to_Grado', '6to_Grado'];
+        var esAvanzado = gradosAvanzados.indexOf(nivel) !== -1;
+        var elCedula = document.getElementById('id_cedula');
+        var elCedulaId = document.getElementById('id_cedula_identidad');
+
+        if (esAvanzado) {
+            tipoDocumentoSelect.parentElement.style.display = 'block';
+            if (tipoDocumentoSelect.value === 'escolar') {
+                if (grupoCedulaEscolar) grupoCedulaEscolar.style.display = 'block';
+                if (grupoCedulaIdentidad) grupoCedulaIdentidad.style.display = 'none';
+                if (grupoNacionalidadEscolar) grupoNacionalidadEscolar.style.display = 'none';
+                if (elCedula) elCedula.setAttribute('required', 'required');
+                if (elCedulaId) elCedulaId.removeAttribute('required');
+                if (selectNacionalidadEstudiante) {
+                    selectNacionalidadEstudiante.value = 'V';
+                }
+            } else {
+                if (grupoCedulaEscolar) grupoCedulaEscolar.style.display = 'none';
+                if (grupoCedulaIdentidad) grupoCedulaIdentidad.style.display = 'block';
+                if (grupoNacionalidadEscolar) grupoNacionalidadEscolar.style.display = 'none';
+                if (elCedula) elCedula.removeAttribute('required');
+                if (elCedulaId) elCedulaId.setAttribute('required', 'required');
+            }
+        } else {
+            tipoDocumentoSelect.parentElement.style.display = 'none';
+            tipoDocumentoSelect.value = 'escolar';
+            if (grupoCedulaEscolar) grupoCedulaEscolar.style.display = 'block';
+            if (grupoCedulaIdentidad) grupoCedulaIdentidad.style.display = 'none';
+            if (grupoNacionalidadEscolar) grupoNacionalidadEscolar.style.display = 'none';
+            if (elCedula) elCedula.setAttribute('required', 'required');
+            if (elCedulaId) elCedulaId.removeAttribute('required');
+            if (selectNacionalidadEstudiante) {
+                selectNacionalidadEstudiante.value = 'V';
+            }
+        }
+    }
+
+    if (nivelSelect) nivelSelect.addEventListener('change', actualizarTipoDocumento);
+    if (tipoDocumentoSelect) tipoDocumentoSelect.addEventListener('change', actualizarTipoDocumento);
+    actualizarTipoDocumento();
+
+    // ==================================================
+    // VALIDACION AL ENVIAR
+    // ==================================================
+    function obtener(id) { return document.getElementById(id); }
+
+    function validarFormulario(e) {
+        logDiag('Iniciando validacion...', false);
+        var errores = [];
+        try {
+            var nombres = obtener('id_nombres');
+            var apellidos = obtener('id_apellidos');
+            var cedula = obtener('id_cedula');
+            var cedulaIdentidad = obtener('id_cedula_identidad');
+            var fechaNac = obtener('id_fecha_nacimiento');
+            var genero = obtener('id_genero');
+            var nivel = obtener('id_nivel');
+            var direccion = obtener('id_direccion');
+            var paisNacimiento = obtener('id_pais_nacimiento');
+            var estadoNacimiento = obtener('id_estado_nacimiento');
+            var ciudadNacimiento = obtener('id_ciudad_nacimiento');
+            var repNombres = obtener('id_rep_nombres');
+            var repApellidos = obtener('id_rep_apellidos');
+            var repCedula = obtener('id_rep_cedula');
+            var repParentesco = obtener('id_rep_parentesco');
+            var repTelefono = obtener('id_rep_telefono');
+            var repEmail = obtener('id_rep_email');
+
+            var faltantes = [];
+            var check = [
+                ['nombres', nombres], ['apellidos', apellidos], ['cedula', cedula],
+                ['cedula_identidad', cedulaIdentidad], ['fecha_nacimiento', fechaNac],
+                ['genero', genero], ['nivel', nivel], ['direccion', direccion],
+                ['pais_nacimiento', paisNacimiento], ['estado_nacimiento', estadoNacimiento],
+                ['ciudad_nacimiento', ciudadNacimiento], ['rep_nombres', repNombres],
+                ['rep_apellidos', repApellidos], ['rep_cedula', repCedula],
+                ['rep_parentesco', repParentesco], ['rep_telefono', repTelefono],
+                ['rep_email', repEmail]
+            ];
+            check.forEach(function(par) { if (!par[1]) faltantes.push(par[0]); });
+            if (faltantes.length > 0) {
+                logDiag('Elementos NO encontrados: ' + faltantes.join(', '), true);
+            } else {
+                logDiag('Todos los elementos encontrados', false);
+            }
+
+            var regexLetras = /^[A-Za-z\u00C0-\u017F\s'.-]+$/;
+            var regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!nombres.value.trim()) errores.push('El campo Nombres es obligatorio.');
+            else if (!regexLetras.test(nombres.value.trim())) errores.push('El nombre solo puede contener letras.');
+
+            if (!apellidos.value.trim()) errores.push('El campo Apellidos es obligatorio.');
+            else if (!regexLetras.test(apellidos.value.trim())) errores.push('El apellido solo puede contener letras.');
+
+            var tipoDoc = tipoDocumentoSelect ? tipoDocumentoSelect.value : 'escolar';
+            var gradosAvanzados = ['3er_Grado', '4to_Grado', '5to_Grado', '6to_Grado'];
+            var esAvanzado = gradosAvanzados.indexOf(nivel.value) !== -1;
+
+            // ✅ VALIDACIÓN CORREGIDA: Solo validar la cédula que se está usando
+            if (esAvanzado && tipoDoc === 'identidad') {
+                // Si es cédula de identidad, validar cedula_identidad
+                if (!cedulaIdentidad.value.trim()) {
+                    errores.push('La Cedula de Identidad es obligatoria para este grado.');
+                } else if (!/^\d{6,10}$/.test(cedulaIdentidad.value)) {
+                    errores.push('La Cedula de Identidad debe tener entre 6 y 10 digitos.');
+                } else if (!ES_EDICION && CEDULAS_REGISTRADAS.indexOf(cedulaIdentidad.value.trim()) !== -1) {
+                    errores.push('La Cedula de Identidad ' + cedulaIdentidad.value.trim() + ' ya esta registrada.');
+                }
+            } else {
+                // Si es cédula escolar (o nivel inicial), validar cedula
+                if (!cedula.value.trim()) {
+                    errores.push('La Cedula Escolar es obligatoria.');
+                } else if (!/^\d{6,10}$/.test(cedula.value)) {
+                    errores.push('La Cedula Escolar debe tener entre 6 y 10 digitos.');
+                } else if (!ES_EDICION && CEDULAS_REGISTRADAS.indexOf(cedula.value.trim()) !== -1) {
+                    errores.push('La Cedula Escolar ' + cedula.value.trim() + ' ya esta registrada.');
+                }
+            }
+
+            if (!fechaNac.value) {
+                errores.push('La fecha de nacimiento es obligatoria.');
+            } else {
+                var fecha = new Date(fechaNac.value + 'T00:00:00');
+                var hoy = new Date();
+                var edad = hoy.getFullYear() - fecha.getFullYear();
+                var mDiff = hoy.getMonth() - fecha.getMonth();
+                if (mDiff < 0 || (mDiff === 0 && hoy.getDate() < fecha.getDate())) edad--;
+                if (fecha > hoy) errores.push('La fecha de nacimiento no puede ser en el futuro.');
+                else if (edad < 2) errores.push('El estudiante debe tener al menos 2 anos cumplidos.');
+                else if (edad > 13) errores.push('El estudiante no puede tener mas de 13 anos.');
+            }
+
+            if (!genero.value) errores.push('Debe seleccionar un genero.');
+            if (!nivel.value) errores.push('Debe seleccionar un nivel educativo.');
+            if (!direccion.value.trim()) errores.push('La direccion es obligatoria.');
+
+            if (!paisNacimiento.value) errores.push('Debe seleccionar el pais de nacimiento.');
+            if (!estadoNacimiento.value.trim()) errores.push('El estado/departamento de nacimiento es obligatorio.');
+            if (!ciudadNacimiento.value.trim()) errores.push('La ciudad/municipio de nacimiento es obligatoria.');
+
+            if (!repNombres.value.trim()) errores.push('Los nombres del representante son obligatorios.');
+            else if (!regexLetras.test(repNombres.value.trim())) errores.push('El nombre del representante solo puede contener letras.');
+
+            if (!repApellidos.value.trim()) errores.push('Los apellidos del representante son obligatorios.');
+            else if (!regexLetras.test(repApellidos.value.trim())) errores.push('El apellido del representante solo puede contener letras.');
+
+            if (!repCedula.value.trim()) errores.push('La cedula del representante es obligatoria.');
+            else if (!/^\d{6,10}$/.test(repCedula.value)) errores.push('La cedula del representante debe tener entre 6 y 10 digitos.');
+
+            if (!repParentesco.value) errores.push('Debe seleccionar un parentesco.');
+
+            if (!repTelefono.value.trim()) errores.push('El telefono del representante es obligatorio.');
+            else if (!/^\d{10,11}$/.test(repTelefono.value)) errores.push('El telefono del representante debe tener entre 10 y 11 digitos.');
+
+            if (repEmail.value && !regexEmail.test(repEmail.value))
+                errores.push('El correo del representante (opcional) no tiene un formato valido.');
+
+        } catch (err) {
+            logDiag('EXCEPCION: ' + err.message, true);
+            mostrarNotificacion('Error interno al validar. Revisa la consola (F12).', 'error', 6000);
+            e.preventDefault();
+            return false;
+        }
+
+        logDiag('Errores encontrados: ' + errores.length, false);
+
+        if (errores.length > 0) {
+            e.preventDefault();
+            errores.forEach(function(msg, i) {
+                setTimeout(function() { mostrarNotificacion(msg, 'error', 4500); }, i * 150);
+            });
+            return false;
+        }
+
+        logDiag('Validacion OK. Enviando formulario...', false);
+        var btn = document.getElementById('btnGuardar');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+        }
+        return true;
+    }
+
+    var formEl = document.getElementById('formEstudiante');
+    if (formEl) {
+        formEl.addEventListener('submit', validarFormulario);
+        logDiag('Listener de submit registrado OK', false);
+    } else {
+        logDiag('ERROR: No se encontro #formEstudiante', true);
+    }
+
+    // ==================================================
+    // CONVERTIR MENSAJES DE DJANGO A NOTIFICACIONES
+    // ==================================================
+    document.querySelectorAll('.alert').forEach(function(alertEl) {
+        var texto = alertEl.textContent.trim();
+        var tipo = 'info';
+        if (alertEl.classList.contains('alert-danger') || alertEl.classList.contains('alert-error')) tipo = 'error';
+        else if (alertEl.classList.contains('alert-success')) tipo = 'exito';
+        else if (alertEl.classList.contains('alert-warning')) tipo = 'advertencia';
+        if (texto) mostrarNotificacion(texto, tipo, 4500);
+        alertEl.remove();
+    });
+
+    // ==================================================
+    // CONVERTIR .errorlist DE DJANGO EN NOTIFICACIONES
+    // ==================================================
+    document.querySelectorAll('.errorlist').forEach(function(ul) {
+        ul.querySelectorAll('li').forEach(function(li) {
+            mostrarNotificacion(li.textContent.trim(), 'error', 5000);
+        });
+        ul.remove();
+    });
+</script>
+</body>
+</html>

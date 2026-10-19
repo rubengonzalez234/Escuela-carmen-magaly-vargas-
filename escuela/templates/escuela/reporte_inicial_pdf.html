@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado Educación Inicial</title>
+    <style>
+        /* ============================================ */
+        /* PÁGINA + FRAME DEL FOOTER                     */
+        /* ============================================ */
+        @page {
+            size: letter landscape;
+            margin: 1cm 0.8cm 1.5cm 0.8cm;
+
+            /* ✅ FRAME DEL FOOTER — se repite en cada página */
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 0.8cm;
+                right: 0.8cm;
+                bottom: 0.4cm;
+                height: 1cm;
+            }
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 9pt;
+            color: #333333;
+            line-height: 1.3;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ============================================ */
+        /* ENCABEZADO                                    */
+        /* ============================================ */
+        .header-table {
+            width: 100%;
+            border-bottom: 3px solid #0d6efd;
+            padding-bottom: 8px;
+            margin-bottom: 4px;
+        }
+        .header-table td { vertical-align: middle; padding: 0; }
+        .header-logo { width: 90px; text-align: left; }
+        .header-logo img { width: 80px; height: auto; }
+        .header-titles { text-align: center; }
+        .header-title {
+            font-size: 15pt;
+            font-weight: bold;
+            color: #0d6efd;
+            margin: 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .header-subtitle {
+            font-size: 9pt;
+            color: #555555;
+            margin-top: 3px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .header-meta {
+            text-align: right;
+            font-size: 8.5pt;
+            color: #666666;
+            line-height: 1.4;
+        }
+        .header-meta .meta-label { color: #0d6efd; font-weight: bold; }
+
+        /* ============================================ */
+        /* TÍTULO                                        */
+        /* ============================================ */
+        .title-section { text-align: center; margin: 12px 0 8px 0; }
+        .title-section h2 {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #212529;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .title-section .nivel-tag {
+            display: inline-block;
+            background-color: #0d6efd;
+            color: #ffffff;
+            padding: 4px 18px;
+            font-size: 10pt;
+            font-weight: bold;
+            border-radius: 12px;
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ============================================ */
+        /* CAJA INFO                                     */
+        /* ============================================ */
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+            border-top: 1px solid #dee2e6;
+            border-right: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+        }
+        .info-box table { width: 100%; border-collapse: collapse; }
+        .info-box td { padding: 3px 6px; font-size: 9pt; vertical-align: middle; }
+        .info-box .label {
+            color: #0d6efd;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 8pt;
+            letter-spacing: 0.5px;
+        }
+        .info-box .value { color: #212529; font-weight: bold; font-size: 9.5pt; }
+
+        /* ============================================ */
+        /* TABLA DE DATOS                                */
+        /* ============================================ */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .data-table thead th {
+            background-color: #0d6efd;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 7.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 7px 4px;
+            border: 1px solid #0d6efd;
+            text-align: left;
+        }
+        .data-table thead th.center { text-align: center; }
+        .data-table tbody td {
+            padding: 5px 4px;
+            border: 1px solid #dee2e6;
+            font-size: 8.5pt;
+            vertical-align: middle;
+        }
+        .data-table tbody tr:nth-child(even) { background-color: #f8f9fa; }
+        .data-table tbody td.center { text-align: center; }
+        .data-table tbody td.cedula {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #495057;
+            font-size: 8pt;
+        }
+        .data-table tbody td.bold { font-weight: bold; color: #212529; }
+
+        /* Badge de género */
+        .badge-genero {
+            display: inline-block;
+            padding: 2px 7px;
+            font-size: 7pt;
+            font-weight: bold;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .badge-m { background-color: #0d6efd; color: #ffffff; }
+        .badge-f { background-color: #d63384; color: #ffffff; }
+
+        /* ============================================ */
+        /* MATRÍCULA DISCRIMINADA                        */
+        /* ============================================ */
+        .matricula-box {
+            margin-top: 20px;
+            margin-bottom: 5px;
+            border: 2px solid #0d6efd;
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: #ffffff;
+            page-break-inside: avoid;
+        }
+        .matricula-box .matricula-titulo {
+            background-color: #0d6efd;
+            color: #ffffff;
+            padding: 6px 14px;
+            font-size: 10pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            text-align: center;
+        }
+        .matricula-box .matricula-body {
+            padding: 12px 16px;
+            background-color: #f8f9fa;
+        }
+        .matricula-box .matricula-body table { width: 100%; border-collapse: collapse; }
+        .matricula-box .matricula-body td {
+            padding: 8px 10px;
+            font-size: 11pt;
+            text-align: center;
+            border-right: 1px solid #dee2e6;
+        }
+        .matricula-box .matricula-body td:last-child { border-right: none; }
+        .matricula-box .matricula-label {
+            font-size: 8.5pt;
+            color: #495057;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .matricula-box .matricula-numero {
+            font-size: 20pt;
+            font-weight: 800;
+            color: #0d6efd;
+            line-height: 1;
+            display: block;
+        }
+        .matricula-box .matricula-numero.ninas { color: #d63384; }
+        .matricula-box .matricula-numero.ninos { color: #0d6efd; }
+        .matricula-box .matricula-numero.total { color: #198754; }
+
+        /* ============================================ */
+        /* FIRMA                                         */
+        /* ============================================ */
+        .firma-section {
+            margin-top: 25px;
+            width: 100%;
+            table-layout: fixed;
+            page-break-inside: avoid;
+        }
+        .firma-section td { text-align: center; padding: 0 20px; vertical-align: bottom; }
+        .firma-line {
+            border-top: 1px solid #333333;
+            margin: 0 auto 4px auto;
+            width: 80%;
+            height: 28px;
+        }
+        .firma-nombre {
+            font-size: 8.5pt;
+            font-weight: bold;
+            color: #212529;
+            text-transform: uppercase;
+        }
+        .firma-cargo {
+            font-size: 7.5pt;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .empty-row td {
+            text-align: center;
+            padding: 20px;
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        /* ============================================ */
+        /* FOOTER (dentro del frame)                     */
+        /* ============================================ */
+        #footer_content {
+            font-size: 8pt;
+            color: #777777;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            padding-top: 5px;
+        }
+        #footer_content strong { color: #0d6efd; }
+    </style>
+</head>
+<body>
+
+    <!-- ✅ CONTENIDO DEL FOOTER — se renderiza en el frame del @page -->
+    <div id="footer_content">
+        <strong>E.N Carmen Magaly Vargas</strong> — Documento generado automáticamente por el sistema | {{ fecha|date:"d/m/Y" }} - {{ hora }}
+    </div>
+
+    <!-- NUEVA IMAGEN DE ENCABEZADO INSTITUCIONAL -->
+    <div style="text-align: center; margin-bottom: 4px; display: block; clear: both;">
+        <img src="/static/img/encabezado.png" style="width: 100%; max-width: 100%; height: auto;" alt="Encabezado Institucional">
+    </div>
+
+    <!-- ==================== ENCABEZADO ==================== -->
+    <table class="header-table">
+        <tr>
+            <td class="header-logo">
+                <!-- <img src="/static/img/logo.png" alt="Logo"> -->
+            </td>
+            <td class="header-titles">
+                <div class="header-title">E.N Carmen Magaly Vargas</div>
+                <div class="header-subtitle">Sistema de Control Escolar</div>
+            </td>
+            <td class="header-meta">
+                <span class="meta-label">FECHA:</span> {{ fecha|date:"d/m/Y" }}<br>
+                <span class="meta-label">HORA:</span> {{ hora }}<br>
+                <span class="meta-label">USUARIO:</span> {{ usuario }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- ==================== TÍTULO ==================== -->
+    <div class="title-section">
+        <h2>Listado Oficial de Estudiantes — Educación Inicial</h2>
+    </div>
+
+    <!-- ==================== CAJA INFO ==================== -->
+    <div class="info-box">
+        <table>
+            <tr>
+                <td style="width: 33%;">
+                    <span class="label">Nivel:</span><br>
+                    <span class="value">{{ nivel_display }}</span>
+                </td>
+                <td style="width: 33%;">
+                    <span class="label">Docente Responsable:</span><br>
+                    <span class="value">
+                        {% if docente %}
+                            {{ docente.nombres }} {{ docente.apellidos }}
+                        {% else %}
+                            Sin asignar
+                        {% endif %}
+                    </span>
+                </td>
+                <td style="width: 34%;">
+                    <span class="label">Total Estudiantes:</span><br>
+                    <span class="value">{{ total }} estudiante{{ total|pluralize:"s" }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ==================== TABLA ==================== -->
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th class="center" style="width: 3%;">N°</th>
+                <th class="center" style="width: 8%;">Cédula Escolar</th>
+                <th style="width: 12%;">Apellidos</th>
+                <th style="width: 12%;">Nombres</th>
+                <th class="center" style="width: 7%;">Género</th>
+                <th class="center" style="width: 8%;">F. Nacimiento</th>
+                <th class="center" style="width: 4%;">Edad</th>
+                <th style="width: 14%;">Lugar de Nacimiento</th>
+                <th style="width: 18%;">Representante</th>
+                <th class="center" style="width: 14%;">Teléfono Rep.</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for est in estudiantes %}
+            <tr>
+                <td class="center">{{ forloop.counter }}</td>
+                <td class="center cedula">{{ est.cedula|default:"—" }}</td>
+                <td>{{ est.apellidos|title }}</td>
+                <td>{{ est.nombres|title }}</td>
+                <td class="center">
+                    {% if est.genero == 'M' %}
+                        <span class="badge-genero badge-m">M</span>
+                    {% else %}
+                        <span class="badge-genero badge-f">F</span>
+                    {% endif %}
+                </td>
+                <td class="center">{{ est.fecha_nacimiento|date:"d/m/Y" }}</td>
+                <td class="center bold">{{ est.edad }}</td>
+                <td>{{ est.lugar_nacimiento_completo }}</td>
+                <td>{{ est.rep_nombres|title }} {{ est.rep_apellidos|title }}</td>
+                <td class="center">{{ est.rep_telefono|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row">
+                <td colspan="10">Sin estudiantes registrados en este nivel</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- ==================== MATRÍCULA DISCRIMINADA ==================== -->
+    <div class="matricula-box">
+        <div class="matricula-titulo">
+            Matrícula Discriminada
+        </div>
+        <div class="matricula-body">
+            <table>
+                <tr>
+                    <td style="width: 33%;">
+                        <span class="matricula-label">Niñas</span>
+                        <span class="matricula-numero ninas">{{ total_ninas }}</span>
+                    </td>
+                    <td style="width: 33%;">
+                        <span class="matricula-label">Niños</span>
+                        <span class="matricula-numero ninos">{{ total_ninos }}</span>
+                    </td>
+                    <td style="width: 34%;">
+                        <span class="matricula-label">Total General</span>
+                        <span class="matricula-numero total">{{ total }}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- ==================== FIRMA ==================== -->
+    <table class="firma-section">
+        <tr>
+            <td>
+                <div class="firma-line"></div>
+                <div class="firma-nombre">
+                    {% if docente %}{{ docente.nombres }} {{ docente.apellidos }}{% else %}____________________{% endif %}
+                </div>
+                <div class="firma-cargo">Docente Responsable</div>
+            </td>
+            <td>
+                <div class="firma-line"></div>
+                <div class="firma-nombre">Dirección del Plantel</div>
+                <div class="firma-cargo">Sello y Firma</div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

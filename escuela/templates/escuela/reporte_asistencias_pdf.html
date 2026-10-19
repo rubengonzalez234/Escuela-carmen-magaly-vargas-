@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Asistencias del Personal</title>
+    {% load static %}
+    <style>
+        @page {
+            size: letter landscape;
+            margin: 0.4cm 0.4cm 1.2cm 0.4cm;
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 0.4cm;
+                right: 0.4cm;
+                bottom: 0.3cm;
+                height: 0.9cm;
+                width: 27cm;
+            }
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 8pt;
+            color: #333333;
+            line-height: 1.2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 27cm;
+            margin: 0 auto;
+        }
+
+        /* ============================================ */
+        /* ENCABEZADO INSTITUCIONAL                      */
+        /* ============================================ */
+        .header-img {
+            width: 100%;
+            max-width: 20cm;
+            height: auto;
+            display: block;
+            margin: 0 auto 4px auto;
+        }
+
+        .header-table {
+            width: 100%;
+            border-bottom: 3px solid #0d6efd;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+        }
+        .header-table td { vertical-align: middle; padding: 0; }
+        .header-titles { text-align: center; }
+        .header-title {
+            font-size: 12pt; font-weight: bold; color: #0d6efd;
+            margin: 0; text-transform: uppercase;
+        }
+        .header-subtitle {
+            font-size: 7.5pt; color: #555555; margin-top: 1px;
+            text-transform: uppercase;
+        }
+        .header-meta {
+            text-align: right; font-size: 7.5pt;
+            color: #666666; line-height: 1.3;
+        }
+        .header-meta .meta-label { color: #0d6efd; font-weight: bold; }
+
+        /* ============================================ */
+        /* TÍTULO                                        */
+        /* ============================================ */
+        .title-section { text-align: center; margin: 6px 0 6px 0; }
+        .title-section h2 {
+            font-size: 12pt; font-weight: bold; color: #212529;
+            margin: 0; text-transform: uppercase;
+        }
+        .title-section .nivel-tag {
+            display: inline-block; background-color: #0d6efd; color: #ffffff;
+            padding: 3px 14px; font-size: 9pt; font-weight: bold;
+            border-radius: 10px; margin-top: 3px;
+        }
+
+        /* ============================================ */
+        /* LISTA DE EMPLEADOS (NÓMINA)                   */
+        /* ============================================ */
+        .lista-empleados {
+            width: 100%;
+            border: 2px solid #0d6efd;
+            border-radius: 5px;
+            background: #f0f6ff;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            font-size: 8pt;
+        }
+        .lista-empleados-titulo {
+            font-size: 9pt;
+            font-weight: bold;
+            color: #0d6efd;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #0d6efd;
+            padding-bottom: 3px;
+        }
+        .lista-empleados-grid {
+            display: table;
+            width: 100%;
+            border-spacing: 8px 3px;
+        }
+        .lista-empleados-fila {
+            display: table-row;
+        }
+        .lista-empleados-item {
+            display: table-cell;
+            font-size: 8pt;
+            color: #212529;
+            padding: 1px 4px;
+            white-space: nowrap;
+        }
+        .lista-empleados-item .num {
+            font-weight: bold;
+            color: #0d6efd;
+            display: inline-block;
+            min-width: 22px;
+        }
+        .lista-empleados-item .nombre {
+            font-weight: 600;
+        }
+
+        /* ============================================ */
+        /* TABLA DE ASISTENCIAS                          */
+        /* ============================================ */
+        .tabla-asistencia-pdf {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+            border: 2px solid #0d6efd;
+            margin-bottom: 10px;
+        }
+        .tabla-asistencia-pdf thead th {
+            background: #e7f0ff;
+            color: #0a58ca;
+            font-weight: 800;
+            font-size: 7pt;
+            text-transform: uppercase;
+            text-align: center;
+            padding: 4px 0;
+            border: 1px solid #0d6efd;
+            vertical-align: middle;
+            line-height: 1.1;
+        }
+        .tabla-asistencia-pdf thead th.col-num {
+            font-size: 9pt;
+            padding-left: 4px;
+            padding-right: 4px;
+        }
+        .tabla-asistencia-pdf thead th .letra-dia {
+            display: block;
+            font-size: 8pt;
+            font-weight: 800;
+            color: #0d6efd;
+        }
+        .tabla-asistencia-pdf thead th .fecha-dia {
+            display: block;
+            font-size: 6.5pt;
+            color: #0a58ca;
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        .tabla-asistencia-pdf thead th.es-feriado,
+        .tabla-asistencia-pdf thead th.es-vacaciones {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .tabla-asistencia-pdf thead th.es-feriado .letra-dia,
+        .tabla-asistencia-pdf thead th.es-vacaciones .letra-dia { color: #856404; }
+        .tabla-asistencia-pdf thead th.es-feriado .fecha-dia,
+        .tabla-asistencia-pdf thead th.es-vacaciones .fecha-dia { color: #856404; }
+
+        .tabla-asistencia-pdf tbody td {
+            border: 1px solid #0d6efd;
+            padding: 2px 0;
+            vertical-align: middle;
+            height: 26px;
+            text-align: center;
+            font-size: 10pt;
+            font-weight: bold;
+        }
+        .tabla-asistencia-pdf tbody td.col-num {
+            text-align: center;
+            font-weight: 700;
+            color: #0a58ca;
+            background: #f0f6ff;
+            font-size: 10pt;
+            padding-left: 4px;
+            padding-right: 4px;
+        }
+        .tabla-asistencia-pdf tbody tr:nth-child(even) td.col-num {
+            background: #e7f0ff;
+        }
+
+        .tabla-asistencia-pdf tbody td.estado-feriado,
+        .tabla-asistencia-pdf tbody td.estado-vacaciones {
+            background: #fff3cd;
+            color: #b8860b;
+            font-size: 12pt;
+        }
+
+        .tabla-asistencia-pdf tbody td.estado-presente {
+            background: #d1e7dd;
+            color: #198754;
+            font-size: 12pt;
+        }
+
+        .tabla-asistencia-pdf tbody td.estado-ausente {
+            background: #f8d7da;
+            color: #dc3545;
+            font-size: 12pt;
+        }
+
+        .tabla-asistencia-pdf tbody td.total-presente {
+            background: #d1e7dd;
+            color: #198754;
+            font-weight: 800;
+            font-size: 10pt;
+        }
+        .tabla-asistencia-pdf tbody td.total-ausente {
+            background: #f8d7da;
+            color: #dc3545;
+            font-weight: 800;
+            font-size: 10pt;
+        }
+
+        /* ============================================ */
+        /* TARJETAS DE CONTADORES                        */
+        /* ============================================ */
+        .contadores-titulo {
+            text-align: center;
+            font-size: 10pt;
+            font-weight: bold;
+            color: #0d6efd;
+            text-transform: uppercase;
+            margin: 10px 0 6px 0;
+        }
+
+        .contadores-grid {
+            width: 100%;
+            margin: 0 auto 10px auto;
+            border-collapse: separate;
+            border-spacing: 10px 0;
+        }
+        .contadores-grid td {
+            width: 33.33%;
+            vertical-align: top;
+            text-align: center;
+        }
+
+        .tarjeta-contador {
+            border-radius: 5px;
+            padding: 10px 5px;
+            border: 2px solid;
+        }
+        .tarjeta-contador .contador-label {
+            font-size: 8.5pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+            display: block;
+        }
+        .tarjeta-contador .contador-numero {
+            font-size: 20pt;
+            font-weight: 800;
+            line-height: 1;
+            display: block;
+        }
+
+        .tarjeta-presente { border-color: #198754; background-color: #d1e7dd; }
+        .tarjeta-presente .contador-label { color: #0f5132; }
+        .tarjeta-presente .contador-numero { color: #198754; }
+
+        .tarjeta-ausente { border-color: #dc3545; background-color: #f8d7da; }
+        .tarjeta-ausente .contador-label { color: #842029; }
+        .tarjeta-ausente .contador-numero { color: #dc3545; }
+
+        .tarjeta-feriados { border-color: #ffc107; background-color: #fff3cd; }
+        .tarjeta-feriados .contador-label { color: #856404; }
+        .tarjeta-feriados .contador-numero { color: #b8860b; }
+
+        /* ============================================ */
+        /* FIRMAS                                        */
+        /* ============================================ */
+        .firma-section {
+            margin-top: 30px;
+            width: 100%;
+        }
+        .firma-section td {
+            text-align: center;
+            padding: 0 20px;
+            vertical-align: bottom;
+        }
+        .firma-line {
+            border-top: 1px solid #333333;
+            margin: 0 auto 3px auto;
+            width: 70%;
+            height: 25px;
+        }
+        .firma-nombre {
+            font-size: 8pt;
+            font-weight: bold;
+            color: #212529;
+            text-transform: uppercase;
+        }
+        .firma-cargo {
+            font-size: 7pt;
+            color: #666666;
+            text-transform: uppercase;
+        }
+
+        /* ============================================ */
+        /* FOOTER (PDF FRAME)                            */
+        /* ============================================ */
+        #footer_content {
+            font-size: 7pt;
+            color: #777777;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            padding-top: 3px;
+            line-height: 1.3;
+        }
+        #footer_content strong { color: #0d6efd; }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+
+    <!-- ==================== ENCABEZADO INSTITUCIONAL ==================== -->
+    <img src="{% static 'img/encabezado.png' %}" class="header-img" alt="Encabezado Institucional">
+
+    <!-- ==================== ENCABEZADO ==================== -->
+    <table class="header-table">
+        <tr>
+            <td class="header-titles">
+                <div class="header-title">E.N Carmen Magaly Vargas</div>
+                <div class="header-subtitle">Sistema de Control Escolar</div>
+            </td>
+            <td class="header-meta" style="width: 180px;">
+                <span class="meta-label">FECHA:</span> {{ fecha|date:"d/m/Y" }}<br>
+                <span class="meta-label">HORA:</span> {{ hora }}<br>
+                <span class="meta-label">USUARIO:</span> {{ usuario }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- ==================== TÍTULO ==================== -->
+    <div class="title-section">
+        <h2>Reporte de Asistencias del Personal</h2>
+        <div class="nivel-tag">{{ mes_nombre }} {{ anio }}</div>
+    </div>
+
+    <!-- ==================== NÓMINA DE PERSONAL ==================== -->
+    <div class="lista-empleados">
+        <div class="lista-empleados-titulo">Nómina de Personal</div>
+        <table class="lista-empleados-grid">
+            <tr>
+                {% for fila in filas %}
+                <td class="lista-empleados-item">
+                    <span class="num">{{ forloop.counter }}.</span>
+                    <span class="nombre">{{ fila.nombre }}</span>
+                </td>
+                {% if forloop.counter|divisibleby:3 and not forloop.last %}
+            </tr>
+            <tr>
+                {% endif %}
+                {% endfor %}
+            </tr>
+        </table>
+    </div>
+
+    <!-- ==================== TABLA DE ASISTENCIAS ==================== -->
+    <table class="tabla-asistencia-pdf">
+        <thead>
+            <tr>
+                <th class="col-num">N°</th>
+                {% for d in dias %}
+                <th class="{% if d|date:'Y-m-d' in feriados_map %}es-feriado{% elif d|date:'Y-m-d' in vacaciones_map %}es-vacaciones{% endif %}">
+                    <span class="letra-dia">
+                        {% if d.weekday == 0 %}L
+                        {% elif d.weekday == 1 %}M
+                        {% elif d.weekday == 2 %}M
+                        {% elif d.weekday == 3 %}J
+                        {% elif d.weekday == 4 %}V
+                        {% endif %}
+                    </span>
+                    <span class="fecha-dia">{{ d.day }}</span>
+                </th>
+                {% endfor %}
+                <th style="background: #d1e7dd; color: #198754;">✓</th>
+                <th style="background: #f8d7da; color: #dc3545;">✗</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fila in filas %}
+            <tr>
+                <td class="col-num">{{ forloop.counter }}</td>
+                {% for celda in fila.celdas %}
+                    {% if celda.es_feriado %}
+                        <td class="estado-feriado">★</td>
+                    {% elif celda.es_vacaciones %}
+                        <td class="estado-vacaciones">★</td>
+                    {% elif celda.estado == 'presente' %}
+                        <td class="estado-presente">✓</td>
+                    {% elif celda.estado == 'ausente' %}
+                        <td class="estado-ausente">✗</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                {% endfor %}
+                <td class="total-presente">{{ fila.total_presente }}</td>
+                <td class="total-ausente">{{ fila.total_ausente }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- ==================== CONTADORES ==================== -->
+    <div class="contadores-titulo">Resumen del Período</div>
+
+    <table class="contadores-grid">
+        <tr>
+            <td>
+                <div class="tarjeta-contador tarjeta-presente">
+                    <span class="contador-label">Asistencias</span>
+                    <span class="contador-numero">{{ total_presente }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="tarjeta-contador tarjeta-ausente">
+                    <span class="contador-label">Inasistencias</span>
+                    <span class="contador-numero">{{ total_ausente }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="tarjeta-contador tarjeta-feriados">
+                    <span class="contador-label">Feriados / Vacaciones</span>
+                    <span class="contador-numero">{{ total_feriados }}</span>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- ==================== FIRMAS ==================== -->
+    <br><br><table class="firma-section">
+        <tr>
+            <td>
+                <div class="firma-line"></div>
+                <div class="firma-nombre">Dirección del Plantel</div>
+                <div class="firma-cargo">Sello y Firma</div>
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+<!-- ==================== FOOTER (PDF FRAME) ==================== -->
+<div id="footer_content">
+    <strong>E.N Carmen Magaly Vargas</strong> — Documento generado automáticamente | {{ fecha|date:"d/m/Y" }} - {{ hora }}
+</div>
+
+</body>
+</html>
