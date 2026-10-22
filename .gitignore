@@ -10,10 +10,6 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Base de datos local
-db.sqlite3
-*.sqlite3
-
 # Archivos estáticos generados
 staticfiles/
 media/

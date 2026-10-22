@@ -310,7 +310,10 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label">Telefono</label>
+                        <label class="form-label">
+                            Teléfono
+                            <span class="text-muted" style="font-size:0.75rem;">(opcional)</span>
+                        </label>
                         {{ form.rep_telefono }}
                         {{ form.rep_telefono.errors }}
                     </div>
@@ -344,9 +347,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // ==================================================
-    // DIAGNOSTICO VISIBLE
-    // ==================================================
     var _diag = document.getElementById('diagnosticoJS');
     function logDiag(msg, esError) {
         console.log(msg);
@@ -359,9 +359,6 @@
 
     logDiag('SCRIPT CARGADO OK', false);
 
-    // ==================================================
-    // SISTEMA DE NOTIFICACIONES
-    // ==================================================
     function mostrarNotificacion(mensaje, tipo, duracion) {
         tipo = tipo || 'error';
         duracion = (duracion === undefined) ? 4000 : duracion;
@@ -391,9 +388,6 @@
         return notif;
     }
 
-    // ==================================================
-    // UTILIDADES
-    // ==================================================
     var RE_LETRAS = /[^A-Za-z\u00C0-\u017F\s'.-]/g;
     var RE_TITULO = /(^|\s|'|-)([a-z\u00E0-\u00FF])/g;
 
@@ -405,17 +399,11 @@
         });
     }
 
-    // ==================================================
-    // VARIABLES DEL SERVIDOR
-    // ==================================================
     var ES_EDICION = {% if es_edicion %}true{% else %}false{% endif %};
     var CEDULAS_REGISTRADAS = [
         {% for c in cedulas_registradas %}"{{ c }}"{% if not forloop.last %},{% endif %}{% endfor %}
     ];
 
-    // ==================================================
-    // FECHA DE NACIMIENTO
-    // ==================================================
     (function configurarFechaNacimiento() {
         var input = document.getElementById('id_fecha_nacimiento');
         if (!input) return;
@@ -435,9 +423,6 @@
         input.setAttribute('max', formatear(max));
     })();
 
-    // ==================================================
-    // INPUTS DE SOLO LETRAS
-    // ==================================================
     ['id_nombres', 'id_apellidos', 'id_rep_nombres', 'id_rep_apellidos',
      'id_estado_nacimiento', 'id_ciudad_nacimiento'].forEach(function(id) {
         var input = document.getElementById(id);
@@ -455,9 +440,6 @@
         });
     });
 
-    // ==================================================
-    // INPUTS DE SOLO NUMEROS
-    // ==================================================
     var inputsNumericos = [
         { id: 'id_cedula', max: 10 },
         { id: 'id_cedula_identidad', max: 10 },
@@ -481,9 +463,6 @@
         });
     });
 
-    // ==================================================
-    // EMAIL SIN ESPACIOS
-    // ==================================================
     ['id_rep_email'].forEach(function(id) {
         var input = document.getElementById(id);
         if (!input) return;
@@ -494,9 +473,6 @@
         });
     });
 
-    // ==================================================
-    // LOGICA TIPO DE DOCUMENTO
-    // ==================================================
     var nivelSelect = document.getElementById('id_nivel');
     var tipoDocumentoSelect = document.getElementById('id_tipo_documento');
     var grupoCedulaEscolar = document.getElementById('grupo_cedula_escolar');
@@ -548,9 +524,6 @@
     if (tipoDocumentoSelect) tipoDocumentoSelect.addEventListener('change', actualizarTipoDocumento);
     actualizarTipoDocumento();
 
-    // ==================================================
-    // VALIDACION AL ENVIAR
-    // ==================================================
     function obtener(id) { return document.getElementById(id); }
 
     function validarFormulario(e) {
@@ -606,9 +579,7 @@
             var gradosAvanzados = ['3er_Grado', '4to_Grado', '5to_Grado', '6to_Grado'];
             var esAvanzado = gradosAvanzados.indexOf(nivel.value) !== -1;
 
-            // ✅ VALIDACIÓN CORREGIDA: Solo validar la cédula que se está usando
             if (esAvanzado && tipoDoc === 'identidad') {
-                // Si es cédula de identidad, validar cedula_identidad
                 if (!cedulaIdentidad.value.trim()) {
                     errores.push('La Cedula de Identidad es obligatoria para este grado.');
                 } else if (!/^\d{6,10}$/.test(cedulaIdentidad.value)) {
@@ -617,7 +588,6 @@
                     errores.push('La Cedula de Identidad ' + cedulaIdentidad.value.trim() + ' ya esta registrada.');
                 }
             } else {
-                // Si es cédula escolar (o nivel inicial), validar cedula
                 if (!cedula.value.trim()) {
                     errores.push('La Cedula Escolar es obligatoria.');
                 } else if (!/^\d{6,10}$/.test(cedula.value)) {
@@ -659,8 +629,12 @@
 
             if (!repParentesco.value) errores.push('Debe seleccionar un parentesco.');
 
-            if (!repTelefono.value.trim()) errores.push('El telefono del representante es obligatorio.');
-            else if (!/^\d{10,11}$/.test(repTelefono.value)) errores.push('El telefono del representante debe tener entre 10 y 11 digitos.');
+            // ✅ El teléfono es OPCIONAL. Solo se valida si el usuario escribió algo.
+            if (repTelefono.value.trim() !== '') {
+                if (!/^\d{10,11}$/.test(repTelefono.value)) {
+                    errores.push('El teléfono del representante debe tener entre 10 y 11 dígitos.');
+                }
+            }
 
             if (repEmail.value && !regexEmail.test(repEmail.value))
                 errores.push('El correo del representante (opcional) no tiene un formato valido.');
@@ -699,9 +673,6 @@
         logDiag('ERROR: No se encontro #formEstudiante', true);
     }
 
-    // ==================================================
-    // CONVERTIR MENSAJES DE DJANGO A NOTIFICACIONES
-    // ==================================================
     document.querySelectorAll('.alert').forEach(function(alertEl) {
         var texto = alertEl.textContent.trim();
         var tipo = 'info';
@@ -712,9 +683,6 @@
         alertEl.remove();
     });
 
-    // ==================================================
-    // CONVERTIR .errorlist DE DJANGO EN NOTIFICACIONES
-    // ==================================================
     document.querySelectorAll('.errorlist').forEach(function(ul) {
         ul.querySelectorAll('li').forEach(function(li) {
             mostrarNotificacion(li.textContent.trim(), 'error', 5000);

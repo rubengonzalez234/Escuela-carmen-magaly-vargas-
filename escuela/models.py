@@ -42,7 +42,6 @@ class Estudiante(models.Model):
         ('Venezuela', 'Venezuela'),
         ('Colombia', 'Colombia'),
     ]
-    # ✅ NUEVO: Estado del estudiante
     ESTADO_CHOICES = [
         ('activo', 'Activo'),
         ('egresado', 'Egresado'),
@@ -94,7 +93,6 @@ class Estudiante(models.Model):
     fecha_inscripcion = models.DateField(auto_now_add=True)
     activo = models.BooleanField(default=True)
 
-    # ✅ NUEVO CAMPO
     estado = models.CharField(
         max_length=20,
         choices=ESTADO_CHOICES,
@@ -112,7 +110,10 @@ class Estudiante(models.Model):
         verbose_name="Nacionalidad del Representante"
     )
     rep_parentesco = models.CharField(max_length=20, choices=PARENTESCO_CHOICES, default='Madre')
-    rep_telefono = models.CharField(max_length=15)
+    
+    # ✅ CAMBIO: Teléfono del representante es OPCIONAL a nivel de base de datos
+    rep_telefono = models.CharField(max_length=15, null=True, blank=True)
+    
     rep_email = models.EmailField(blank=True)
 
     def __str__(self):
@@ -138,7 +139,6 @@ class Estudiante(models.Model):
     def nombre_corto(self):
         return f"{self.primer_nombre} {self.primer_apellido}".strip()
 
-    # ✅ NUEVO: Nombre completo (para consistencia con PersonaBase)
     @property
     def nombre_completo(self):
         return f"{self.nombres} {self.apellidos}".strip()
@@ -237,14 +237,12 @@ class PersonaBase(models.Model):
     def nombre_corto(self):
         return f"{self.primer_nombre} {self.primer_apellido}".strip()
 
-    # ✅ NUEVO: Nombre completo para usar en tarjetas/dashboards/PDFs
     @property
     def nombre_completo(self):
         return f"{self.nombres} {self.apellidos}".strip()
 
     @property
     def cedula_completa(self):
-        """Devuelve la cédula con su prefijo de nacionalidad."""
         nacionalidad = self.nacionalidad or 'V'
         return f"{nacionalidad}-{self.cedula}"
 
@@ -457,7 +455,6 @@ class ConfiguracionAnual(models.Model):
         verbose_name="Fecha de Fin de Año Escolar"
     )
     activo = models.BooleanField(default=True, verbose_name="Activo")
-    # ✅ NUEVOS CAMPOS
     cerrado = models.BooleanField(
         default=False,
         verbose_name="Cerrado",
@@ -474,7 +471,6 @@ class ConfiguracionAnual(models.Model):
 
     @property
     def anio_inicio(self):
-        """Extrae el año de inicio del string '2026-2027'"""
         try:
             return int(self.anio_escolar.split('-')[0])
         except (ValueError, IndexError):
@@ -482,7 +478,6 @@ class ConfiguracionAnual(models.Model):
 
     @property
     def anio_fin(self):
-        """Extrae el año de fin del string '2026-2027'"""
         try:
             return int(self.anio_escolar.split('-')[1])
         except (ValueError, IndexError):
@@ -503,7 +498,6 @@ class Feriado(models.Model):
         ('eventos', 'Evento Especial'),
     ]
 
-    # ✅ NUEVO: FK a ConfiguracionAnual
     configuracion = models.ForeignKey(
         ConfiguracionAnual,
         on_delete=models.CASCADE,
@@ -524,7 +518,6 @@ class Feriado(models.Model):
         verbose_name="Descripción",
         help_text="Detalle opcional del evento (ej: 'Día de la Independencia')"
     )
-    # ✅ NUEVO
     recurrente = models.BooleanField(
         default=True,
         verbose_name="Recurrente",
@@ -561,7 +554,6 @@ class PeriodoVacaciones(models.Model):
         verbose_name="Descripción",
         help_text="Ej: Vacaciones de Navidad, Carnaval, Semana Santa..."
     )
-    # ✅ NUEVO
     recurrente = models.BooleanField(
         default=True,
         verbose_name="Recurrente",

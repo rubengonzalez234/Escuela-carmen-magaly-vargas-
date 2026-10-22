@@ -11,27 +11,61 @@
         body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
         .navbar-custom { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
         .card { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .stats-card { transition: all 0.3s; }
-        .stats-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(13,110,253,0.15); }
         .navbar-brand i { color: white; }
 
-        /* RELOJ DIGITAL */
+        /* ============================================ */
+        /* RELOJ DIGITAL (CON DISEÑO DE TARJETA)        */
+        /* ============================================ */
+        .reloj-card-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
         .reloj-retro {
             background-color: white;
+            /* ✅ Borde azul fijo siempre visible */
             border: 4px solid #3498db;
             border-radius: 25px;
-            padding: 10px 30px;
+            padding: 15px 35px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 15px;
+            /* Sombra base */
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
         }
+        /* La línea azul superior animada (se dibuja sobre el borde) */
+        .reloj-retro::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: transparent;
+            box-shadow: inset 0 6px 0 0 #3498db;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.35s ease;
+            pointer-events: none;
+        }
+        /* Efecto hover: Se eleva y crece la sombra, manteniendo los colores */
+        .reloj-retro:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(52, 152, 219, 0.25);
+            border-color: #3498db; /* Se mantiene igual */
+        }
+        .reloj-retro:hover::before { transform: scaleX(1); }
+
         .numeros-digitales {
             font-family: 'Digital Numbers', sans-serif;
             font-size: 3rem;
             color: #333;
             letter-spacing: 2px;
+            margin-top: 5px;
+            z-index: 1; /* Para que quede sobre la línea animada */
         }
         .periodo-dia {
             display: flex;
@@ -40,6 +74,7 @@
             font-family: Arial, sans-serif;
             font-size: 0.9rem;
             line-height: 1;
+            z-index: 1;
         }
         .fecha-actual {
             font-size: 0.85rem;
@@ -48,14 +83,96 @@
             letter-spacing: 0.5px;
         }
 
-        /* TARJETAS DE ESTADÍSTICAS */
-        .stats-card .icono { font-size: 2.8rem; display: block; margin-bottom: 10px; }
-        .stats-card .numero { font-size: 2.8rem; font-weight: 800; color: #0d6efd; margin-bottom: 4px; }
-        .stats-card .etiqueta {
-            font-size: 0.95rem; font-weight: 700; color: #0d6efd;
-            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0;
+        /* ============================================ */
+        /* TARJETAS DE ESTADÍSTICAS                     */
+        /* ============================================ */
+        .tarjeta-contador {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            position: relative;
+            overflow: hidden;
         }
-        .stats-card .card-body { padding: 20px 15px; }
+        .tarjeta-contador::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 6px;
+            background: var(--azul-institucional);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.35s ease;
+        }
+        .tarjeta-contador:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(13, 110, 253, 0.12);
+            border-color: var(--azul-institucional);
+            color: inherit;
+        }
+        .tarjeta-contador:hover::before { transform: scaleX(1); }
+
+        .tarjeta-contador .icono-wrapper {
+            width: 70px; height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+            font-size: 2.2rem;
+            transition: all 0.35s ease;
+            background: rgba(13, 110, 253, 0.1);
+            color: var(--azul-institucional);
+        }
+        .tarjeta-contador:hover .icono-wrapper {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .tarjeta-contador .numero {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+            line-height: 1;
+        }
+        .tarjeta-contador .etiqueta {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0;
+        }
+
+        /* Colores específicos para cada contador */
+        .cont-azul .icono-wrapper { background: rgba(13, 110, 253, 0.1); color: #0d6efd; }
+        .cont-azul:hover { border-color: #0d6efd; box-shadow: 0 20px 40px rgba(13, 110, 253, 0.15); }
+        .cont-azul::before { background: #0d6efd; }
+        .cont-azul .numero { color: #0d6efd; }
+
+        .cont-verde .icono-wrapper { background: rgba(25, 135, 84, 0.1); color: #198754; }
+        .cont-verde:hover { border-color: #198754; box-shadow: 0 20px 40px rgba(25, 135, 84, 0.15); }
+        .cont-verde::before { background: #198754; }
+        .cont-verde .numero { color: #198754; }
+
+        .cont-amarillo .icono-wrapper { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+        .cont-amarillo:hover { border-color: #ffc107; box-shadow: 0 20px 40px rgba(255, 193, 7, 0.15); }
+        .cont-amarillo::before { background: #ffc107; }
+        .cont-amarillo .numero { color: #ffc107; }
+
+        .cont-cian .icono-wrapper { background: rgba(13, 202, 240, 0.1); color: #0dcaf0; }
+        .cont-cian:hover { border-color: #0dcaf0; box-shadow: 0 20px 40px rgba(13, 202, 240, 0.15); }
+        .cont-cian::before { background: #0dcaf0; }
+        .cont-cian .numero { color: #0dcaf0; }
 
         /* ============================================ */
         /* DIRECTOR DEL PLANTEL (destacado)              */
@@ -396,8 +513,8 @@
 
 <div class="container">
 
-    <!-- ========== RELOJ ========== -->
-    <div class="d-flex justify-content-center mb-3">
+    <!-- ========== RELOJ (NUEVO DISEÑO TARJETA) ========== -->
+    <div class="reloj-card-wrapper animar-entrada delay-1">
         <div class="reloj-retro">
             <div id="reloj-digital" class="numeros-digitales">00:00</div>
             <div class="periodo-dia">
@@ -406,10 +523,10 @@
             </div>
         </div>
     </div>
-    <div id="fecha-actual" class="text-center text-muted small fw-bold text-uppercase fecha-actual mb-4"></div>
+    <div id="fecha-actual" class="text-center text-muted small fw-bold text-uppercase fecha-actual mb-4 animar-entrada delay-1"></div>
 
     <!-- ========== DIRECTOR DEL PLANTEL (destacado, centrado) ========== -->
-    <div class="animar-entrada delay-1 mb-4">
+    <div class="animar-entrada delay-2 mb-4">
         <div class="directivo-principal">
             <div class="avatar-grande">
                 <i class="bi bi-person-badge-fill"></i>
@@ -441,7 +558,7 @@
     <!-- ========== AULA ANEXA + CDC (lado a lado) ========== -->
     <div class="row g-4 mb-4">
         <!-- Director(a) del Aula Anexa -->
-        <div class="col-md-6 animar-entrada delay-2">
+        <div class="col-md-6 animar-entrada delay-3">
             <div class="directivo-card anexa">
                 <div class="avatar">
                     <i class="bi bi-building-fill"></i>
@@ -501,42 +618,49 @@
         </div>
     </div>
 
-    <!-- ========== TARJETAS (CONTADORES) ========== -->
+    <!-- ========== TARJETAS CONTADORES ========== -->
     <div class="row g-4 mt-3">
-        <div class="col-md-3">
-            <div class="card stats-card">
-                <div class="card-body text-center py-4">
-                    <i class="bi bi-people-fill text-primary icono"></i>
-                    <div class="numero">{{ total_estudiantes }}</div>
-                    <p class="etiqueta">Estudiantes</p>
+        <!-- Estudiantes -->
+        <div class="col-md-3 animar-entrada delay-1">
+            <div class="tarjeta-contador cont-azul">
+                <div class="icono-wrapper">
+                    <i class="bi bi-people-fill"></i>
                 </div>
+                <div class="numero">{{ total_estudiantes }}</div>
+                <p class="etiqueta">Estudiantes</p>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stats-card">
-                <div class="card-body text-center py-4">
-                    <i class="bi bi-person-workspace text-success icono"></i>
-                    <div class="numero">{{ total_docentes }}</div>
-                    <p class="etiqueta">Docentes</p>
+
+        <!-- Docentes -->
+        <div class="col-md-3 animar-entrada delay-2">
+            <div class="tarjeta-contador cont-verde">
+                <div class="icono-wrapper">
+                    <i class="bi bi-person-workspace"></i>
                 </div>
+                <div class="numero">{{ total_docentes }}</div>
+                <p class="etiqueta">Docentes</p>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stats-card">
-                <div class="card-body text-center py-4">
-                    <i class="bi bi-people-fill text-warning icono"></i>
-                    <div class="numero">{{ total_apoyo }}</div>
-                    <p class="etiqueta">Personal de Apoyo</p>
+
+        <!-- Personal de Apoyo -->
+        <div class="col-md-3 animar-entrada delay-3">
+            <div class="tarjeta-contador cont-amarillo">
+                <div class="icono-wrapper">
+                    <i class="bi bi-people-fill"></i>
                 </div>
+                <div class="numero">{{ total_apoyo }}</div>
+                <p class="etiqueta">Personal de Apoyo</p>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stats-card">
-                <div class="card-body text-center py-4">
-                    <i class="bi bi-calendar-check text-info icono"></i>
-                    <div class="numero">{{ total_asistencias }}</div>
-                    <p class="etiqueta">Marcajes de Personal</p>
+
+        <!-- Marcajes de Personal -->
+        <div class="col-md-3 animar-entrada delay-3">
+            <div class="tarjeta-contador cont-cian">
+                <div class="icono-wrapper">
+                    <i class="bi bi-calendar-check"></i>
                 </div>
+                <div class="numero">{{ total_asistencias }}</div>
+                <p class="etiqueta">Marcajes de Personal</p>
             </div>
         </div>
     </div>

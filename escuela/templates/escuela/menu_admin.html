@@ -210,13 +210,13 @@
         .delay-2 { animation-delay: 0.2s; }
         .delay-3 { animation-delay: 0.3s; }
 
-        /* Modales y Notificaciones (Mantenemos la misma lógica) */
+        /* Modales y Notificaciones */
         .modal-content { border-radius: 20px; border: none; box-shadow: 0 25px 60px rgba(0,0,0,0.15); }
         .modal-header { background: linear-gradient(135deg, var(--azul-institucional) 0%, #0b5ed7 100%); color: white; border-bottom: none; padding: 20px 25px;}
         
         .tipo-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         .tipo-tab {
-            flex: 1; min-width: 140px; border: 2px solid #e9ecef; border-radius: 12px;
+            flex: 1; min-width: 120px; border: 2px solid #e9ecef; border-radius: 12px;
             padding: 12px 16px; background: white; cursor: pointer;
             transition: all 0.25s ease; display: flex; align-items: center; gap: 10px;
             font-weight: 600; color: #495057; text-align: left;
@@ -350,7 +350,7 @@
             </a>
         </div>
 
-        <!-- 5. NUEVO: Inscripción y Cierre Escolar -->
+        <!-- 5. Inscripción y Cierre Escolar -->
         <div class="col-lg-3 col-md-6 animar-entrada delay-3">
             <a href="{% url 'inscripcion_escolar' %}" class="tarjeta-modulo mod-teal">
                 <div class="icono-wrapper">
@@ -430,6 +430,7 @@
                         <i class="bi bi-diagram-3 me-1"></i> Seleccionar tipo de personal:
                     </label>
                     <div class="tipo-tabs">
+                        <!-- Pestaña Docentes -->
                         <button type="button" class="tipo-tab active" id="tab-docentes" onclick="cambiarTipo('docentes', this)">
                             <i class="bi bi-person-workspace"></i>
                             <div>
@@ -440,6 +441,7 @@
                             </div>
                         </button>
 
+                        <!-- Pestaña Administrativos -->
                         <button type="button" class="tipo-tab" id="tab-administrativos" onclick="cambiarTipo('administrativos', this)">
                             <i class="bi bi-briefcase-fill"></i>
                             <div>
@@ -450,12 +452,24 @@
                             </div>
                         </button>
 
+                        <!-- Pestaña Personal de Apoyo -->
                         <button type="button" class="tipo-tab" id="tab-apoyo" onclick="cambiarTipo('apoyo', this)">
                             <i class="bi bi-people-fill"></i>
                             <div>
                                 <div>Personal de Apoyo</div>
                                 <small class="text-muted" style="font-size:0.75rem;">
                                     <span id="badge-count-apoyo">0</span> registrados
+                                </small>
+                            </div>
+                        </button>
+
+                        <!-- Pestaña Personal de Cocina -->
+                        <button type="button" class="tipo-tab" id="tab-cocina" onclick="cambiarTipo('cocina', this)">
+                            <i class="bi bi-egg-fried"></i>
+                            <div>
+                                <div>Personal de Cocina</div>
+                                <small class="text-muted" style="font-size:0.75rem;">
+                                    <span id="badge-count-cocina">0</span> registrados
                                 </small>
                             </div>
                         </button>
@@ -561,6 +575,9 @@
     function abrirModalPersonal() {
         modalPersonal = new bootstrap.Modal(document.getElementById('modalPersonal'));
         modalPersonal.show();
+        // Al abrir, cargamos por defecto docentes y reseteamos los contadores
+        document.querySelectorAll('.tipo-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-docentes').classList.add('active');
         cargarPersonal('docentes');
     }
 
@@ -611,7 +628,12 @@
 
     function renderTablaPersonal(lista, tipo) {
         const contenedor = document.getElementById('contenido-personal');
-        document.getElementById(`badge-count-${tipo}`).textContent = lista.length;
+        
+        // Actualizar el badge contador
+        const badgeId = `badge-count-${tipo}`;
+        if (document.getElementById(badgeId)) {
+            document.getElementById(badgeId).textContent = lista.length;
+        }
 
         if (!lista || lista.length === 0) {
             contenedor.innerHTML = `
@@ -623,15 +645,21 @@
             return;
         }
 
+        // Determinar el nombre correcto para la URL de edición
         let tipoNombre = 'Docente';
         if (tipo === 'administrativos') tipoNombre = 'Administrativo';
         else if (tipo === 'apoyo') tipoNombre = 'Apoyo';
+        else if (tipo === 'cocina') tipoNombre = 'Cocina'; 
 
+        // Determinar la columna extra (Nivel para docentes, Cargo para el resto)
         let columnaExtra = 'Nivel / Grado';
-        if (tipo === 'administrativos' || tipo === 'apoyo') columnaExtra = 'Cargo';
+        if (tipo === 'administrativos' || tipo === 'apoyo' || tipo === 'cocina') {
+            columnaExtra = 'Cargo';
+        }
 
         let filas = '';
         lista.forEach(p => {
+            // Generar la URL correcta para el botón editar
             const urlEditar = `/personal/registrar/?tipo=${tipoNombre}&pk=${p.id}`;
 
             filas += `
@@ -717,7 +745,7 @@
         .then(data => {
             if (data.ok) {
                 mostrarNotificacion(`✅ ${data.mensaje}`, 'exito', 3500);
-                cargarPersonal(tipo);
+                cargarPersonal(tipo); // Recarga la tabla automáticamente
             } else {
                 mostrarNotificacion(`Error: ${data.error}`, 'error', 4500);
             }
@@ -755,6 +783,7 @@
             });
         }
 
+        // Convertir las alertas de Django a notificaciones flotantes
         document.querySelectorAll('.alert').forEach(alertEl => {
             const texto = alertEl.textContent.trim();
             let tipo = 'info';

@@ -283,9 +283,8 @@ def _obtener_cedulas_registradas(excluir_pk=None):
 # ================================================================
 # REGISTRAR / EDITAR ESTUDIANTE
 # ================================================================
-# ================================================================
-# REGISTRAR / EDITAR ESTUDIANTE
-# ================================================================
+import urllib.parse
+
 @login_required
 def registrar_estudiante(request):
     referer = request.META.get('HTTP_REFERER', '')
@@ -320,15 +319,21 @@ def registrar_estudiante(request):
     )
 
     if request.method == 'POST':
+        post_data = request.POST.copy()
+        telefono_raw = post_data.get('rep_telefono', '').strip()
+        if not telefono_raw:
+            post_data['rep_telefono'] = None
+
         if es_edicion:
-            form = EstudianteForm(request.POST, instance=instancia_existente)
+            form = EstudianteForm(post_data, instance=instancia_existente)
         else:
-            form = EstudianteForm(request.POST)
+            form = EstudianteForm(post_data)
 
         if form.is_valid():
             estudiante = form.save(commit=False)
             tipo_doc = request.POST.get('tipo_documento', 'escolar')
             estudiante.tipo_documento = tipo_doc
+            estudiante.rep_telefono = telefono_raw if telefono_raw else None
 
             if tipo_doc == 'identidad':
                 cedula_identidad = request.POST.get('cedula_identidad', '').strip()
@@ -339,11 +344,8 @@ def registrar_estudiante(request):
                     if qs_cedula_id.exists():
                         messages.error(request, f"La Cédula de Identidad {cedula_identidad} ya está registrada.")
                         return render(request, 'escuela/registrar_estudiante.html', {
-                            'form': form,
-                            'cedulas_registradas': cedulas_registradas,
-                            'url_origen': url_origen,
-                            'es_edicion': es_edicion,
-                            'pk_editar': pk_editar,
+                            'form': form, 'cedulas_registradas': cedulas_registradas,
+                            'url_origen': url_origen, 'es_edicion': es_edicion, 'pk_editar': pk_editar,
                         })
                     estudiante.cedula_identidad = cedula_identidad
                     if not estudiante.cedula:
@@ -351,21 +353,15 @@ def registrar_estudiante(request):
                 else:
                     messages.error(request, "La Cédula de Identidad es obligatoria cuando se selecciona ese tipo de documento.")
                     return render(request, 'escuela/registrar_estudiante.html', {
-                        'form': form,
-                        'cedulas_registradas': cedulas_registradas,
-                        'url_origen': url_origen,
-                        'es_edicion': es_edicion,
-                        'pk_editar': pk_editar,
+                        'form': form, 'cedulas_registradas': cedulas_registradas,
+                        'url_origen': url_origen, 'es_edicion': es_edicion, 'pk_editar': pk_editar,
                     })
             else:
                 if not estudiante.cedula:
                     messages.error(request, "La Cédula Escolar es obligatoria cuando se selecciona ese tipo de documento.")
                     return render(request, 'escuela/registrar_estudiante.html', {
-                        'form': form,
-                        'cedulas_registradas': cedulas_registradas,
-                        'url_origen': url_origen,
-                        'es_edicion': es_edicion,
-                        'pk_editar': pk_editar,
+                        'form': form, 'cedulas_registradas': cedulas_registradas,
+                        'url_origen': url_origen, 'es_edicion': es_edicion, 'pk_editar': pk_editar,
                     })
                 estudiante.cedula_identidad = None
 
@@ -380,11 +376,8 @@ def registrar_estudiante(request):
                 if qs_cedula.exists():
                     messages.error(request, f"La Cédula Escolar {estudiante.cedula} ya está registrada.")
                     return render(request, 'escuela/registrar_estudiante.html', {
-                        'form': form,
-                        'cedulas_registradas': cedulas_registradas,
-                        'url_origen': url_origen,
-                        'es_edicion': es_edicion,
-                        'pk_editar': pk_editar,
+                        'form': form, 'cedulas_registradas': cedulas_registradas,
+                        'url_origen': url_origen, 'es_edicion': es_edicion, 'pk_editar': pk_editar,
                     })
 
             estudiante.save()
@@ -396,9 +389,8 @@ def registrar_estudiante(request):
                 return redirect('inicial')
             else:
                 messages.success(request, f"Estudiante {estudiante.nombres} {estudiante.apellidos} registrado exitosamente.")
-                messages.info(request, "Generando Constancia de Cupo...")
                 
-                # ✅ NUEVO: Redirigir al listado con los parámetros para que el JS sepa qué PDF abrir
+                # ✅ Redirigimos a la lista con el parámetro para que el HTML descargue el PDF
                 if estudiante.nivel in NIVELES_PRIMARIA:
                     return redirect(f'/primaria/?pdf_cupo={estudiante.pk}')
                 return redirect(f'/inicial/?pdf_cupo={estudiante.pk}')
@@ -421,11 +413,8 @@ def registrar_estudiante(request):
             form = EstudianteForm()
 
     return render(request, 'escuela/registrar_estudiante.html', {
-        'form': form,
-        'cedulas_registradas': cedulas_registradas,
-        'url_origen': url_origen,
-        'es_edicion': es_edicion,
-        'pk_editar': pk_editar,
+        'form': form, 'cedulas_registradas': cedulas_registradas,
+        'url_origen': url_origen, 'es_edicion': es_edicion, 'pk_editar': pk_editar,
     })
 # ================================================================
 # VER DETALLE DEL ESTUDIANTE

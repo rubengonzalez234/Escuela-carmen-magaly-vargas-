@@ -12,6 +12,56 @@
         .table-hover tbody tr:hover { background-color: #f2f7ff; }
         .stats-card { border-left: 4px solid #0d6efd; }
 
+        /* ===== NUEVO DISEÑO DEL ENCABEZADO ===== */
+        .header-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            border-left: 5px solid #0d6efd;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .header-panel .panel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #e7f1ff;
+            color: #0d6efd;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            width: fit-content;
+            margin-bottom: 4px;
+        }
+        .header-panel .panel-badge i {
+            font-size: 0.9rem;
+        }
+        .header-panel h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-panel h1 i {
+            color: #0d6efd;
+            font-size: 2rem;
+        }
+        .header-panel p {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+        /* ======================================= */
+
         .calle-acordeon {
             border: 1px solid #eef2f7;
             border-radius: 14px;
@@ -281,13 +331,15 @@
             {% endfor %}
         {% endif %}
 
-        <!-- ========== ENCABEZADO ========== -->
-        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-            <div>
-                <h2 class="fw-bold text-dark mb-0">
-                    <i class="bi bi-journal-richtext text-primary me-2"></i>Educación Primaria
-                </h2>
-            </div>
+        <!-- ========== ENCABEZADO CON NUEVO DISEÑO ========== -->
+        <div class="header-panel">
+            <span class="panel-badge">
+                <i class="bi bi-grid-1x2-fill"></i> PANEL DE CONTROL
+            </span>
+            <h1>
+                <i class="bi bi-journal-richtext"></i> Educación Primaria
+            </h1>
+            <p>Gestión de estudiantes, grados y documentos institucionales.</p>
         </div>
 
         <!-- ========== BUSCADOR + BOTONES ========== -->
@@ -988,22 +1040,31 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ==================================================
-        // ✅ DETECTAR PDF DE CUPO Y DESCARGARLO (iframe)
+        // ✅ DETECTAR PDF DE CUPO Y FORZAR DESCARGA CON <a>
         // ==================================================
         document.addEventListener("DOMContentLoaded", function() {
             const urlParams = new URLSearchParams(window.location.search);
             const pdfCupoId = urlParams.get('pdf_cupo');
 
             if (pdfCupoId) {
-                // Creamos un iframe invisible para forzar la descarga en segundo plano
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = `/constancia-cupo/${pdfCupoId}/`;
-                document.body.appendChild(iframe);
-
-                // Limpiamos la URL para que no se vuelva a descargar si el usuario recarga
+                // 1. Limpiamos la URL
                 const newUrl = window.location.pathname;
                 window.history.replaceState({}, document.title, newUrl);
+
+                // 2. Creamos un enlace invisible
+                const link = document.createElement('a');
+                link.href = `/constancia-cupo/${pdfCupoId}/`;
+                link.download = '';
+                link.style.display = 'none';
+                document.body.appendChild(link);
+
+                // 3. Hacemos click automático
+                link.click();
+
+                // 4. Limpiamos
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                }, 1000);
             }
         });
 

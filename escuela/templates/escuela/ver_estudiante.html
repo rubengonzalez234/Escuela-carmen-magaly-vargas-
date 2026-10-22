@@ -222,7 +222,8 @@
 
                 <div class="col-md-6">
                     <label class="form-label">Teléfono</label>
-                    <input type="text" class="form-control" value="{{ estudiante.rep_telefono }}" readonly>
+                    <!-- ✅ CAMBIO: Filtro default para mostrar raya si es None o vacío -->
+                    <input type="text" class="form-control" value="{{ estudiante.rep_telefono|default:'—' }}" readonly>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Correo</label>

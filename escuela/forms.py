@@ -38,7 +38,7 @@ class EstudianteForm(forms.ModelForm):
             'rep_cedula': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 12345678', 'autocomplete': 'off'}),
             'rep_nacionalidad': forms.Select(attrs={'class': 'form-select'}),
             'rep_parentesco': forms.Select(attrs={'class': 'form-select'}),
-            'rep_telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 04141234567', 'autocomplete': 'off'}),
+            'rep_telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 04141234567 (opcional)', 'autocomplete': 'off'}),
             'rep_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'correo@ejemplo.com (opcional)', 'autocomplete': 'off'}),
         }
         labels = {
@@ -61,8 +61,6 @@ class EstudianteForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # ✅ Hacer que cedula y cedula_identidad NO sean obligatorios a nivel de formulario.
-        # La validación real se hace en la vista según el tipo_documento.
         self.fields['cedula'].required = False
         
         for field_name in ['genero', 'nivel', 'rep_parentesco', 'nacionalidad', 'rep_nacionalidad']:
@@ -124,22 +122,16 @@ class EstudianteForm(forms.ModelForm):
         return self._validar_nombre(self.cleaned_data.get('apellidos'), 'Apellidos')
 
     def clean_cedula(self):
-        """
-        ✅ CORREGIDO: Si el campo está vacío, devolvemos None/'' sin lanzar error.
-        La vista se encargará de validar si es requerido según el tipo_documento.
-        """
         cedula = (self.cleaned_data.get('cedula') or '').strip()
         
         if not cedula:
-            return ''  # No lanzar error aquí. La vista lo maneja.
+            return '' 
         
-        # Validar formato si viene con datos
         if not self.REGEX_SOLO_NUMEROS.match(cedula):
             raise ValidationError("La Cédula Escolar solo puede contener números.")
         if not (6 <= len(cedula) <= 10):
             raise ValidationError("La Cédula Escolar debe tener entre 6 y 10 dígitos.")
         
-        # Validar duplicados
         qs = Estudiante.objects.filter(cedula=cedula)
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
@@ -182,7 +174,8 @@ class EstudianteForm(forms.ModelForm):
         return self._validar_cedula(self.cleaned_data.get('rep_cedula'), 'Cédula')
 
     def clean_rep_telefono(self):
-        return self._validar_telefono(self.cleaned_data.get('rep_telefono'), 'Teléfono', obligatorio=True)
+        # ✅ CAMBIO: Teléfono del representante ahora es OPCIONAL
+        return self._validar_telefono(self.cleaned_data.get('rep_telefono'), 'Teléfono', obligatorio=False)
 
     def clean_rep_email(self):
         return self._validar_email(self.cleaned_data.get('rep_email'), 'Correo', obligatorio=False)
